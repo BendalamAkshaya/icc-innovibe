@@ -80,7 +80,7 @@ export function ApprovalDetailDrawer({
           <div className="space-y-2">
             <h3 className="font-extrabold text-xs text-slate-900 uppercase tracking-wider">Business Case Justification</h3>
             <p className="text-xs text-slate-700 font-medium leading-relaxed bg-slate-50 p-4 rounded-2xl border border-slate-200">
-              {request.description}
+              {request.businessImpact}
             </p>
           </div>
 

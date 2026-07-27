@@ -12,17 +12,17 @@ export function ResourceUtilizationPanel({ resources }: ResourceUtilizationPanel
   const {
     employeeUtilizationPercent,
     budgetUtilizationPercent,
-    techInfrastructureUtilizationPercent,
-    physicalFacilitiesUtilizationPercent,
-    overallDepartmentCapacityPercent,
+    technologyUtilizationPercent,
+    infrastructureUsagePercent,
+    departmentCapacityPercent,
   } = resources;
 
   const items = [
     { label: 'Employee Capacity & Workload', val: employeeUtilizationPercent, color: 'bg-indigo-600', text: 'Optimal Headcount' },
     { label: 'Budget Utilization Plan', val: budgetUtilizationPercent, color: 'bg-emerald-500', text: 'Within Q2 Plan' },
-    { label: 'Tech & Cloud Infrastructure', val: techInfrastructureUtilizationPercent, color: 'bg-sky-500', text: 'High Software Adoption' },
-    { label: 'Physical Facilities & Hubs', val: physicalFacilitiesUtilizationPercent, color: 'bg-purple-500', text: 'Service Hub Capacity' },
-    { label: 'Overall Department Capacity', val: overallDepartmentCapacityPercent, color: 'bg-amber-500', text: 'Balanced Scalability' },
+    { label: 'Tech & Cloud Infrastructure', val: technologyUtilizationPercent, color: 'bg-sky-500', text: 'High Software Adoption' },
+    { label: 'Physical Facilities & Hubs', val: infrastructureUsagePercent, color: 'bg-purple-500', text: 'Service Hub Capacity' },
+    { label: 'Overall Department Capacity', val: departmentCapacityPercent, color: 'bg-amber-500', text: 'Balanced Scalability' },
   ];
 
   return (
@@ -34,7 +34,7 @@ export function ResourceUtilizationPanel({ resources }: ResourceUtilizationPanel
             <h2 className="text-base font-extrabold text-slate-900">Resource & Capacity Utilization</h2>
           </div>
           <span className="text-[10px] font-black px-2.5 py-0.5 rounded bg-indigo-100 text-indigo-800 border border-indigo-200">
-            {overallDepartmentCapacityPercent}% Capacity
+            {departmentCapacityPercent}% Capacity
           </span>
         </div>
 

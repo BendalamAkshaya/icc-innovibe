@@ -232,7 +232,7 @@ export function ExecutiveInboxList({
                   <div className="space-y-1">
                     <span className="text-[10px] font-black uppercase text-slate-400">Business Case Justification</span>
                     <p className="text-slate-700 font-medium leading-relaxed bg-white p-3 rounded-xl border border-slate-200">
-                      {req.description}
+                      {req.businessImpact}
                     </p>
                   </div>
 
