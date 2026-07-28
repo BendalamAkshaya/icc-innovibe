@@ -473,26 +473,6 @@ function HRDashboardContent() {
         </div>
       </div>
 
-      {/* COO Executive Payroll Dispatch Banner */}
-      <div className="p-4 bg-emerald-50 border border-emerald-200 rounded-2xl flex items-center justify-between shadow-2xs">
-        <div className="flex items-center space-x-3">
-          <div className="p-2 bg-emerald-100 text-emerald-700 rounded-xl">
-            <CheckCircle2 className="h-5 w-5 text-emerald-600" />
-          </div>
-          <div>
-            <span className="text-xs font-black text-emerald-950 block uppercase tracking-wider">
-              CONFIRMATION: MONTHLY PAYROLL APPROVED BY COO
-            </span>
-            <span className="text-[11px] text-emerald-800 font-semibold block">
-              COO approved July 2026 payroll disbursement. Disbursement authorized for current 30-day cycle.
-            </span>
-          </div>
-        </div>
-        <span className="px-3 py-1 bg-emerald-200 text-emerald-900 text-[10px] font-extrabold rounded-full">
-          30-Day Active Approval
-        </span>
-      </div>
-
       {/* KPI Row */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
         <div className="glass-card p-5 rounded-2xl border border-slate-200">
