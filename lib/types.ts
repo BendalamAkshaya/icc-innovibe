@@ -1,4 +1,4 @@
-export type RoleType = 'CEO' | 'COO' | 'CTO' | 'SERVICE_MANAGER' | 'HR';
+export type RoleType = 'CEO' | 'COO' | 'CTO' | 'SERVICE_MANAGER' | 'HR' | 'TECHNICIAN';
 
 export interface UserRoleProfile {
   id: string;

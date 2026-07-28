@@ -91,6 +91,9 @@ export const AuthService = {
     } else if (cleanEmail === 'hr@innovibemobility.com' && cleanPass === 'hr123') {
       matchedRole = 'HR';
       matchedProfile = initialProfiles.HR;
+    } else if (cleanEmail === 'tech@innovibemobility.com' && cleanPass === 'tech123') {
+      matchedRole = 'TECHNICIAN';
+      matchedProfile = initialProfiles.TECHNICIAN;
     }
 
     if (!matchedRole || !matchedProfile) {

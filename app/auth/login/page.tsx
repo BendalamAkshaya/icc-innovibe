@@ -52,6 +52,14 @@ export default function LoginPage() {
       pass: 'hr123',
       badge: 'Productivity & Staff',
     },
+    {
+      role: 'TECHNICIAN' as RoleType,
+      label: 'Technician',
+      email: 'tech@innovibemobility.com',
+      pass: 'tech123',
+      badge: 'Diagnostics & Repairs',
+      badgeColor: 'bg-emerald-100 text-emerald-800 border-emerald-300',
+    },
   ];
 
   const handleSelectAccount = (acc: typeof demoAccounts[0]) => {

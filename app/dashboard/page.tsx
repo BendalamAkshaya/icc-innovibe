@@ -15,6 +15,7 @@ export default function DashboardIndex() {
       CTO: '/dashboard/cto',
       SERVICE_MANAGER: '/dashboard/service-manager',
       HR: '/dashboard/hr',
+      TECHNICIAN: '/dashboard/technician',
     };
 
     const targetRoute = roleRoutes[activeRole] || '/dashboard/ceo';

@@ -22,6 +22,7 @@ export function Navbar() {
     CTO: { title: 'CTO Dashboard (Technology)', badgeColor: 'bg-purple-100 text-purple-900 border-purple-300' },
     SERVICE_MANAGER: { title: 'Service Manager Dashboard', badgeColor: 'bg-emerald-100 text-emerald-900 border-emerald-300' },
     HR: { title: 'HR Dashboard (Human Resources)', badgeColor: 'bg-pink-100 text-pink-900 border-pink-300' },
+    TECHNICIAN: { title: 'Technician Portal', badgeColor: 'bg-teal-100 text-teal-900 border-teal-300' },
   };
 
   return (

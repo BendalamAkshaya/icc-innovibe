@@ -46,6 +46,15 @@ export const initialProfiles: Record<string, UserRoleProfile> = {
     avatar: 'https://images.unsplash.com/photo-1580489944761-15a19d654956?auto=format&fit=crop&q=80&w=250',
     permissions: ['STAFF_MANAGEMENT', 'PRODUCTIVITY_ANALYTICS', 'ATTENDANCE_ROSTER'],
   },
+  TECHNICIAN: {
+    id: 'usr_tech_006',
+    name: 'Rahul Sharma',
+    email: 'tech@innovibemobility.com',
+    role: 'TECHNICIAN',
+    title: 'Senior EV Technician',
+    avatar: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&q=80&w=250',
+    permissions: ['VIEW_JOB_CARDS', 'UPDATE_TICKETS', 'VIEW_SOP'],
+  },
 };
 
 export const defaultRoleConfigs: RolePermissionConfig[] = [
@@ -78,6 +87,12 @@ export const defaultRoleConfigs: RolePermissionConfig[] = [
     roleName: 'HR Dashboard (Human Resources)',
     description: 'Technician productivity stats, customer rating reviews, SLA compliance, staff attendance rosters.',
     accessibleFeatures: ['Technician Performance Index', 'Customer Feedback Audits', 'Staff Attendance Roster', 'SLA Analytics'],
+  },
+  {
+    role: 'TECHNICIAN',
+    roleName: 'Technician Portal',
+    description: 'Assigned job cards, SOPs, and service execution workflows.',
+    accessibleFeatures: ['Job Cards', 'SOPs', 'Parts Requisition', 'Service Reports'],
   },
 ];
 
