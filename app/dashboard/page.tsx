@@ -14,7 +14,7 @@ export default function DashboardIndex() {
       COO: '/dashboard/coo',
       CTO: '/dashboard/cto',
       SERVICE_MANAGER: '/dashboard/service-manager',
-      HR: '/dashboard/hr',
+      HR: '/dashboard/hr?view=dashboard',
       TECHNICIAN: '/dashboard/technician',
     };
 
