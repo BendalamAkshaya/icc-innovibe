@@ -60,7 +60,7 @@ export default function TechnicianPortalPage() {
     router.push(`/dashboard/technician?view=${tabId}`);
     setActiveTab(tabId);
   };
-  const [toast, setToast] = useState<{ message: string; type: 'success' | 'info' | 'warning' } | null>(null);
+  const [toast, setToast] = useState<{ message: string; type: 'success' | 'info' | 'warning' | 'error' } | null>(null);
 
   // Core Technician Portal States
   const [checkedIn, setCheckedIn] = useState(true);
@@ -417,7 +417,7 @@ export default function TechnicianPortalPage() {
   };
 
   // Helper Toast Alert
-  const showToast = (message: string, type: 'success' | 'info' | 'warning' = 'success') => {
+  const showToast = (message: string, type: 'success' | 'info' | 'warning' | 'error' = 'success') => {
     setToast({ message, type });
     setTimeout(() => setToast(null), 3000);
   };
@@ -501,9 +501,10 @@ export default function TechnicianPortalPage() {
         <div className={`fixed top-4 right-4 z-50 px-4 py-3 rounded-2xl shadow-xl flex items-center gap-2 text-xs font-bold border transition-all animate-in slide-in-from-top duration-300 ${
           toast.type === 'success' ? 'bg-emerald-50 text-emerald-800 border-emerald-200' :
           toast.type === 'warning' ? 'bg-amber-50 text-amber-800 border-amber-200' :
+          toast.type === 'error' ? 'bg-rose-50 text-rose-800 border-rose-200' :
           'bg-blue-50 text-blue-800 border-blue-200'
         }`}>
-          <CheckCircle2 className="h-4 w-4 shrink-0" />
+          {toast.type === 'error' || toast.type === 'warning' ? <AlertTriangle className="h-4 w-4 shrink-0" /> : toast.type === 'info' ? <Info className="h-4 w-4 shrink-0" /> : <CheckCircle2 className="h-4 w-4 shrink-0" />}
           <span>{toast.message}</span>
         </div>
       )}

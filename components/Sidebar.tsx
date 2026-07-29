@@ -39,6 +39,12 @@ import {
   DoorOpen,
   Bell,
   Settings,
+  CheckSquare,
+  CheckCircle2,
+  Database,
+  Camera,
+  Volume2,
+  User,
 } from 'lucide-react';
 
 interface NavItem {
@@ -187,9 +193,47 @@ const roleNavigationMap: Record<RoleType, { workspaceTitle: string; categories: 
       {
         title: 'Field Operations',
         items: [
-          { name: 'My Dashboard', path: '/dashboard/technician', icon: LayoutDashboard, color: 'text-teal-600' },
-          { name: 'SOP Checklists', path: '/dashboard/technician?module=sop', exactQuery: 'sop', icon: ClipboardList, color: 'text-amber-600' },
-          { name: 'Service Queue', path: '/dashboard/technician?module=service', exactQuery: 'service', icon: Wrench, color: 'text-emerald-600' },
+          { name: 'My Dashboard', path: '/dashboard/technician?view=dashboard', exactQuery: 'dashboard', icon: LayoutDashboard, color: 'text-blue-600' },
+          { name: 'Assigned Jobs', path: '/dashboard/technician?view=assigned-jobs', exactQuery: 'assigned-jobs', icon: Briefcase, color: 'text-indigo-600' },
+          { name: 'Job Cards', path: '/dashboard/technician?view=job-cards', exactQuery: 'job-cards', icon: FileText, color: 'text-blue-500' },
+          { name: 'Service Schedule', path: '/dashboard/technician?view=service-schedule', exactQuery: 'service-schedule', icon: Calendar, color: 'text-cyan-600' },
+        ],
+      },
+      {
+        title: 'Service & Diagnosis',
+        items: [
+          { name: 'Vehicle Inspection', path: '/dashboard/technician?view=inspection', exactQuery: 'inspection', icon: CheckSquare, color: 'text-amber-500' },
+          { name: 'EV Diagnosis Reports', path: '/dashboard/technician?view=diagnosis', exactQuery: 'diagnosis', icon: TrendingUp, color: 'text-violet-600' },
+          { name: 'Service Checklists', path: '/dashboard/technician?view=checklists', exactQuery: 'checklists', icon: ClipboardList, color: 'text-teal-600' },
+          { name: 'Service Completion', path: '/dashboard/technician?view=completion', exactQuery: 'completion', icon: CheckCircle2, color: 'text-green-600' },
+        ],
+      },
+      {
+        title: 'Inventory & Approvals',
+        items: [
+          { name: 'Spare Parts Requests', path: '/dashboard/technician?view=spares', exactQuery: 'spares', icon: Database, color: 'text-purple-600' },
+          { name: 'Inventory Requests', path: '/dashboard/technician?view=inventory', exactQuery: 'inventory', icon: Layers, color: 'text-pink-600' },
+          { name: 'Customer Signature', path: '/dashboard/technician?view=signature', exactQuery: 'signature', icon: UserCheck, color: 'text-emerald-700' },
+          { name: 'Photo Uploads', path: '/dashboard/technician?view=photos', exactQuery: 'photos', icon: Camera, color: 'text-indigo-500' },
+        ],
+      },
+      {
+        title: 'HR & Administration',
+        items: [
+          { name: 'Attendance', path: '/dashboard/technician?view=attendance', exactQuery: 'attendance', icon: Clock, color: 'text-emerald-600' },
+          { name: 'Leave Requests', path: '/dashboard/technician?view=leaves', exactQuery: 'leaves', icon: CalendarRange, color: 'text-rose-600' },
+          { name: 'Performance Dashboard', path: '/dashboard/technician?view=performance', exactQuery: 'performance', icon: Award, color: 'text-yellow-600' },
+          { name: 'Payroll', path: '/dashboard/technician?view=payroll', exactQuery: 'payroll', icon: IndianRupee, color: 'text-teal-700' },
+          { name: 'Incentives', path: '/dashboard/technician?view=incentives', exactQuery: 'incentives', icon: Zap, color: 'text-amber-600' },
+          { name: 'Training', path: '/dashboard/technician?view=training', exactQuery: 'training', icon: GraduationCap, color: 'text-purple-700' },
+        ],
+      },
+      {
+        title: 'Communication',
+        items: [
+          { name: 'Announcements', path: '/dashboard/technician?view=announcements', exactQuery: 'announcements', icon: Volume2, color: 'text-slate-500' },
+          { name: 'Notifications', path: '/dashboard/technician?view=notifications', exactQuery: 'notifications', icon: Bell, color: 'text-orange-500' },
+          { name: 'My Profile', path: '/dashboard/technician?view=profile', exactQuery: 'profile', icon: User, color: 'text-slate-600' },
         ],
       },
     ],
