@@ -24,6 +24,21 @@ import {
   ChevronRight,
   Lock,
   Layers,
+  LayoutDashboard,
+  Briefcase,
+  UserCheck,
+  ClipboardList,
+  Clock,
+  CalendarRange,
+  IndianRupee,
+  Award,
+  GraduationCap,
+  FolderOpen,
+  Contact,
+  Calendar,
+  DoorOpen,
+  Bell,
+  Settings,
 } from 'lucide-react';
 
 interface NavItem {
@@ -132,11 +147,36 @@ const roleNavigationMap: Record<RoleType, { workspaceTitle: string; categories: 
     workspaceTitle: 'HR Staff Workspace',
     categories: [
       {
-        title: 'Productivity & Staff',
+        title: 'Core HR',
         items: [
-          { name: 'Staff Analytics Overview', path: '/dashboard/hr', icon: Users, color: 'text-pink-600' },
-          { name: 'Technician Performance', path: '/dashboard/hr?module=performance', exactQuery: 'performance', icon: TrendingUp, color: 'text-emerald-600' },
-          { name: 'Attendance & Roster', path: '/dashboard/hr?module=roster', exactQuery: 'roster', icon: FileText, color: 'text-purple-600' },
+          { name: 'Dashboard', path: '/dashboard/hr?view=dashboard', exactQuery: 'dashboard', icon: LayoutDashboard, color: 'text-sky-600' },
+          { name: 'Employee Management', path: '/dashboard/hr?view=employees', exactQuery: 'employees', icon: Users, color: 'text-blue-600' },
+          { name: 'Attendance', path: '/dashboard/hr?view=attendance', exactQuery: 'attendance', icon: Clock, color: 'text-amber-600' },
+          { name: 'Leave Management', path: '/dashboard/hr?view=leaves', exactQuery: 'leaves', icon: CalendarRange, color: 'text-rose-600' },
+          { name: 'Payroll', path: '/dashboard/hr?view=payroll', exactQuery: 'payroll', icon: IndianRupee, color: 'text-emerald-600' },
+          { name: 'Performance', path: '/dashboard/hr?view=performance', exactQuery: 'performance', icon: Award, color: 'text-amber-500' },
+        ],
+      },
+      {
+        title: 'Recruitment & Growth',
+        items: [
+          { name: 'Recruitment', path: '/dashboard/hr?view=recruitment', exactQuery: 'recruitment', icon: Briefcase, color: 'text-indigo-600' },
+          { name: 'Candidate Management', path: '/dashboard/hr?view=candidates', exactQuery: 'candidates', icon: UserCheck, color: 'text-emerald-600' },
+          { name: 'Onboarding', path: '/dashboard/hr?view=onboarding', exactQuery: 'onboarding', icon: ClipboardList, color: 'text-violet-600' },
+          { name: 'Training & Learning', path: '/dashboard/hr?view=training', exactQuery: 'training', icon: GraduationCap, color: 'text-purple-600' },
+          { name: 'Intern Management', path: '/dashboard/hr?view=interns', exactQuery: 'interns', icon: Sparkles, color: 'text-pink-500' },
+        ],
+      },
+      {
+        title: 'Administration',
+        items: [
+          { name: 'Employee Documents', path: '/dashboard/hr?view=documents', exactQuery: 'documents', icon: FolderOpen, color: 'text-teal-600' },
+          { name: 'Employee ID Cards', path: '/dashboard/hr?view=id-cards', exactQuery: 'id-cards', icon: Contact, color: 'text-cyan-600' },
+          { name: 'HR Policies', path: '/dashboard/hr?view=policies', exactQuery: 'policies', icon: FileText, color: 'text-slate-600' },
+          { name: 'Holiday Calendar', path: '/dashboard/hr?view=holidays', exactQuery: 'holidays', icon: Calendar, color: 'text-orange-500' },
+          { name: 'Exit Management', path: '/dashboard/hr?view=exit', exactQuery: 'exit', icon: DoorOpen, color: 'text-red-500' },
+          { name: 'Reports', path: '/dashboard/hr?view=reports', exactQuery: 'reports', icon: BarChart3, color: 'text-indigo-600' },
+          { name: 'Settings', path: '/dashboard/hr?view=settings', exactQuery: 'settings', icon: Settings, color: 'text-slate-600' },
         ],
       },
     ],
@@ -148,7 +188,7 @@ export function Sidebar() {
   const searchParams = useSearchParams();
   const { activeRole, isSuperAdmin } = useRole();
 
-  const currentModuleParam = searchParams ? searchParams.get('module') : null;
+  const currentModuleParam = searchParams ? (searchParams.get('module') || searchParams.get('view')) : null;
 
   const currentWorkspace = roleNavigationMap[activeRole] || roleNavigationMap.CEO;
 
