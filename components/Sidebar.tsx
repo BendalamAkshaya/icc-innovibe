@@ -181,6 +181,19 @@ const roleNavigationMap: Record<RoleType, { workspaceTitle: string; categories: 
       },
     ],
   },
+  TECHNICIAN: {
+    workspaceTitle: 'Technician Hub',
+    categories: [
+      {
+        title: 'Field Operations',
+        items: [
+          { name: 'My Dashboard', path: '/dashboard/technician', icon: LayoutDashboard, color: 'text-teal-600' },
+          { name: 'SOP Checklists', path: '/dashboard/technician?module=sop', exactQuery: 'sop', icon: ClipboardList, color: 'text-amber-600' },
+          { name: 'Service Queue', path: '/dashboard/technician?module=service', exactQuery: 'service', icon: Wrench, color: 'text-emerald-600' },
+        ],
+      },
+    ],
+  },
 };
 
 export function Sidebar() {
