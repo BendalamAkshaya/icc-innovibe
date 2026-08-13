@@ -50,14 +50,11 @@ function getInitialProfile(role: RoleType): UserRoleProfile {
 }
 
 export function RoleProvider({ children }: { children: React.ReactNode }) {
-  const [activeRole, setActiveRoleState] = useState<RoleType>(getInitialRole);
+  const [activeRole, setActiveRoleState] = useState<RoleType>('CEO');
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(true);
   const [profiles, setProfiles] = useState(initialProfiles);
   const [roleConfigs, setRoleConfigs] = useState(defaultRoleConfigs);
-  const [currentProfileState, setCurrentProfileState] = useState<UserRoleProfile>(() => {
-    const role = getInitialRole();
-    return getInitialProfile(role);
-  });
+  const [currentProfileState, setCurrentProfileState] = useState<UserRoleProfile>(initialProfiles.CEO);
 
   // Restore Session on Client Mount
   useEffect(() => {
