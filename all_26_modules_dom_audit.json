@@ -1,0 +1,646 @@
+[
+  [
+    "Technology Dashboard",
+    "dashboard",
+    {
+      "count": 12,
+      "parentCount": 5,
+      "parentDisplays": [
+        "flex",
+        "flex",
+        "flex",
+        "flex",
+        "flex"
+      ],
+      "status": "OK",
+      "sampleWidths": [
+        172,
+        172,
+        172,
+        199
+      ]
+    }
+  ],
+  [
+    "Software Development",
+    "software-development",
+    {
+      "count": 17,
+      "parentCount": 6,
+      "parentDisplays": [
+        "flex",
+        "flex",
+        "flex",
+        "flex",
+        "flex",
+        "grid"
+      ],
+      "status": "OK",
+      "sampleWidths": [
+        0,
+        0,
+        0,
+        0
+      ]
+    }
+  ],
+  [
+    "Product Roadmap",
+    "product-roadmap",
+    {
+      "count": 18,
+      "parentCount": 7,
+      "parentDisplays": [
+        "flex",
+        "flex",
+        "flex",
+        "flex",
+        "flex",
+        "grid",
+        "flex"
+      ],
+      "status": "OK",
+      "sampleWidths": [
+        0,
+        0,
+        0,
+        0
+      ]
+    }
+  ],
+  [
+    "Sprint Management",
+    "sprint-management",
+    {
+      "count": 15,
+      "parentCount": 6,
+      "parentDisplays": [
+        "flex",
+        "flex",
+        "flex",
+        "flex",
+        "flex",
+        "grid"
+      ],
+      "status": "OK",
+      "sampleWidths": [
+        0,
+        0,
+        0,
+        0
+      ]
+    }
+  ],
+  [
+    "Bug Tracking",
+    "bug-tracking",
+    {
+      "count": 20,
+      "parentCount": 6,
+      "parentDisplays": [
+        "flex",
+        "flex",
+        "flex",
+        "flex",
+        "flex",
+        "grid"
+      ],
+      "status": "OK",
+      "sampleWidths": [
+        0,
+        0,
+        0,
+        0
+      ]
+    }
+  ],
+  [
+    "Feature Requests",
+    "feature-requests",
+    {
+      "count": 18,
+      "parentCount": 6,
+      "parentDisplays": [
+        "flex",
+        "flex",
+        "flex",
+        "flex",
+        "flex",
+        "grid"
+      ],
+      "status": "OK",
+      "sampleWidths": [
+        0,
+        0,
+        0,
+        0
+      ]
+    }
+  ],
+  [
+    "API Management",
+    "api-management",
+    {
+      "count": 18,
+      "parentCount": 6,
+      "parentDisplays": [
+        "flex",
+        "flex",
+        "flex",
+        "flex",
+        "flex",
+        "grid"
+      ],
+      "status": "OK",
+      "sampleWidths": [
+        0,
+        0,
+        0,
+        0
+      ]
+    }
+  ],
+  [
+    "Database Management",
+    "database-management",
+    {
+      "count": 18,
+      "parentCount": 6,
+      "parentDisplays": [
+        "flex",
+        "flex",
+        "flex",
+        "flex",
+        "flex",
+        "grid"
+      ],
+      "status": "OK",
+      "sampleWidths": [
+        0,
+        0,
+        0,
+        0
+      ]
+    }
+  ],
+  [
+    "Cloud Infrastructure",
+    "cloud-infrastructure",
+    {
+      "count": 12,
+      "parentCount": 5,
+      "parentDisplays": [
+        "flex",
+        "flex",
+        "flex",
+        "flex",
+        "flex"
+      ],
+      "status": "OK",
+      "sampleWidths": [
+        0,
+        0,
+        0,
+        0
+      ]
+    }
+  ],
+  [
+    "DevOps & Pipelines",
+    "devops-pipelines",
+    {
+      "count": 18,
+      "parentCount": 6,
+      "parentDisplays": [
+        "flex",
+        "flex",
+        "flex",
+        "flex",
+        "flex",
+        "grid"
+      ],
+      "status": "OK",
+      "sampleWidths": [
+        0,
+        0,
+        0,
+        0
+      ]
+    }
+  ],
+  [
+    "System Logs",
+    "system-logs",
+    {
+      "count": 12,
+      "parentCount": 5,
+      "parentDisplays": [
+        "flex",
+        "flex",
+        "flex",
+        "flex",
+        "flex"
+      ],
+      "status": "OK",
+      "sampleWidths": [
+        0,
+        0,
+        0,
+        0
+      ]
+    }
+  ],
+  [
+    "IoT Device Management",
+    "iot-device-management",
+    {
+      "count": 20,
+      "parentCount": 6,
+      "parentDisplays": [
+        "flex",
+        "flex",
+        "flex",
+        "flex",
+        "flex",
+        "grid"
+      ],
+      "status": "OK",
+      "sampleWidths": [
+        0,
+        0,
+        0,
+        0
+      ]
+    }
+  ],
+  [
+    "Telemetry Platform",
+    "telemetry-platform",
+    {
+      "count": 24,
+      "parentCount": 12,
+      "parentDisplays": [
+        "flex",
+        "flex",
+        "flex",
+        "flex",
+        "flex",
+        "grid",
+        "flex",
+        "flex",
+        "flex",
+        "flex",
+        "flex",
+        "flex"
+      ],
+      "status": "OK",
+      "sampleWidths": [
+        0,
+        0,
+        0,
+        0
+      ]
+    }
+  ],
+  [
+    "EVcare.AI Dashboard",
+    "evcare-ai-dashboard",
+    {
+      "count": 28,
+      "parentCount": 14,
+      "parentDisplays": [
+        "flex",
+        "flex",
+        "flex",
+        "flex",
+        "flex",
+        "grid",
+        "flex",
+        "flex",
+        "flex",
+        "flex",
+        "flex",
+        "flex",
+        "flex",
+        "flex"
+      ],
+      "status": "OK",
+      "sampleWidths": [
+        0,
+        0,
+        0,
+        0
+      ]
+    }
+  ],
+  [
+    "AI Diagnostics",
+    "ai-diagnostics",
+    {
+      "count": 24,
+      "parentCount": 12,
+      "parentDisplays": [
+        "flex",
+        "flex",
+        "flex",
+        "flex",
+        "flex",
+        "grid",
+        "flex",
+        "flex",
+        "flex",
+        "flex",
+        "flex",
+        "flex"
+      ],
+      "status": "OK",
+      "sampleWidths": [
+        0,
+        0,
+        0,
+        0
+      ]
+    }
+  ],
+  [
+    "Mobile App Management",
+    "mobile-app-management",
+    {
+      "count": 28,
+      "parentCount": 14,
+      "parentDisplays": [
+        "flex",
+        "flex",
+        "flex",
+        "flex",
+        "flex",
+        "grid",
+        "flex",
+        "flex",
+        "flex",
+        "flex",
+        "flex",
+        "flex",
+        "flex",
+        "flex"
+      ],
+      "status": "OK",
+      "sampleWidths": [
+        0,
+        0,
+        0,
+        0
+      ]
+    }
+  ],
+  [
+    "Web Portal Management",
+    "web-portal-management",
+    {
+      "count": 28,
+      "parentCount": 14,
+      "parentDisplays": [
+        "flex",
+        "flex",
+        "flex",
+        "flex",
+        "flex",
+        "grid",
+        "flex",
+        "flex",
+        "flex",
+        "flex",
+        "flex",
+        "flex",
+        "flex",
+        "flex"
+      ],
+      "status": "OK",
+      "sampleWidths": [
+        0,
+        0,
+        0,
+        0
+      ]
+    }
+  ],
+  [
+    "AI Models",
+    "ai-models",
+    {
+      "count": 24,
+      "parentCount": 12,
+      "parentDisplays": [
+        "flex",
+        "flex",
+        "flex",
+        "flex",
+        "flex",
+        "grid",
+        "flex",
+        "flex",
+        "flex",
+        "flex",
+        "flex",
+        "flex"
+      ],
+      "status": "OK",
+      "sampleWidths": [
+        0,
+        0,
+        0,
+        0
+      ]
+    }
+  ],
+  [
+    "Machine Learning",
+    "machine-learning",
+    {
+      "count": 24,
+      "parentCount": 12,
+      "parentDisplays": [
+        "flex",
+        "flex",
+        "flex",
+        "flex",
+        "flex",
+        "grid",
+        "flex",
+        "flex",
+        "flex",
+        "flex",
+        "flex",
+        "flex"
+      ],
+      "status": "OK",
+      "sampleWidths": [
+        0,
+        0,
+        0,
+        0
+      ]
+    }
+  ],
+  [
+    "Cybersecurity",
+    "cybersecurity",
+    {
+      "count": 12,
+      "parentCount": 5,
+      "parentDisplays": [
+        "flex",
+        "flex",
+        "flex",
+        "flex",
+        "flex"
+      ],
+      "status": "OK",
+      "sampleWidths": [
+        0,
+        0,
+        0,
+        0
+      ]
+    }
+  ],
+  [
+    "Integrations",
+    "integrations",
+    {
+      "count": 12,
+      "parentCount": 5,
+      "parentDisplays": [
+        "flex",
+        "flex",
+        "flex",
+        "flex",
+        "flex"
+      ],
+      "status": "OK",
+      "sampleWidths": [
+        0,
+        0,
+        0,
+        0
+      ]
+    }
+  ],
+  [
+    "Reports & Analytics",
+    "reports-analytics",
+    {
+      "count": 12,
+      "parentCount": 5,
+      "parentDisplays": [
+        "flex",
+        "flex",
+        "flex",
+        "flex",
+        "flex"
+      ],
+      "status": "OK",
+      "sampleWidths": [
+        0,
+        0,
+        0,
+        0
+      ]
+    }
+  ],
+  [
+    "Notifications",
+    "notifications",
+    {
+      "count": 24,
+      "parentCount": 12,
+      "parentDisplays": [
+        "flex",
+        "flex",
+        "flex",
+        "flex",
+        "flex",
+        "grid",
+        "flex",
+        "flex",
+        "flex",
+        "flex",
+        "flex",
+        "flex"
+      ],
+      "status": "OK",
+      "sampleWidths": [
+        0,
+        0,
+        0,
+        0
+      ]
+    }
+  ],
+  [
+    "Document Repository",
+    "document-repository",
+    {
+      "count": 12,
+      "parentCount": 5,
+      "parentDisplays": [
+        "flex",
+        "flex",
+        "flex",
+        "flex",
+        "flex"
+      ],
+      "status": "OK",
+      "sampleWidths": [
+        0,
+        0,
+        0,
+        0
+      ]
+    }
+  ],
+  [
+    "User Management",
+    "user-management",
+    {
+      "count": 12,
+      "parentCount": 5,
+      "parentDisplays": [
+        "flex",
+        "flex",
+        "flex",
+        "flex",
+        "flex"
+      ],
+      "status": "OK",
+      "sampleWidths": [
+        0,
+        0,
+        0,
+        0
+      ]
+    }
+  ],
+  [
+    "System Configuration",
+    "system-configuration",
+    {
+      "count": 12,
+      "parentCount": 5,
+      "parentDisplays": [
+        "flex",
+        "flex",
+        "flex",
+        "flex",
+        "flex"
+      ],
+      "status": "OK",
+      "sampleWidths": [
+        0,
+        0,
+        0,
+        0
+      ]
+    }
+  ]
+]

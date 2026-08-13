@@ -1,0 +1,291 @@
+=== renderSoftwareDevelopmentModule (app.js) ===
+function renderSoftwareDevelopmentModule() {
+    viewSubpage.innerHTML = `
+      <!-- EXECUTIVE TOOLBAR: PRIMARY / SECONDARY ACTIONS -->
+      <section style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 14px; margin-bottom: 1.0rem;">
+        <button class="btn btn-primary btn-sm" onclick="alert('ACTION: Create Project wizard initiated.')"><i class="fa-solid fa-plus"></i> Create Project</button>
+        <button class="btn btn-outline btn-sm" onclick="alert('ACTION: Dynamic Architecture Review Map opened.')"><i class="fa-solid fa-sitemap"></i> View Architecture</button>
+        <button class="btn btn-outline btn-sm" onclick="alert('ACTION: Exporting Engineering Health Report PDF...')"><i class="fa-solid fa-download"></i> Export Report</button>
+      </section>
+
+      <!-- MULTI-DIMENSIONAL FILTERS ROW (cto2.mp4 style) -->
+      <div class="filter-toolbar" style="margin-bottom: 1.5rem;">
+        <div class="filter-group">
+          <div class="search-control">
+            <i class="fa-solid fa-magnifying-glass"></i>
+            <input type="text" id="projectSearchInput" placeholder="Search project name, owner, tech">
+          </div>
+          <select class="select-control" id="productFilterSelect">
+            <option value="all">Project: All</option>
+            <option value="EVcare">EVcare.AI</option>
+            <option value="Mobile">Mobile Application</option>
+            <option value="Web">Web Portal</option>
+            <option value="Fleet">Fleet Platform</option>
+            <option value="Office">Office Systems</option>
+          </select>
+          <select class="select-control" id="teamFilterSelect">
+            <option value="all">Team: All Teams</option>
+            <option value="Backend AI">Backend & AI</option>
+            <option value="Mobile Squad">Mobile Squad</option>
+            <option value="Frontend Team">Frontend Team</option>
+            <option value="EV Telematics">EV Telematics</option>
+            <option value="Cloud Infra">Cloud Infra</option>
+          </select>
+          <select class="select-control" id="statusFilterSelect">
+            <option value="all">Status: All</option>
+            <option value="Healthy">Healthy</option>
+            <option value="Needs Attention">Needs Attention</option>
+            <option value="Critical">Critical</option>
+          </select>
+          <select class="select-control" id="techFilterSelect">
+            <option value="all">Technology Stack: All</option>
+            <option value="React">React</option>
+            <option value="Flutter">Flutter</option>
+            <option value="Python">Python</option>
+            <option value="Go">Go</option>
+            <option value="Rust">Rust</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- SECTION 1: 5 EXECUTIVE KPI CARDS (cto2.mp4 style) -->
+      <section style="display: grid; grid-template-columns: repeat(5, 1fr); gap: 12px; margin-bottom: 1.5rem;">
+        ${window.portalData.softDevKPIs.map(k => `
+          <div class="kpi-card glassmorphism has-exec-popover">
+            <div class="kpi-header">
+              <span class="kpi-title">${k.title}</span>
+              <div class="kpi-icon" style="background-color: var(--bg-active); color: var(--color-${k.color})">
+                <i class="fa-solid ${k.icon}"></i>
+              ${window.createExecPopoverHTML({status: "Optimal", statusColor: "success", situation: "Codebase delivery velocity running at 94.2% milestone completion.", businessImpact: "Sustains high codebase quality and enterprise delivery velocity.", aiRecommendation: "Allocate refactoring capacity before next major release.", recommendedAction: "Open Software Dev", relatedModule: "Software Development"})}</div>
+            </div>
+            <div class="kpi-value">${k.value}</div>
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 8px;">
+              <span style="font-size: 0.72rem; color: var(--text-muted); font-weight: 500;">${k.support}</span>
+              <span class="badge badge-${k.trendClass === 'positive' ? 'success' : k.trendClass === 'negative' ? 'danger' : 'grey'}" style="font-size: 0.65rem;">
+                ${k.change}
+              </span>
+            </div>
+          </div>
+        `).join('')}
+      </section>
+
+      <!-- SECTION 2: APPLICATION ECOSYSTEM ARCHITECTURE VIEW (cto2.mp4 style) -->
+      <section class="card" style="margin-bottom: 1.5rem;">
+        <div class="card-header">
+          <div>
+            <span class="card-title"><i class="fa-solid fa-sitemap"></i> Application Ecosystem Architecture View</span>
+            <span class="card-subtitle">Executive visualization of system connections from mobile clients to cloud IoT infrastructure</span>
+          </div>
+        </div>
+        <div class="card-body">
+          <div style="display: flex; justify-content: space-between; align-items: center; gap: 12px; overflow-x: auto; padding: 10px 0;">
+            <div class="card" style="padding: 10px; text-align: center; min-width: 140px; background-color: var(--bg-app); border: 1px solid var(--border-color);">
+              <i class="fa-solid fa-mobile-screen-button" style="color: var(--color-blue); font-size: 1.15rem; margin-bottom: 4px;"></i>
+              <div style="font-size: 0.78rem; font-weight: 700;">Mobile Apps</div>
+              <span style="font-size: 0.65rem; color: var(--text-muted);">EVcare iOS & Android</span>
+            </div>
+            <i class="fa-solid fa-arrow-right" style="color: var(--text-muted);"></i>
+            <div class="card" style="padding: 10px; text-align: center; min-width: 140px; background-color: var(--bg-app); border: 1px solid var(--border-color);">
+              <i class="fa-solid fa-server" style="color: var(--color-purple); font-size: 1.15rem; margin-bottom: 4px;"></i>
+              <div style="font-size: 0.78rem; font-weight: 700;">Backend Services</div>
+              <span style="font-size: 0.65rem; color: var(--text-muted);">FastAPI & Go Gateway</span>
+            </div>
+            <i class="fa-solid fa-arrow-right" style="color: var(--text-muted);"></i>
+            <div class="card" style="padding: 10px; text-align: center; min-width: 140px; background-color: var(--bg-app); border: 1px solid var(--border-color);">
+              <i class="fa-solid fa-database" style="color: var(--color-green); font-size: 1.15rem; margin-bottom: 4px;"></i>
+              <div style="font-size: 0.78rem; font-weight: 700;">Database Layer</div>
+              <span style="font-size: 0.65rem; color: var(--text-muted);">PostgreSQL & Timescale</span>
+            </div>
+            <i class="fa-solid fa-arrow-right" style="color: var(--text-muted);"></i>
+            <div class="card" style="padding: 10px; text-align: center; min-width: 140px; background-color: var(--bg-app); border: 1px solid var(--border-color);">
+              <i class="fa-solid fa-cloud" style="color: var(--color-blue); font-size: 1.15rem; margin-bottom: 4px;"></i>
+              <div style="font-size: 0.78rem; font-weight: 700;">Cloud Infra</div>
+              <span style="font-size: 0.65rem; color: var(--text-muted);">AWS EKS & Azure MS</span>
+            </div>
+            <i class="fa-solid fa-arrow-right" style="color: var(--text-muted);"></i>
+            <div class="card" style="padding: 10px; text-align: center; min-width: 140px; background-color: var(--bg-app); border: 1px solid var(--border-color);">
+              <i class="fa-solid fa-tower-broadcast" style="color: var(--color-purple); font-size: 1.15rem; margin-bottom: 4px;"></i>
+              <div style="font-size: 0.78rem; font-weight: 700;">IoT / Telemetry</div>
+              <span style="font-size: 0.65rem; color: var(--text-muted);">CAN-bus & MQTT/Kafka</span>
+            </div>
+            <i class="fa-solid fa-arrow-right" style="color: var(--text-muted);"></i>
+            <div class="card" style="padding: 10px; text-align: center; min-width: 140px; background-color: var(--bg-app); border: 1px solid var(--border-color);">
+              <i class="fa-solid fa-plug" style="color: var(--color-green); font-size: 1.15rem; margin-bottom: 4px;"></i>
+              <div style="font-size: 0.78rem; font-weight: 700;">External APIs</div>
+              <span style="font-size: 0.65rem; color: var(--text-muted);">ChargePoint & OpenADR</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- SECTION 3: SOFTWARE PROJECT PORTFOLIO TABLE (cto2.mp4 style) -->
+      <section class="card" style="margin-bottom: 1.5rem;">
+        <div class="card-header">
+          <div>
+            <span class="card-title"><i class="fa-solid fa-folder-open"></i> Software Project Portfolio</span>
+            <span class="card-subtitle">Executive overview of projects owners, technology stack, progress, and versions</span>
+          </div>
+        </div>
+        <div class="card-body" style="padding: 0;">
+          <div class="table-responsive">
+            <table class="enterprise-table" id="softDevProjectsTable">
+              <thead>
+                <tr>
+                  <th onclick="window.sortProjectTable('name')">PROJECT NAME <i class="fa-solid fa-sort"></i></th>
+                  <th onclick="window.sortProjectTable('owner')">PROJECT OWNER <i class="fa-solid fa-sort"></i></th>
+                  <th>TECHNOLOGY STACK</th>
+                  <th onclick="window.sortProjectTable('status')">CURRENT STATUS <i class="fa-solid fa-sort"></i></th>
+                  <th onclick="window.sortProjectTable('progress')">DEVELOPMENT PROGRESS <i class="fa-solid fa-sort"></i></th>
+                  <th>CURRENT VERSION</th>
+                  <th>ACTIONS</th>
+                </tr>
+              </thead>
+              <tbody id="projectsTableBody">
+                <!-- Dynamically populated -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- SECTION 4: TECHNOLOGY STACK OVERVIEW (cto2.mp4 style) -->
+      <section style="margin-bottom: 1.5rem;">
+        <h3 style="font-size: 1rem; font-weight: 800; margin-bottom: 10px; letter-spacing: -0.02em;">Technology Stack Overview</h3>
+        <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px;">
+          ${window.portalData.techStackOverview.map(t => `
+            <div class="card" style="padding: 1.25rem;">
+              <span style="font-size: 0.68rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em; display: block; margin-bottom: 10px;">${t.title}</span>
+              <div style="font-size: 1.15rem; font-weight: 800; margin-bottom: 4px;">${t.main}</div>
+              <span style="font-size: 0.72rem; color: var(--text-secondary); display: block; margin-bottom: 12px;">${t.sub}</span>
+              <div style="display: flex; flex-direction: column; gap: 4px; border-top: 1px solid var(--border-color); padding-top: 10px; font-size: 0.72rem; color: var(--text-muted);">
+                ${t.items.map(item => `<div>&bull; ${item}</div>`).join('')}
+              </div>
+            </div>
+          `).join('')}
+        </div>
+      </section>
+
+      <!-- SECTION 5: TWO-COLUMN DETAIL CARDS (cto2.mp4 style) -->
+      <div class="dashboard-grid" style="margin-top: 0; margin-bottom: 1.5rem;">
+        
+        <!-- Application Environment Status -->
+        <div class="card col-6">
+          <div class="card-header">
+            <span class="card-title"><i class="fa-solid fa-server"></i> Application Environment Status</span>
+            <span class="badge badge-success">3/3 Operational</span>
+          </div>
+          <div class="card-body" style="display: flex; flex-direction: column; gap: 12px;">
+            ${window.portalData.environments.map(env => `
+              <div style="border-bottom: 1px solid var(--border-color); padding-bottom: 10px; display: flex; justify-content: space-between; align-items: flex-start;">
+                <div>
+                  <h4 style="font-size: 0.85rem; font-weight: 700; margin-bottom: 2px;">${env.name}</h4>
+                  <span style="font-size: 0.72rem; color: var(--text-muted);">${env.desc}</span>
+                </div>
+                <div style="text-align: right;">
+                  <span class="badge badge-${env.statusClass}" style="font-size: 0.65rem; margin-bottom: 4px;">${env.status}</span>
+                  <div style="font-size: 0.72rem; color: var(--text-secondary); font-weight: 600;">Availability: ${env.availability}</div>
+                </div>
+              </div>
+            `).join('')}
+          </div>
+        </div>
+
+        <!-- Engineering Activity Summary -->
+        <div class="card col-6">
+          <div class="card-header">
+            <span class="card-title"><i class="fa-solid fa-timeline"></i> Engineering Activity Summary</span>
+            <span class="badge badge-grey">CTO Summary Feed</span>
+          </div>
+          <div class="card-body" style="display: flex; flex-direction: column; gap: 12px;">
+            ${window.portalData.engineeringActivity.map(act => `
+              <div style="border-bottom: 1px solid var(--border-color); padding-bottom: 8px; display: flex; justify-content: space-between; align-items: center; gap: 10px;">
+                <div style="flex: 1;">
+                  <span style="font-size: 0.68rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; display: block;">${act.title}</span>
+                  <p style="font-size: 0.78rem; color: var(--text-primary); margin-top: 2px;">${act.desc}</p>
+                </div>
+                <span style="font-size: 0.72rem; color: var(--text-muted); white-space: nowrap;">${act.time}</span>
+              </div>
+            `).join('')}
+          </div>
+        </div>
+
+      </div>
+
+      <!-- SECTION 6: HEALTH INSIGHTS & ATTENTION CENTER (cto2.mp4 style) -->
+      <div class="dashboard-grid" style="margin-top: 0; margin-bottom: 1.5rem;">
+        
+        <!-- Engineering Health Insights -->
+        <div class="card col-6">
+          <div class="card-header">
+            <span class="card-title"><i class="fa-solid fa-heart-pulse"></i> Engineering Health Insights</span>
+            <span class="badge badge-grey">Executive Overview</span>
+          </div>
+          <div class="card-body" style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 14px;">
+            ${window.portalData.healthInsights.map(h => `
+              <div style="padding: 12px; background-color: var(--bg-app); border: 1px solid var(--border-color); border-radius: var(--radius-md);">
+                <span style="font-size: 0.68rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; display: block;">${h.label}</span>
+                <div style="font-size: 1.35rem; font-weight: 800; color: var(--text-primary); margin-top: 4px; letter-spacing: -0.02em;">${h.score}</div>
+                <span style="font-size: 0.72rem; color: var(--text-secondary); margin-top: 2px; display: block;">${h.desc}</span>
+              </div>
+            `).join('')}
+          </div>
+        </div>
+
+        <!-- CTO Attention Center -->
+        <div class="card col-6">
+          <div class="card-header">
+            <span class="card-title"><i class="fa-solid fa-triangle-exclamation"></i> CTO Attention Center</span>
+            <span class="badge badge-danger">3 Items Require Attention</span>
+          </div>
+          <div class="card-body" style="display: flex; flex-direction: column; gap: 10px; justify-content: space-between;">
+            ${window.portalData.attentionCenter.map(att => `
+              <div style="padding: 8px 10px; border-radius: var(--radius-md); border: 1px solid var(--border-color); background-color: var(--bg-app); display: flex; justify-content: space-between; align-items: center; gap: 10px;">
+                <div style="flex: 1;">
+                  <span class="badge badge-${att.priority === 'Critical' ? 'danger' : att.priority === 'Warning' ? 'warning' : 'success'}" style="font-size: 0.62rem; margin-bottom: 2px;">${att.priority}</span>
+                  <p style="font-size: 0.78rem; color: var(--text-secondary); line-height: 1.3;">${att.title}</p>
+                </div>
+                <button class="btn btn-primary btn-sm" style="font-size: 0.68rem; padding: 4px 8px;" onclick="alert('CTO EXPLICIT ACTION: Initiated ${att.action}')">${att.action}</button>
+              </div>
+            `).join('')}
+          </div>
+        </div>
+
+      </div>
+
+      <!-- SECTION 7: AI RECOMMENDATIONS (cto2.mp4 style) -->
+      <section class="card" style="margin-bottom: 1rem;">
+        <div class="card-header">
+          <span class="card-title"><i class="fa-solid fa-wand-magic-sparkles"></i> AI Engineering Intelligence & Recommendations</span>
+          <span class="badge badge-grey">3 Active Insights</span>
+        </div>
+        <div class="card-body">
+          <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px;">
+            ${window.portalData.aiRecommendations.map(rec => `
+              <div class="card" style="padding: 12px; background-color: var(--bg-surface); border: 1px solid var(--border-color);">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                  <span style="font-size: 0.75rem; font-weight: 700; color: var(--text-primary);">${rec.title}</span>
+                  <span class="badge badge-grey" style="font-size: 0.62rem;">${rec.priority}</span>
+                </div>
+                <p style="font-size: 0.78rem; color: var(--text-secondary); line-height: 1.35; margin-bottom: 8px;">${rec.desc}</p>
+                <div style="font-size: 0.72rem; background-color: var(--bg-app); border: 1px solid var(--border-color); padding: 8px; border-radius: var(--radius-sm); color: var(--text-secondary); line-height: 1.35;">
+                  💡 <strong>Recommendation:</strong> ${rec.recommendation}
+                </div>
+              </div>
+            `).join('')}
+          </div>
+        </div>
+      </section>
+    `;
+
+    // Local table controller states
+    let searchVal = '';
+    let sortKey = 'name';
+    let sortOrder = 'asc';
+    let productVal = 'all';
+    let teamVal = 'all';
+    let statusVal = 'all';
+    let techVal = 'all';
+
+    
+
+=== portalData.softwareDevelopment (data.js) ===

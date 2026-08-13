@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>InnoVibe Mobility CTO Portal</title>
+  
+  <!-- Font Awesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <!-- Custom Stylesheet -->
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="app-layout">
+    
+    <!-- LEFT SIDEBAR -->
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar-header">
+        <div class="brand">
+          <div class="brand-icon">
+            <i class="fa-solid fa-bolt"></i>
+          </div>
+          <div class="brand-text">
+            <span class="brand-title">InnoVibe</span>
+            <span class="brand-subtitle">office.innovibe.mobility</span>
+          </div>
+        </div>
+        <button class="sidebar-toggle-btn" id="sidebarToggleBtn" title="Toggle Sidebar">
+          <i class="fa-solid fa-chevron-left" id="toggleIcon"></i>
+        </button>
+      </div>
+
+
+      <!-- Scrollable Navigation Groups -->
+      <nav class="sidebar-nav" id="sidebarNav">
+        
+        <!-- CORE PLATFORM -->
+        <div class="nav-group">
+          <div class="nav-group-title">Core Platform</div>
+          <a href="#" class="nav-item active" data-view="dashboard">
+            <i class="fa-solid fa-chart-line"></i>
+            <span>Technology Dashboard</span>
+          </a>
+          <a href="#" class="nav-item" data-view="software-development">
+            <i class="fa-solid fa-code"></i>
+            <span>Software Development</span>
+          </a>
+          <a href="#" class="nav-item" data-view="product-roadmap">
+            <i class="fa-solid fa-map"></i>
+            <span>Product Roadmap</span>
+          </a>
+          <a href="#" class="nav-item" data-view="sprint-management">
+            <i class="fa-solid fa-clock"></i>
+            <span>Sprint Management</span>
+          </a>
+          <a href="#" class="nav-item" data-view="bug-tracking">
+            <i class="fa-solid fa-bug"></i>
+            <span>Bug Tracking</span>
+            <span class="nav-badge orange">23</span>
+          </a>
+          <a href="#" class="nav-item" data-view="feature-requests">
+            <i class="fa-solid fa-lightbulb"></i>
+            <span>Feature Requests</span>
+            <span class="nav-badge blue">12</span>
+          </a>
+        </div>
+
+        <!-- ENGINEERING & APIS -->
+        <div class="nav-group">
+          <div class="nav-group-title">Engineering & APIs</div>
+          <a href="#" class="nav-item" data-view="api-management">
+            <i class="fa-solid fa-network-wired"></i>
+            <span>API Management</span>
+          </a>
+          <a href="#" class="nav-item" data-view="database-management">
+            <i class="fa-solid fa-database"></i>
+            <span>Database Management</span>
+          </a>
+          <a href="#" class="nav-item" data-view="cloud-infrastructure">
+            <i class="fa-solid fa-cloud"></i>
+            <span>Cloud Infrastructure</span>
+          </a>
+          <a href="#" class="nav-item" data-view="devops-pipelines">
+            <i class="fa-solid fa-infinity"></i>
+            <span>DevOps & Pipelines</span>
+            <span class="nav-badge green">Live</span>
+          </a>
+          <a href="#" class="nav-item" data-view="system-logs">
+            <i class="fa-solid fa-scroll"></i>
+            <span>System Logs</span>
+          </a>
+        </div>
+
+        <!-- MOBILITY & IOT PLATFORMS -->
+        <div class="nav-group">
+          <div class="nav-group-title">Mobility & IoT Platforms</div>
+          <a href="#" class="nav-item" data-view="iot-device-management">
+            <i class="fa-solid fa-car-battery"></i>
+            <span>IoT Device Management</span>
+          </a>
+          <a href="#" class="nav-item" data-view="telemetry-platform">
+            <i class="fa-solid fa-tower-broadcast"></i>
+            <span>Telemetry Platform</span>
+            <span class="nav-badge green">14.2M</span>
+          </a>
+          <a href="#" class="nav-item" data-view="evcare-ai-dashboard">
+            <i class="fa-solid fa-wand-magic-sparkles"></i>
+            <span>EVcare.AI Dashboard</span>
+            <span class="nav-badge purple">AI</span>
+          </a>
+          <a href="#" class="nav-item" data-view="ai-diagnostics">
+            <i class="fa-solid fa-heart-pulse"></i>
+            <span>AI Diagnostics</span>
+          </a>
+          <a href="#" class="nav-item" data-view="mobile-app-management">
+            <i class="fa-solid fa-mobile-screen-button"></i>
+            <span>Mobile App Management</span>
+          </a>
+          <a href="#" class="nav-item" data-view="web-portal-management">
+            <i class="fa-solid fa-globe"></i>
+            <span>Web Portal Management</span>
+          </a>
+        </div>
+
+        <!-- AI & ML INTELLIGENCE -->
+        <div class="nav-group">
+          <div class="nav-group-title">AI & ML Intelligence</div>
+          <a href="#" class="nav-item" data-view="ai-models">
+            <i class="fa-solid fa-brain"></i>
+            <span>AI Models</span>
+          </a>
+          <a href="#" class="nav-item" data-view="machine-learning">
+            <i class="fa-solid fa-gears"></i>
+            <span>Machine Learning</span>
+          </a>
+        </div>
+
+        <!-- SECURITY & GOVERNANCE -->
+        <div class="nav-group">
+          <div class="nav-group-title">Security & Governance</div>
+          <a href="#" class="nav-item" data-view="cybersecurity">
+            <i class="fa-solid fa-user-shield"></i>
+            <span>Cybersecurity</span>
+            <span class="nav-badge green">ISO 26262</span>
+          </a>
+          <a href="#" class="nav-item" data-view="integrations">
+            <i class="fa-solid fa-plug"></i>
+            <span>Integrations</span>
+          </a>
+          <a href="#" class="nav-item" data-view="reports-analytics">
+            <i class="fa-solid fa-file-invoice-dollar"></i>
+            <span>Reports & Analytics</span>
+          </a>
+          <a href="#" class="nav-item" data-view="document-repository">
+            <i class="fa-solid fa-folder-open"></i>
+            <span>Document Repository</span>
+          </a>
+        </div>
+
+        <!-- ADMINISTRATION -->
+        <div class="nav-group">
+          <div class="nav-group-title">Administration</div>
+          <a href="#" class="nav-item" data-view="notifications">
+            <i class="fa-solid fa-bell"></i>
+            <span>Notifications</span>
+          </a>
+          <a href="#" class="nav-item" data-view="user-management">
+            <i class="fa-solid fa-users-gear"></i>
+            <span>User Management</span>
+            <span class="nav-badge grey">142</span>
+          </a>
+          <a href="#" class="nav-item" data-view="system-configuration">
+            <i class="fa-solid fa-sliders"></i>
+            <span>System Configuration</span>
+          </a>
+        </div>
+
+      </nav>
+
+      <!-- Sidebar Status Footer -->
+      <div class="sidebar-footer">
+        <div class="system-status">
+          <span class="status-dot"></span>
+          <span>All Systems Operational</span>
+        </div>
+      </div>
+    </aside>
+
+    <!-- MAIN APP CONTAINER -->
+    <div class="main-wrapper">
+      
+      <!-- TOP HEADER -->
+      <header class="top-header">
+        <div class="header-left">
+          <button class="mobile-menu-btn" id="mobileMenuBtn">
+            <i class="fa-solid fa-bars"></i>
+          </button>
+          <div class="page-title-group">
+            <h1 class="page-title" id="headerPageTitle">Technology Dashboard</h1>
+            <span class="portal-badge">Executive Technology Workspace</span>
+          </div>
+        </div>
+
+        <div class="header-center">
+          <div class="global-search-bar" id="globalSearchBar">
+            <i class="fa-solid fa-magnifying-glass"></i>
+            <input type="text" placeholder="Search CTO workspace (Ctrl + K)..." readonly>
+          </div>
+        </div>
+
+        <div class="header-right">
+          <!-- Notification Bell Trigger -->
+          <div class="notification-trigger-container">
+            <button class="header-icon-btn" id="headerNotificationBtn" title="Notifications">
+              <i class="fa-regular fa-bell"></i>
+              <span class="badge-dot" id="notificationDot"></span>
+            </button>
+          </div>
+
+          <!-- Theme Toggle Button -->
+          <button class="header-icon-btn" id="themeToggleBtn" title="Toggle Theme">
+            <i class="fa-regular fa-moon" id="themeToggleIcon"></i>
+          </button>
+
+          <!-- User Profile Display -->
+                    <!-- User Profile Display & Dropdown -->
+          <div style="position: relative;">
+            <div class="user-profile" id="userProfileDropdownTrigger" style="cursor: pointer;">
+              <div class="user-avatar">
+                <img src="https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&w=120&q=80" alt="CTO Profile">
+              </div>
+              <div class="user-details">
+                <span class="user-name">Dr. Elena Rostova <i class="fa-solid fa-chevron-down" style="font-size: 0.65rem; margin-left: 4px; opacity: 0.7;"></i></span>
+                <span class="user-role">Chief Technology Officer</span>
+              </div>
+            </div>
+
+            <!-- User Profile & Logout Dropdown Menu -->
+            <div class="user-profile-dropdown" id="userProfileDropdown" style="display: none; position: absolute; right: 0; top: 110%; width: 240px; background-color: var(--bg-surface); border: 1px solid var(--border-color); border-radius: var(--radius-lg); box-shadow: var(--shadow-lg); z-index: 1000; padding: 8px 0; backdrop-filter: blur(12px);">
+              <div style="padding: 10px 14px; border-bottom: 1px solid var(--border-color);">
+                <div style="font-size: 0.82rem; font-weight: 800; color: var(--text-primary);">Dr. Elena Rostova</div>
+                <div style="font-size: 0.70rem; color: var(--text-secondary);">elena.rostova@innovibe.mobility</div>
+                <span class="badge badge-success" style="font-size: 0.58rem; margin-top: 4px; padding: 2px 6px;">Passkey SSO Active</span>
+              </div>
+              
+              <div style="padding: 4px 0;">
+                <a href="#" class="profile-dropdown-item" onclick="event.preventDefault(); window.switchRoute('system-configuration')" style="display: flex; align-items: center; gap: 10px; padding: 8px 14px; font-size: 0.78rem; color: var(--text-primary); text-decoration: none;">
+                  <i class="fa-solid fa-user-gear" style="color: var(--color-blue); width: 16px;"></i> CTO Preferences
+                </a>
+                <a href="#" class="profile-dropdown-item" onclick="event.preventDefault(); window.switchRoute('cybersecurity')" style="display: flex; align-items: center; gap: 10px; padding: 8px 14px; font-size: 0.78rem; color: var(--text-primary); text-decoration: none;">
+                  <i class="fa-solid fa-shield-halved" style="color: var(--color-purple); width: 16px;"></i> Security & Tokens
+                </a>
+              </div>
+
+              <div style="border-top: 1px solid var(--border-color); padding-top: 4px; margin-top: 4px;">
+                <a href="#" id="portalLogoutBtn" class="profile-dropdown-item logout-item" style="display: flex; align-items: center; gap: 10px; padding: 8px 14px; font-size: 0.78rem; color: var(--color-red); font-weight: 700; text-decoration: none;">
+                  <i class="fa-solid fa-right-from-bracket" style="color: var(--color-red); width: 16px;"></i> Log Out
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      <!-- VIEWPORT PANES CONTAINER -->
+      <main class="main-content" id="mainContent">
+        <!-- Dashboard View Pane (Loaded by Default) -->
+        <div class="view-pane active" id="view-dashboard">
+          <!-- Technology Dashboard content rendered dynamically -->
+        </div>
+
+        <!-- Common Sub-page view pane for direct routing -->
+        <div class="view-pane" id="view-subpage">
+          <!-- Module dynamic subpages render inside here -->
+        </div>
+      </main>
+
+    </div>
+  </div>
+
+  <!-- SEARCH MODAL / COMMAND PALETTE -->
+  <div class="modal-overlay" id="searchModalOverlay">
+    <div class="command-palette">
+      <div class="palette-header">
+        <i class="fa-solid fa-magnifying-glass"></i>
+        <input type="text" class="palette-input" id="paletteInput" placeholder="Search modules, features, metrics, APIs...">
+        <span class="esc-badge">ESC</span>
+      </div>
+      <div class="palette-results" id="paletteResults">
+        <!-- Dynamic results list -->
+      </div>
+    </div>
+  </div>
+
+  <!-- NOTIFICATIONS dropdown center -->
+  <div class="notification-dropdown" id="notificationDropdown">
+    <div class="dropdown-header">
+      <span class="dropdown-header-title">
+        <i class="fa-solid fa-bell"></i> Notifications Center
+      </span>
+      <span class="badge badge-info" id="notificationCountBadge">4 New</span>
+    </div>
+    <div class="notification-list" id="notificationDropdownList">
+      <!-- Dynamic notification list items -->
+    </div>
+    <div class="dropdown-footer">
+      <button class="dropdown-footer-btn" id="clearAllNotificationsBtn">Mark all as read</button>
+    </div>
+  </div>
+
+  <!-- INSPECTION DRAWER OVERLAY -->
+  <div class="slide-over-overlay" id="drawerOverlay">
+    <div class="slide-over-panel" id="drawerPanel">
+      <div class="drawer-header">
+        <h3 class="drawer-title" id="drawerTitle">Component Inspector</h3>
+        <button class="drawer-close-btn" id="drawerCloseBtn" title="Close Details">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+      <div class="drawer-body" id="drawerBody">
+        <!-- Rendered dynamically -->
+      </div>
+    </div>
+  </div>
+
+  <!-- Chart.js CDN for beautiful dashboard visualizations -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  <!-- Code Scripts -->
+  <script src="js/data.js"></script>
+  <script src="js/charts.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>

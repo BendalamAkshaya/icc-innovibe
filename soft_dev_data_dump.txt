@@ -1,0 +1,54 @@
+=== softDevKPIs ===
+softDevKPIs: [
+    { id: 'active-projects', title: 'Active Projects', value: '8', support: '8 Active Projects', trend: 'On Track', trendClass: 'positive', change: '+1', icon: 'fa-diagram-project', color: 'blue' },
+    { id: 'dev-teams', title: 'Development Teams', value: '6', support: '6 Engineering Teams', trend: 'Allocated', trendClass: 'neutral', change: '0', icon: 'fa-users', color: 'purple' },
+    { id: 'developers-count', title: 'Developers', value: '42', support: '42 developers', trend: 'Max Load', trendClass: 'negative', change: '+3', icon: 'fa-code', color: 'green' },
+    { id: 'current-releases', title: 'Current Releases', value: '5', support: '5 Upcoming Releases', trend: 'On Track', trendClass: 'positive', change: 'v3.4.0', icon: 'fa-rocket', color: 'blue' },
+    { id: 'health-score', title: 'Health Score', value: '94%', support: '94% Healthy', trend: 'Optimal', trendClass: 'positive', change: '+1.5%', icon: 'fa-heart-pulse', color: 'green' }
+  ],
+
+=== techStackOverview ===
+techStackOverview: [
+    { title: 'FRONTEND', main: 'React <span class="badge badge-info" style="font-size:0.68rem;">v18.3</span>', sub: 'Used by 6 Applications', items: ['Flutter v3.22 (Used by 2 Mobile Apps)', 'HTML5 / CSS3 (Used by 4 Services)', 'Tailwind CSS (Used by 3 Portals)'] },
+    { title: 'BACKEND', main: 'Python <span class="badge badge-info" style="font-size:0.68rem;">v3.12</span>', sub: 'Used by 5 Services', items: ['Go v1.22 (Used by 5 Services)', 'Node.js Express (Used by 4 microservices)', 'Rust v1.8 (Used by 1 Core Service)'] },
+    { title: 'DATABASE', main: 'PostgreSQL <span class="badge badge-info" style="font-size:0.68rem;">v16.2</span>', sub: 'Used by 4 Instances', items: ['TimescaleDB v2.15 (Used by 2 Clusters)', 'Redis v7.2 (Used by 3 Clusters)', 'MongoDB (Used by 1 Logs Instance)'] },
+    { title: 'CLOUD & AI/ML', main: 'AWS EKS <span class="badge badge-info" style="font-size:0.68rem;">v1.30</span>', sub: 'Used by 12 Workloads', items: ['PyTorch v2.3 (Used by 3 AI Models)', 'TensorFlow v2.16 (Used by 1 AI Model)', 'Vercel Edge Networks (Used by 2 Portals)'] }
+  ],
+
+=== environments ===
+environments: [
+    { name: 'Production Environment', status: 'Healthy', statusClass: 'success', availability: '99.99%', version: 'v3.4.0', desc: '38 Services Live &bull; Last Deploy 2 hours ago' },
+    { name: 'Testing / Staging Environment', status: 'Healthy', statusClass: 'success', availability: '99.8%', version: 'v3.5.0-rc2', desc: '32 Services Live &bull; Last Deploy 45 mins ago' },
+    { name: 'Development Environment', status: 'Healthy', statusClass: 'success', availability: '99.5%', version: 'v3.6.0-dev', desc: 'Sandbox Active &bull; Zero downtime' }
+  ],
+
+=== engineeringActivity ===
+engineeringActivity: [
+    { title: 'Technology / Upgrade', desc: 'EVcare AI backend upgraded to Python 3.12', time: '2 hours ago' },
+    { title: 'Latest Deployment', desc: 'New mobile version v2.8.1 deployed successfully', time: '4 hours ago' },
+    { title: 'Major System Update', desc: 'Kafka partition auto-rebalancing enabled', time: '6 hours ago' },
+    { title: 'Architecture Change', desc: 'mTLS RS256 token validation implemented', time: '8 hours ago' }
+  ],
+
+=== healthInsights ===
+healthInsights: [
+    { label: 'Code Quality', score: '92 / 100', desc: 'SonarQube Rated A' },
+    { label: 'Deployment Stability', score: '99.8%', desc: '0 Rollback Events' },
+    { label: 'System Reliability', score: '99.9%', desc: 'SLA Compliant' },
+    { label: 'Technical Debt', score: 'Low', desc: '20 Hours Debt' }
+  ],
+
+=== attentionCenter ===
+attentionCenter: [
+    { title: 'Backend service scaling requires release before next peak.', priority: 'Critical', action: 'Scale Backend Service' },
+    { title: 'Mobile application performance decreased on iOS.', priority: 'Warning', action: 'Reallocate Mobile QA' },
+    { title: 'Cloud migration completed successfully.', priority: 'Positive', action: 'View Cloud Metrics' }
+  ],
+
+=== aiRecommendations ===
+aiRecommendations: [
+    { title: 'Performance Insight', desc: 'Backend response time increased by 10% on core API endpoints during peak tariff hours.', recommendation: 'Review REST API query caching and database index optimization.', priority: 'Medium Impact' },
+    { title: 'Technical Risk Alert', desc: 'Mobile application BLE pairing handshake latency spiked by 240ms on iOS 18.', recommendation: 'Reallocate 2 QA engineers to Mobile team.', priority: 'High Impact' },
+    { title: 'Cost Optimization Opportunity', desc: 'Idle AWS EKS cluster pods represent $3,200/month excess cloud spend.', recommendation: 'Enable dynamic pod auto-scaling policies on AWS.', priority: 'Cost Savings' }
+  ],
+
