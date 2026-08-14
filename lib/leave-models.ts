@@ -8,11 +8,30 @@ export type LeaveStatus = 'PENDING' | 'APPROVED' | 'REJECTED' | 'CANCELLED';
 export type LeaveType =
   | 'CASUAL_LEAVE'
   | 'SICK_LEAVE'
+  | 'PAID_TIME_OFF'
+  | 'UNPAID_LEAVE'
   | 'MATERNITY_LEAVE'
   | 'PATERNITY_LEAVE'
   | 'COMPENSATORY_OFF'
-  | 'UNPAID_LEAVE'
   | 'EMERGENCY_LEAVE';
+
+export const LEAVE_TYPE_LABELS: Record<LeaveType, string> = {
+  SICK_LEAVE: 'Sick Leave',
+  CASUAL_LEAVE: 'Casual Leave',
+  PAID_TIME_OFF: 'Paid Time Off (PTO)',
+  UNPAID_LEAVE: 'Unpaid Leave',
+  MATERNITY_LEAVE: 'Maternity Leave',
+  PATERNITY_LEAVE: 'Paternity Leave',
+  COMPENSATORY_OFF: 'Compensatory Off',
+  EMERGENCY_LEAVE: 'Emergency Leave',
+};
+
+export interface LeaveBalance {
+  casualLeave: { used: number; total: number };
+  sickLeave: { used: number; total: number };
+  paidTimeOff: { used: number; total: number };
+  unpaidLeave: { used: number; total: number };
+}
 
 export interface LeaveRequest {
   id: string;
@@ -52,6 +71,7 @@ export interface CreateLeaveRequestPayload {
 }
 
 export interface LeaveFilterParams {
+  employeeId?: string;
   searchQuery?: string;
   department?: string | 'ALL';
   role?: string | 'ALL';

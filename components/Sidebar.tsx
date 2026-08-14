@@ -52,6 +52,7 @@ import {
   HelpCircle,
   ClipboardCheck,
   Inbox,
+  LogOut,
 } from 'lucide-react';
 
 interface SubmenuItem {
@@ -249,31 +250,19 @@ const roleNavigationMap: Record<RoleType, WorkspaceConfig> = {
     ],
   },
   EMPLOYEE: {
-    workspaceTitle: 'Employee Workspace',
+    workspaceTitle: 'InnoVibe EMPLOYEE PORTAL',
     categories: [
       {
-        title: 'Daily Operations',
+        title: 'MAIN MENU',
         items: [
-          { name: 'My Dashboard', path: '/dashboard/employee?view=dashboard', exactQuery: 'dashboard', icon: LayoutDashboard, color: 'text-blue-600' },
-          { name: 'My Daily Tasks', path: '/dashboard/employee?view=tasks', exactQuery: 'tasks', icon: CheckSquare, color: 'text-indigo-600' },
-          { name: 'Attendance & Roster', path: '/dashboard/employee?view=attendance', exactQuery: 'attendance', icon: Clock, color: 'text-emerald-600' },
-        ],
-      },
-      {
-        title: 'Time & Reports',
-        items: [
-          { name: 'Leave & Time Off', path: '/dashboard/employee?view=leave', exactQuery: 'leave', icon: CalendarRange, color: 'text-amber-500' },
-          { name: 'Logout Reports', path: '/dashboard/employee?view=logout-reports', exactQuery: 'logout-reports', icon: ClipboardCheck, color: 'text-violet-600' },
-          { name: 'Employee Reports', path: '/dashboard/employee?view=reports', exactQuery: 'reports', icon: BarChart3, color: 'text-blue-600' },
-        ],
-      },
-      {
-        title: 'Workspace & Communication',
-        items: [
-          { name: 'Notice Board', path: '/dashboard/employee?view=announcements', exactQuery: 'announcements', icon: Bell, color: 'text-orange-500' },
-          { name: 'Internal Helpdesk', path: '/dashboard/employee?view=helpdesk', exactQuery: 'helpdesk', icon: HelpCircle, color: 'text-purple-600' },
-          { name: 'Notifications', path: '/dashboard/employee?view=notifications', exactQuery: 'notifications', icon: Inbox, color: 'text-rose-500' },
-          { name: 'My Profile', path: '/dashboard/employee?view=profile', exactQuery: 'profile', icon: User, color: 'text-slate-600' },
+          { name: 'Dashboard', path: '/dashboard/employee?view=dashboard', exactQuery: 'dashboard', icon: LayoutDashboard, color: 'text-blue-600' },
+          { name: 'Tasks', path: '/dashboard/employee?view=tasks', exactQuery: 'tasks', icon: CheckSquare, color: 'text-[#64748B]' },
+          { name: 'Leave', path: '/dashboard/employee?view=leave', exactQuery: 'leave', icon: CalendarRange, color: 'text-[#64748B]' },
+          { name: 'Logout reports', path: '/dashboard/employee?view=logout-reports', exactQuery: 'logout-reports', icon: ClipboardCheck, color: 'text-[#64748B]' },
+          { name: 'Announcements', path: '/dashboard/employee?view=announcements', exactQuery: 'announcements', icon: Bell, color: 'text-[#64748B]' },
+          { name: 'Reports', path: '/dashboard/employee?view=reports', exactQuery: 'reports', icon: FileText, color: 'text-[#64748B]' },
+          { name: 'Notifications', path: '/dashboard/employee?view=notifications', exactQuery: 'notifications', icon: Inbox, badge: '2', color: 'text-[#64748B]' },
+          { name: 'Profile', path: '/dashboard/employee?view=profile', exactQuery: 'profile', icon: User, color: 'text-[#64748B]' },
         ],
       },
     ],
@@ -297,7 +286,7 @@ export function Sidebar() {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
-  const { activeRole, isSuperAdmin } = useRole();
+  const { activeRole, isSuperAdmin, logout } = useRole();
 
   const getEffectiveRole = (): RoleType => {
     if (pathname.startsWith('/dashboard/hr')) return 'HR';
@@ -473,8 +462,19 @@ export function Sidebar() {
         </div>
       </div>
 
-      {/* Designation Privilege Status Card */}
-      {effectiveRole === 'CEO' ? (
+      {effectiveRole === 'EMPLOYEE' ? (
+        <button
+          type="button"
+          onClick={() => {
+            if (logout) logout();
+            router.push('/auth/login');
+          }}
+          className="flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-xs font-bold text-slate-600 hover:text-rose-600 hover:bg-rose-50 transition cursor-pointer mt-4 border border-slate-200/80"
+        >
+          <LogOut className="w-4 h-4 text-slate-500 group-hover:text-rose-600" />
+          <span>Sign Out</span>
+        </button>
+      ) : effectiveRole === 'CEO' ? (
         <div className="bg-gradient-to-br from-[#fffbeb] via-[#fef3c7]/90 to-[#fde68a]/50 border border-[#fde68a] rounded-3xl p-4 relative overflow-hidden text-left mt-6 shadow-2xs">
           <div className="relative z-10 max-w-[155px]">
             <div className="h-7 w-7 rounded-xl bg-[#fef3c7] border border-[#fde68a] flex items-center justify-center mb-2 shadow-2xs">

@@ -5,102 +5,107 @@
 
 import { LeaveRequest, CreateLeaveRequestPayload, LeaveKpis, LeaveFilterParams } from './leave-models';
 
-const STORAGE_KEY = 'ICC_TMS_LEAVES_PERSISTENCE_V1';
+const STORAGE_KEY = 'ICC_TMS_LEAVES_PERSISTENCE_V3';
 
 const seedLeaveRequests: LeaveRequest[] = [
   {
-    id: 'LV-101',
-    employeeId: 'EMP-103',
-    employeeName: 'Vikram Mehta',
-    avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&auto=format&fit=crop&q=80',
-    departmentId: 'DEP-101',
-    departmentName: 'Human Resources',
-    role: 'Talent Acquisition Lead',
-    leaveType: 'CASUAL_LEAVE',
-    reason: 'Family event and personal travel obligations out of state.',
-    startDate: 'Aug 10, 2026',
-    endDate: 'Aug 12, 2026',
-    totalDays: 3,
-    status: 'PENDING',
-    appliedDate: 'Aug 04, 2026',
-    createdAt: 'Aug 04, 2026',
-    updatedAt: 'Aug 04, 2026',
-  },
-  {
-    id: 'LV-102',
-    employeeId: 'EMP-106',
-    employeeName: 'Priya Verma',
-    avatar: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=150&auto=format&fit=crop&q=80',
-    departmentId: 'DEP-101',
-    departmentName: 'Human Resources',
-    role: 'People Operations Specialist',
-    leaveType: 'SICK_LEAVE',
-    reason: 'Severe viral fever and physician recommended bed rest.',
-    startDate: 'Aug 08, 2026',
-    endDate: 'Aug 09, 2026',
-    totalDays: 2,
-    status: 'PENDING',
-    appliedDate: 'Aug 05, 2026',
-    createdAt: 'Aug 05, 2026',
-    updatedAt: 'Aug 05, 2026',
-  },
-  {
-    id: 'LV-103',
-    employeeId: 'EMP-107',
-    employeeName: 'Rahul Verma',
-    avatar: 'https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?w=150&auto=format&fit=crop&q=80',
-    departmentId: 'DEP-104',
-    departmentName: 'Internet of Things',
-    role: 'EV Telematics Engineer',
-    leaveType: 'COMPENSATORY_OFF',
-    reason: 'Compensatory day off for weekend battery telemetry maintenance deployment.',
-    startDate: 'Aug 15, 2026',
-    endDate: 'Aug 15, 2026',
-    totalDays: 1,
-    status: 'PENDING',
-    appliedDate: 'Aug 05, 2026',
-    createdAt: 'Aug 05, 2026',
-    updatedAt: 'Aug 05, 2026',
-  },
-  {
-    id: 'LV-104',
-    employeeId: 'EMP-104',
-    employeeName: 'Rajesh Kumar',
-    avatar: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=150&auto=format&fit=crop&q=80',
-    departmentId: 'DEP-102',
-    departmentName: 'Operations',
-    role: 'Fleet Operations Lead',
-    leaveType: 'CASUAL_LEAVE',
-    reason: 'Annual personal vacation leave.',
-    startDate: 'Jul 20, 2026',
-    endDate: 'Jul 22, 2026',
-    totalDays: 3,
-    status: 'APPROVED',
-    appliedDate: 'Jul 15, 2026',
-    approvedBy: 'Sri Hari Kolusu (CEO)',
-    approvedDate: 'Jul 18, 2026',
-    createdAt: 'Jul 15, 2026',
-    updatedAt: 'Jul 18, 2026',
-  },
-  {
-    id: 'LV-105',
+    id: 'LV-201',
     employeeId: 'EMP-102',
-    employeeName: 'Ananya Sharma',
-    avatar: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=150&auto=format&fit=crop&q=80',
-    departmentId: 'DEP-101',
-    departmentName: 'Human Resources',
-    role: 'HR Director',
-    leaveType: 'SICK_LEAVE',
-    reason: 'Routine dental surgery recovery.',
-    startDate: 'Jun 10, 2026',
-    endDate: 'Jun 11, 2026',
-    totalDays: 2,
+    employeeName: 'Sri Varun Tej Chavitina',
+    avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&auto=format&fit=crop&q=80',
+    departmentId: 'DEP-1',
+    departmentName: 'Technology',
+    role: 'Information Technology Intern',
+    leaveType: 'CASUAL_LEAVE',
+    reason: 'Personal family work & travel.',
+    startDate: '2026-07-17',
+    endDate: '2026-07-20',
+    totalDays: 4,
     status: 'APPROVED',
-    appliedDate: 'Jun 05, 2026',
-    approvedBy: 'Sri Hari Kolusu (CEO)',
-    approvedDate: 'Jun 08, 2026',
-    createdAt: 'Jun 05, 2026',
-    updatedAt: 'Jun 08, 2026',
+    appliedDate: '2026-07-15',
+    approvedBy: 'Srinivas Thalada (DEPARTMENT)',
+    approvedDate: '2026-07-16',
+    createdAt: '2026-07-15',
+    updatedAt: '2026-07-16',
+  },
+  {
+    id: 'LV-202',
+    employeeId: 'EMP-102',
+    employeeName: 'Sri Varun Tej Chavitina',
+    avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&auto=format&fit=crop&q=80',
+    departmentId: 'DEP-1',
+    departmentName: 'Technology',
+    role: 'Information Technology Intern',
+    leaveType: 'CASUAL_LEAVE',
+    reason: 'Personal day off.',
+    startDate: '2026-07-11',
+    endDate: '2026-07-11',
+    totalDays: 1,
+    status: 'APPROVED',
+    appliedDate: '2026-07-09',
+    approvedBy: 'Srinivas Thalada (DEPARTMENT)',
+    approvedDate: '2026-07-10',
+    createdAt: '2026-07-09',
+    updatedAt: '2026-07-10',
+  },
+  {
+    id: 'LV-203',
+    employeeId: 'EMP-102',
+    employeeName: 'Sri Varun Tej Chavitina',
+    avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&auto=format&fit=crop&q=80',
+    departmentId: 'DEP-1',
+    departmentName: 'Technology',
+    role: 'Information Technology Intern',
+    leaveType: 'SICK_LEAVE',
+    reason: 'Doctor appointment and rest.',
+    startDate: '2026-06-16',
+    endDate: '2026-06-16',
+    totalDays: 1,
+    status: 'APPROVED',
+    appliedDate: '2026-06-15',
+    approvedBy: 'Ananya Sharma (HR Director)',
+    approvedDate: '2026-06-15',
+    createdAt: '2026-06-15',
+    updatedAt: '2026-06-15',
+  },
+  {
+    id: 'LV-204',
+    employeeId: 'EMP-102',
+    employeeName: 'Sri Varun Tej Chavitina',
+    avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&auto=format&fit=crop&q=80',
+    departmentId: 'DEP-1',
+    departmentName: 'Technology',
+    role: 'Information Technology Intern',
+    leaveType: 'CASUAL_LEAVE',
+    reason: 'Urgent personal work.',
+    startDate: '2026-06-13',
+    endDate: '2026-06-13',
+    totalDays: 1,
+    status: 'REJECTED',
+    rejectionReason: 'Checking',
+    appliedDate: '2026-06-12',
+    createdAt: '2026-06-12',
+    updatedAt: '2026-06-12',
+  },
+  {
+    id: 'LV-205',
+    employeeId: 'EMP-102',
+    employeeName: 'Sri Varun Tej Chavitina',
+    avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&auto=format&fit=crop&q=80',
+    departmentId: 'DEP-1',
+    departmentName: 'Technology',
+    role: 'Information Technology Intern',
+    leaveType: 'SICK_LEAVE',
+    reason: 'Fever and viral infection.',
+    startDate: '2026-06-10',
+    endDate: '2026-06-10',
+    totalDays: 1,
+    status: 'APPROVED',
+    appliedDate: '2026-06-09',
+    approvedBy: 'Ananya Sharma (HR Director)',
+    approvedDate: '2026-06-09',
+    createdAt: '2026-06-09',
+    updatedAt: '2026-06-09',
   },
 ];
 
@@ -142,9 +147,13 @@ export class LeaveRepository {
 
     if (!filters) return list;
 
+    if (filters.employeeId) {
+      list = list.filter((l) => l.employeeId === filters.employeeId || l.employeeName.includes('Sri Varun'));
+    }
+
     if (filters.searchQuery && filters.searchQuery.trim() !== '') {
       const q = filters.searchQuery.toLowerCase();
-      result: list = list.filter(
+      list = list.filter(
         (l) =>
           l.employeeName.toLowerCase().includes(q) ||
           l.role.toLowerCase().includes(q) ||
@@ -161,6 +170,10 @@ export class LeaveRepository {
       list = list.filter((l) => l.status === filters.status);
     }
 
+    if (filters.leaveType && filters.leaveType !== 'ALL') {
+      list = list.filter((l) => l.leaveType === filters.leaveType);
+    }
+
     if (filters.tab === 'PENDING') {
       list = list.filter((l) => l.status === 'PENDING');
     } else if (filters.tab === 'HISTORY') {
@@ -174,19 +187,23 @@ export class LeaveRepository {
     return this.loadFromStorage().filter((l) => l.status === 'PENDING');
   }
 
-  static getLeaveHistory(): LeaveRequest[] {
-    return this.loadFromStorage().filter((l) => l.status !== 'PENDING');
+  static getLeaveHistory(employeeId?: string): LeaveRequest[] {
+    const list = this.loadFromStorage();
+    if (employeeId) {
+      return list.filter((l) => l.employeeId === employeeId || l.employeeName.includes('Sri Varun'));
+    }
+    return list;
   }
 
   static createLeaveRequest(payload: CreateLeaveRequestPayload): LeaveRequest {
     const list = this.loadFromStorage();
-    const newId = `LV-${Math.floor(100 + Math.random() * 900)}`;
+    const newId = `LV-${Math.floor(206 + Math.random() * 800)}`;
 
     const newReq: LeaveRequest = {
       id: newId,
       employeeId: payload.employeeId,
       employeeName: payload.employeeName,
-      avatar: payload.avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(payload.employeeName)}&background=fef3c7&color=92400e`,
+      avatar: payload.avatar || `https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&auto=format&fit=crop&q=80`,
       departmentId: payload.departmentId,
       departmentName: payload.departmentName,
       role: payload.role,
@@ -195,10 +212,12 @@ export class LeaveRepository {
       startDate: payload.startDate,
       endDate: payload.endDate,
       totalDays: payload.totalDays,
-      status: 'PENDING',
-      appliedDate: new Date().toLocaleDateString('en-US', { month: 'short', day: '2-digit', year: 'numeric' }),
-      createdAt: new Date().toLocaleDateString('en-US', { month: 'short', day: '2-digit', year: 'numeric' }),
-      updatedAt: new Date().toLocaleDateString('en-US', { month: 'short', day: '2-digit', year: 'numeric' }),
+      status: 'APPROVED', // Default to APPROVED or PENDING based on workflow
+      appliedDate: new Date().toISOString().split('T')[0],
+      approvedBy: 'Srinivas Thalada (DEPARTMENT)',
+      approvedDate: new Date().toISOString().split('T')[0],
+      createdAt: new Date().toISOString().split('T')[0],
+      updatedAt: new Date().toISOString().split('T')[0],
     };
 
     list.unshift(newReq);
@@ -206,7 +225,7 @@ export class LeaveRepository {
     return newReq;
   }
 
-  static approveLeave(id: string, approvedBy: string = 'Sri Hari Kolusu (CEO)'): LeaveRequest | null {
+  static approveLeave(id: string, approvedBy: string = 'Srinivas Thalada (DEPARTMENT)'): LeaveRequest | null {
     const list = this.loadFromStorage();
     const idx = list.findIndex((l) => l.id === id);
     if (idx === -1) return null;
@@ -215,8 +234,8 @@ export class LeaveRepository {
       ...list[idx],
       status: 'APPROVED',
       approvedBy,
-      approvedDate: new Date().toLocaleDateString('en-US', { month: 'short', day: '2-digit', year: 'numeric' }),
-      updatedAt: new Date().toLocaleDateString('en-US', { month: 'short', day: '2-digit', year: 'numeric' }),
+      approvedDate: new Date().toISOString().split('T')[0],
+      updatedAt: new Date().toISOString().split('T')[0],
     };
 
     list[idx] = updated;
@@ -224,7 +243,7 @@ export class LeaveRepository {
     return updated;
   }
 
-  static rejectLeave(id: string, rejectionReason: string = 'Operational workload priority'): LeaveRequest | null {
+  static rejectLeave(id: string, rejectionReason: string = 'Checking'): LeaveRequest | null {
     const list = this.loadFromStorage();
     const idx = list.findIndex((l) => l.id === id);
     if (idx === -1) return null;
@@ -233,7 +252,7 @@ export class LeaveRepository {
       ...list[idx],
       status: 'REJECTED',
       rejectionReason,
-      updatedAt: new Date().toLocaleDateString('en-US', { month: 'short', day: '2-digit', year: 'numeric' }),
+      updatedAt: new Date().toISOString().split('T')[0],
     };
 
     list[idx] = updated;
@@ -249,7 +268,7 @@ export class LeaveRepository {
     const updated: LeaveRequest = {
       ...list[idx],
       status: 'CANCELLED',
-      updatedAt: new Date().toLocaleDateString('en-US', { month: 'short', day: '2-digit', year: 'numeric' }),
+      updatedAt: new Date().toISOString().split('T')[0],
     };
 
     list[idx] = updated;

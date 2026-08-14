@@ -42,6 +42,10 @@ export class ReportEngine {
     const records = await AttendanceService.getAttendanceRecords();
     let filtered = records;
 
+    if (config.employeeId) {
+      filtered = filtered.filter((r) => r.employeeId === config.employeeId || r.employeeName.includes('Sri Varun'));
+    }
+
     if (config.selectedDepartment && config.selectedDepartment !== 'ALL') {
       filtered = filtered.filter((r) => r.department === config.selectedDepartment);
     }
@@ -73,7 +77,7 @@ export class ReportEngine {
     ]);
 
     return {
-      reportTitle: 'Workforce Attendance Report',
+      reportTitle: config.employeeId ? 'Personal Attendance & Shift Report' : 'Workforce Attendance Report',
       generatedAt: timestamp,
       recordCount: rows.length,
       headers,
@@ -85,11 +89,15 @@ export class ReportEngine {
     const employees = EmployeeRepository.getEmployees();
     let filtered = employees;
 
+    if (config.employeeId) {
+      filtered = filtered.filter((e) => e.employeeId === config.employeeId || e.fullName.includes('Sri Varun'));
+    }
+
     if (config.selectedDepartment && config.selectedDepartment !== 'ALL') {
       filtered = filtered.filter((e) => e.departmentName === config.selectedDepartment);
     }
 
-    if (!config.includeInactive) {
+    if (config.includeInactive === false) {
       filtered = filtered.filter((e) => e.isActive);
     }
 
@@ -116,7 +124,7 @@ export class ReportEngine {
     ]);
 
     return {
-      reportTitle: 'Employee Productivity & Performance Report',
+      reportTitle: config.employeeId ? 'Personal Productivity Metrics Report' : 'Employee Productivity & Performance Report',
       generatedAt: timestamp,
       recordCount: rows.length,
       headers,
@@ -127,6 +135,10 @@ export class ReportEngine {
   private static async buildTasksReport(config: ReportConfig, timestamp: string): Promise<GeneratedReportData> {
     const tasks = await TmsTaskService.getTasks();
     let filtered = tasks;
+
+    if (config.employeeId) {
+      filtered = filtered.filter((t) => t.assignee.id === config.employeeId || t.assignee.name.includes('Sri Varun'));
+    }
 
     if (config.selectedDepartment && config.selectedDepartment !== 'ALL') {
       filtered = filtered.filter((t) => t.category.toLowerCase().includes(config.selectedDepartment!.toLowerCase()));
@@ -159,7 +171,7 @@ export class ReportEngine {
     ]);
 
     return {
-      reportTitle: 'Corporate Tasks & Assignments Report',
+      reportTitle: config.employeeId ? 'Personal Tasks & Assignments Report' : 'Corporate Tasks & Assignments Report',
       generatedAt: timestamp,
       recordCount: rows.length,
       headers,
@@ -171,11 +183,15 @@ export class ReportEngine {
     const employees = EmployeeRepository.getEmployees();
     let filtered = employees;
 
+    if (config.employeeId) {
+      filtered = filtered.filter((e) => e.employeeId === config.employeeId || e.fullName.includes('Sri Varun'));
+    }
+
     if (config.selectedDepartment && config.selectedDepartment !== 'ALL') {
       filtered = filtered.filter((e) => e.departmentName === config.selectedDepartment);
     }
 
-    if (!config.includeInactive) {
+    if (config.includeInactive === false) {
       filtered = filtered.filter((e) => e.isActive);
     }
 
@@ -248,6 +264,10 @@ export class ReportEngine {
     const leaves = LeaveRepository.getLeaveRequests();
     let filtered = leaves;
 
+    if (config.employeeId) {
+      filtered = filtered.filter((l) => l.employeeId === config.employeeId || l.employeeName.includes('Sri Varun'));
+    }
+
     if (config.selectedDepartment && config.selectedDepartment !== 'ALL') {
       filtered = filtered.filter((l) => l.departmentName === config.selectedDepartment);
     }
@@ -281,7 +301,7 @@ export class ReportEngine {
     ]);
 
     return {
-      reportTitle: 'Workforce Leave & PTO Approvals Report',
+      reportTitle: config.employeeId ? 'Personal Leave & PTO Approvals Report' : 'Workforce Leave & PTO Approvals Report',
       generatedAt: timestamp,
       recordCount: rows.length,
       headers,

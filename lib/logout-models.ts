@@ -49,6 +49,7 @@ export interface SubmitWorkReportPayload {
 }
 
 export interface LogoutFilterParams {
+  employeeId?: string;
   searchQuery?: string;
   department?: string | 'ALL';
   role?: string | 'ALL';

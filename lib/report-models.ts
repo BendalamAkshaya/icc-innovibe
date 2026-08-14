@@ -29,12 +29,13 @@ export interface ReportConfig {
   startDate?: string;
   endDate?: string;
   exportFormat: ExportFormat;
-  employeeSelection: EmployeeSelectionOption;
+  employeeSelection?: EmployeeSelectionOption;
+  employeeId?: string;
   selectedDepartment?: string;
   selectedStatus?: string;
   selectedPriority?: string;
-  includeInactive: boolean;
-  includeArchived: boolean;
+  includeInactive?: boolean;
+  includeArchived?: boolean;
 }
 
 export interface GeneratedReportData {

@@ -4,6 +4,13 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { useRole } from '@/components/RoleContext';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { createCrossRoleTicketNotification, TicketPriority } from '@/lib/ticketNotifications';
+import { TmsTasksView } from '@/components/ceo/tms/tasks/TmsTasksView';
+import { TmsEmployeeLeaveView } from '@/components/ceo/tms/leave/TmsEmployeeLeaveView';
+import { TmsEmployeeSessionHistoryView } from '@/components/ceo/tms/logout/TmsEmployeeSessionHistoryView';
+import { TmsEmployeeAnnouncementsView } from '@/components/ceo/tms/announcements/TmsEmployeeAnnouncementsView';
+import { TmsEmployeeReportsView } from '@/components/ceo/tms/reports/TmsEmployeeReportsView';
+import { TmsEmployeeNotificationsView } from '@/components/ceo/tms/notifications/TmsEmployeeNotificationsView';
+import { NotificationRepository } from '@/lib/notification-repository';
 import {
   ResponsiveContainer,
   AreaChart,
@@ -1026,285 +1033,647 @@ export default function EmployeeDashboardPage() {
 
   return (
     <div className="space-y-6 text-[#0F172A] max-w-[1400px] mx-auto pb-12 font-sans">
-      {/* 1. WELCOME & PRODUCTIVITY SNAPSHOT (Visible ONLY on Dashboard view) */}
+      {/* ========================================================================= */}
+      {/* VIEW 1: MY DASHBOARD (EXACT TARGET REFERENCE LAYOUT) */}
+      {/* ========================================================================= */}
       {activeTab === 'dashboard' && (
-        <>
-          <div className="bg-white rounded-2xl p-6 sm:p-7 border border-[#E2E8F0] shadow-xs relative overflow-hidden flex flex-col lg:flex-row lg:items-center justify-between gap-6">
-            <div className="space-y-2.5 max-w-2xl">
-              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-50 text-blue-700 border border-blue-200/60 text-xs font-bold">
-                <Sparkles className="w-3.5 h-3.5 text-blue-600" />
-                <span>Operations Specialist • Employee Portal</span>
-              </div>
-              <div>
-                <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-[#0F172A]">
-                  Good Afternoon, {currentProfile?.name || 'Sneha Patel'}
-                </h1>
-                <p className="text-sm text-[#475569] font-medium mt-1">
-                  Here's your productivity snapshot and operational tasks for today.
-                </p>
-              </div>
-
-              {/* Shift Details Row */}
-              <div className="flex flex-wrap items-center gap-3 pt-2 text-xs text-[#475569]">
-                <div className="flex items-center gap-1.5 bg-[#F8FAFC] px-3 py-1.5 rounded-xl border border-[#E2E8F0]">
-                  <span className="font-semibold text-[#0F172A]">Shift:</span>
-                  <span>General (09:00 AM – 06:00 PM IST)</span>
-                </div>
-                <div className="flex items-center gap-1.5 bg-indigo-50/80 text-indigo-700 px-2.5 py-1.5 rounded-xl border border-indigo-200/80 text-[11px] font-bold">
-                  <span>🇮🇳 IST (UTC+5:30)</span>
-                </div>
-                <div className="flex items-center gap-2 bg-[#F8FAFC] px-3 py-1.5 rounded-xl border border-[#E2E8F0]">
-                  <span className="relative flex h-2.5 w-2.5">
-                    {isClockedIn && <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>}
-                    <span className={`relative inline-flex rounded-full h-2.5 w-2.5 ${isClockedIn ? 'bg-emerald-500' : 'bg-slate-400'}`}></span>
-                  </span>
-                  <span className="font-bold text-[#0F172A]">
-                    {isClockedIn ? 'Actively Working' : 'Shift Paused'}
-                  </span>
-                </div>
-                <div className="flex items-center gap-1.5 bg-[#F8FAFC] px-3 py-1.5 rounded-xl border border-[#E2E8F0]">
-                  <Clock className="w-3.5 h-3.5 text-blue-600" />
-                  <span className="font-mono font-bold text-[#0F172A]">{workingDuration}</span>
-                </div>
-              </div>
+        <div className="space-y-6">
+          {/* TOP HEADER */}
+          <div className="flex items-center justify-between pb-1">
+            <div className="flex items-center gap-2 text-xs font-bold text-slate-400 uppercase tracking-widest">
+              <Calendar className="w-4 h-4 text-slate-400" />
+              <span>
+                {new Date().toLocaleDateString('en-US', {
+                  weekday: 'long',
+                  month: 'long',
+                  day: 'numeric',
+                  year: 'numeric',
+                }).toUpperCase()}
+              </span>
             </div>
 
-            {/* Action Controls & Clock In/Out */}
-            <div className="flex flex-col sm:flex-row lg:flex-col xl:flex-row items-stretch sm:items-center gap-2.5 shrink-0">
+            <div className="flex items-center gap-3">
               <button
-                onClick={() => {
-                  if (isClockedIn) {
-                    // Prompt automated logout report collection during shift checkout
-                    setIsLogoutReportModalOpen(true);
-                  } else {
-                    setIsClockedIn(true);
-                  }
-                }}
-                className={`px-4 py-2.5 rounded-xl font-bold text-xs transition flex items-center justify-center gap-2 shadow-xs cursor-pointer ${
-                  isClockedIn
-                    ? 'bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200'
-                    : 'bg-emerald-600 hover:bg-emerald-700 text-white'
-                }`}
+                type="button"
+                onClick={() => setView('notifications')}
+                className="relative p-2 rounded-full bg-white border border-slate-200/80 hover:bg-slate-50 transition cursor-pointer shadow-2xs"
+                title="Notifications"
               >
-                <Clock className="w-4 h-4" />
-                <span>{isClockedIn ? 'Check Out & Submit EOD Report' : 'Check In Now'}</span>
+                <Bell className="w-4.5 h-4.5 text-slate-600" />
+                <span className="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-rose-500 text-white text-[9px] font-black flex items-center justify-center border-2 border-white">
+                  2
+                </span>
               </button>
 
               <button
-                onClick={() => setIsLeaveModalOpen(true)}
-                className="px-4 py-2.5 rounded-xl bg-white hover:bg-slate-50 text-[#0F172A] font-bold text-xs transition border border-[#E2E8F0] flex items-center justify-center gap-2 cursor-pointer"
+                type="button"
+                onClick={() => setView('profile')}
+                className="w-8 h-8 rounded-full bg-blue-100 text-blue-700 font-extrabold text-xs flex items-center justify-center border border-blue-200 hover:opacity-90 transition cursor-pointer shadow-2xs"
+                title="View Profile"
               >
-                <CalendarRange className="w-4 h-4 text-indigo-600" />
-                <span>Apply Leave</span>
+                {(profileData.fullName || currentProfile?.name || 'Sri Varun Tej Chavitina').charAt(0)}
               </button>
             </div>
           </div>
 
-          {/* 2. 5 PREMIUM KPI INTERACTIVE STAT CARDS */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
-            {/* KPI 1: Attendance */}
-            <div 
-              onClick={() => setView('attendance')}
-              className="bg-white p-5 rounded-2xl border border-[#E2E8F0] interactive-stat-card cursor-pointer animate-fade-in-up stagger-1 flex flex-col justify-between"
-            >
-              <div>
-                <div className="flex items-center justify-between text-[#475569] mb-2">
-                  <span className="text-xs font-bold uppercase tracking-wider text-[#94A3B8]">Attendance</span>
-                  <div className="p-2 rounded-xl bg-emerald-50 text-emerald-600 stat-icon-glow">
+          {/* GREETING SECTION */}
+          <div>
+            <h1 className="text-2xl sm:text-3xl font-black text-[#0F172A] tracking-tight flex items-center gap-2">
+              <span>
+                {(() => {
+                  const hr = new Date().getHours();
+                  return hr < 12 ? 'Good Morning' : hr < 17 ? 'Good Afternoon' : 'Good Evening';
+                })()}, {(profileData.fullName || currentProfile?.name || 'Sri Varun Tej Chavitina').split(' ')[0]}
+              </span>
+              <span>👋</span>
+            </h1>
+            <p className="text-xs sm:text-sm text-slate-500 font-medium mt-0.5">
+              Here's your productivity snapshot today.
+            </p>
+          </div>
+
+          {/* MAIN DASHBOARD CONTAINER: LEFT CONTENT + RIGHT SIDEBAR */}
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+            
+            {/* ================= LEFT MAIN SECTION (8 COLS) ================= */}
+            <div className="lg:col-span-8 space-y-6">
+
+              {/* LARGE EMPLOYEE SUMMARY CARD */}
+              <div className="bg-white rounded-3xl p-6 sm:p-7 border border-slate-200/90 shadow-xs relative overflow-hidden flex flex-col md:flex-row items-stretch justify-between gap-6">
+                
+                {/* Left Side Info */}
+                <div className="space-y-4 flex-1 flex flex-col justify-between">
+                  <div>
+                    <span className="text-[10px] font-black text-[#6D35F5] uppercase tracking-[0.2em]">WELCOME BACK!</span>
+                    <h2 className="text-xl sm:text-2xl font-black text-[#101A36] tracking-tight mt-0.5">
+                      {profileData.fullName || currentProfile?.name || 'Sri Varun Tej Chavitina'}
+                    </h2>
+                    <p className="text-xs text-slate-500 font-medium flex items-center gap-1.5 mt-1">
+                      <Briefcase className="w-3.5 h-3.5 text-slate-400" />
+                      <span>{profileData.professionalDesignation || 'Information Technology Intern'}</span>
+                    </p>
+                  </div>
+
+                  {/* Bottom Left Pills */}
+                  <div className="flex flex-wrap items-center gap-2.5 pt-2">
+                    {/* Shift Pill */}
+                    <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-slate-50 border border-slate-200/80 text-xs font-semibold text-slate-600">
+                      <Clock className="w-3.5 h-3.5 text-blue-500" />
+                      <div className="flex flex-col">
+                        <span className="text-[9px] font-bold text-slate-400 uppercase tracking-wider leading-none">TODAY'S SHIFT</span>
+                        <span className="text-[11px] font-bold text-slate-800 leading-tight mt-0.5">09:30 AM - 06:30 PM</span>
+                      </div>
+                    </div>
+
+                    {/* Status Pill */}
+                    <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-slate-50 border border-slate-200/80 text-xs font-semibold text-slate-600">
+                      <span className="relative flex h-2.5 w-2.5">
+                        {isClockedIn && <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>}
+                        <span className={`relative inline-flex rounded-full h-2.5 w-2.5 ${isClockedIn ? 'bg-emerald-500' : 'bg-slate-400'}`}></span>
+                      </span>
+                      <div className="flex flex-col">
+                        <span className="text-[9px] font-bold text-slate-400 uppercase tracking-wider leading-none">CURRENT STATUS</span>
+                        <span className="text-[11px] font-bold text-slate-800 leading-tight mt-0.5">{isClockedIn ? 'Active' : 'Offline'}</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Center Productivity Score Ring */}
+                <div className="flex flex-col items-center justify-center px-4 py-2 border-y md:border-y-0 md:border-x border-slate-100 shrink-0">
+                  <div className="relative w-24 h-24 flex items-center justify-center">
+                    <svg viewBox="0 0 100 100" className="w-full h-full -rotate-90 transform overflow-visible">
+                      <circle cx="50" cy="50" r="40" fill="none" stroke="#E2E8F0" strokeWidth="8" />
+                      <circle
+                        cx="50"
+                        cy="50"
+                        r="40"
+                        fill="none"
+                        stroke="#2563EB"
+                        strokeWidth="8"
+                        strokeDasharray="251"
+                        strokeDashoffset="98"
+                        strokeLinecap="round"
+                        className="transition-all duration-1000 ease-out"
+                      />
+                    </svg>
+                    <div className="absolute inset-0 flex flex-col items-center justify-center text-center">
+                      <span className="text-2xl font-black text-[#101A36] leading-none">61</span>
+                      <span className="text-[9px] font-bold text-slate-400 uppercase tracking-wider mt-0.5">SCORE</span>
+                    </div>
+                  </div>
+
+                  <div className="mt-2.5 inline-flex items-center gap-1 px-3 py-1 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200/80 text-[10px] font-extrabold">
+                    <Zap className="w-3 h-3 text-emerald-600 fill-emerald-600" />
+                    <span>GOOD</span>
+                  </div>
+                </div>
+
+                {/* Right Side Quick Actions */}
+                <div className="space-y-2.5 flex flex-col justify-center shrink-0 min-w-[200px]">
+                  <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">QUICK ACTIONS</span>
+                  
+                  {/* Button 1: Check Out / Check In */}
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (isClockedIn) {
+                        setIsLogoutReportModalOpen(true);
+                      } else {
+                        setIsClockedIn(true);
+                      }
+                    }}
+                    className="w-full py-2.5 px-4 rounded-2xl bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-700 hover:to-blue-600 text-white font-bold text-xs shadow-md shadow-blue-500/20 flex items-center justify-between transition cursor-pointer"
+                  >
+                    <span>{isClockedIn ? 'Check Out Shift' : 'Check In Shift'}</span>
+                    <ChevronRight className="w-4 h-4 stroke-[2.5]" />
+                  </button>
+
+                  {/* Button 2: Submit Logout Report */}
+                  <button
+                    type="button"
+                    onClick={() => setIsLogoutReportModalOpen(true)}
+                    className="w-full py-2.5 px-4 rounded-2xl bg-gradient-to-r from-emerald-500 to-emerald-400 hover:from-emerald-600 hover:to-emerald-500 text-white font-bold text-xs shadow-md shadow-emerald-500/20 flex items-center justify-between transition cursor-pointer"
+                  >
+                    <span>Submit Logout Report</span>
+                    <FileText className="w-4 h-4" />
+                  </button>
+
+                  {/* Button 3: Apply for Leave */}
+                  <button
+                    type="button"
+                    onClick={() => setIsLeaveModalOpen(true)}
+                    className="w-full py-2.5 px-4 rounded-2xl bg-gradient-to-r from-purple-500 to-indigo-500 hover:from-purple-600 hover:to-indigo-600 text-white font-bold text-xs shadow-md shadow-purple-500/20 flex items-center justify-between transition cursor-pointer"
+                  >
+                    <span>Apply for Leave</span>
                     <Calendar className="w-4 h-4" />
+                  </button>
+                </div>
+
+              </div>
+
+              {/* ROW 1: ATTENDANCE OVERVIEW | PRODUCTIVITY INSIGHTS | TODAY'S TASKS */}
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+                
+                {/* CARD 1: ATTENDANCE OVERVIEW */}
+                <div
+                  onClick={() => setView('attendance')}
+                  className="bg-white p-5 rounded-3xl border border-slate-200/90 shadow-xs space-y-4 hover:shadow-md hover:border-blue-200 transition cursor-pointer flex flex-col justify-between"
+                >
+                  <div>
+                    <h3 className="text-xs font-bold text-slate-800 uppercase tracking-wider">Attendance Overview</h3>
+                    
+                    <div className="space-y-3 pt-3 text-xs">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2 text-slate-600 font-medium">
+                          <span className="w-2 h-2 rounded-full bg-emerald-500"></span>
+                          <span>First Login</span>
+                        </div>
+                        <span className="font-bold text-slate-900 font-mono">10:39 PM</span>
+                      </div>
+
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2 text-slate-600 font-medium">
+                          <span className="w-2 h-2 rounded-full bg-blue-500"></span>
+                          <span>Last Logout</span>
+                        </div>
+                        <span className="font-bold text-slate-400 font-mono">—</span>
+                      </div>
+
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2 text-slate-600 font-medium">
+                          <span className="w-2 h-2 rounded-full bg-purple-500"></span>
+                          <span>Working Hours</span>
+                        </div>
+                        <span className="font-bold text-slate-900 font-mono">0h 0m</span>
+                      </div>
+
+                      <div className="flex items-center justify-between pt-1">
+                        <div className="flex items-center gap-2 text-slate-600 font-medium">
+                          <span className="w-2 h-2 rounded-full bg-emerald-500"></span>
+                          <span>Status</span>
+                        </div>
+                        <span className="px-2 py-0.5 rounded-md bg-emerald-50 text-emerald-700 text-[10px] font-black border border-emerald-200/80">
+                          ACTIVE
+                        </span>
+                      </div>
+                    </div>
                   </div>
                 </div>
-                <div className="flex items-baseline gap-2">
-                  <span className="text-2xl font-black text-[#0F172A]">22 Days</span>
-                  <span className="text-[11px] font-bold text-emerald-600 flex items-center bg-emerald-50 px-1.5 py-0.5 rounded-md">
-                    <TrendingUp className="w-3 h-3 mr-0.5" /> 100%
-                  </span>
-                </div>
-                <p className="text-[11px] text-[#475569] mt-1 font-medium">0 Unexcused • 100% On-Time</p>
-              </div>
 
-              {/* 7-Day Curved Sparkline Graph */}
-              <div className="pt-3">
-                <div className="flex items-center justify-between text-[9px] text-slate-400 font-bold mb-1">
-                  <span>7D ON-TIME CURVE</span>
-                  <span className="text-emerald-600 font-bold">STEADY</span>
-                </div>
-                <svg viewBox="0 0 100 24" className="w-full h-6 overflow-visible">
-                  <defs>
-                    <linearGradient id="sparkEmerald" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="0%" stopColor="#10B981" stopOpacity="0.3" />
-                      <stop offset="100%" stopColor="#10B981" stopOpacity="0.0" />
-                    </linearGradient>
-                  </defs>
-                  <path d="M0 18 Q 15 14, 30 15 T 60 12 T 85 8 L 100 6 L 100 24 L 0 24 Z" fill="url(#sparkEmerald)" />
-                  <path d="M0 18 Q 15 14, 30 15 T 60 12 T 85 8 L 100 6" fill="none" stroke="#10B981" strokeWidth="2" strokeLinecap="round" />
-                  <circle cx="100" cy="6" r="2.5" fill="#10B981" className="animate-ping" />
-                  <circle cx="100" cy="6" r="2" fill="#10B981" />
-                </svg>
-              </div>
-            </div>
+                {/* CARD 2: PRODUCTIVITY INSIGHTS */}
+                <div className="bg-white p-5 rounded-3xl border border-slate-200/90 shadow-xs space-y-3 flex flex-col justify-between">
+                  <div>
+                    <div className="flex items-center justify-between">
+                      <h3 className="text-xs font-bold text-slate-800 uppercase tracking-wider">Productivity Insights</h3>
+                      <span className="text-[10px] text-slate-400 font-medium">This Week</span>
+                    </div>
 
-            {/* KPI 2: Assigned Tasks */}
-            <div 
-              onClick={() => setView('tasks')}
-              className="bg-white p-5 rounded-2xl border border-[#E2E8F0] interactive-stat-card cursor-pointer animate-fade-in-up stagger-2 flex flex-col justify-between"
-            >
-              <div>
-                <div className="flex items-center justify-between text-[#475569] mb-2">
-                  <span className="text-xs font-bold uppercase tracking-wider text-[#94A3B8]">Assigned Tasks</span>
-                  <div className="p-2 rounded-xl bg-blue-50 text-blue-600 stat-icon-glow">
-                    <CheckSquare className="w-4 h-4" />
+                    <div className="pt-2">
+                      <span className="text-[9px] font-bold text-slate-400 uppercase tracking-wider">PROD SCORE</span>
+                      <div className="flex items-baseline gap-2 mt-0.5">
+                        <span className="text-2xl font-black text-[#101A36]">61</span>
+                        <span className="text-[10px] font-bold text-emerald-600 flex items-center">
+                          ▲ 12% <span className="text-slate-400 font-normal ml-1">vs last week</span>
+                        </span>
+                      </div>
+                    </div>
+
+                    {/* Smooth Blue Spline Area Chart */}
+                    <div className="relative h-14 w-full my-2">
+                      <svg viewBox="0 0 200 60" className="w-full h-full overflow-visible">
+                        <defs>
+                          <linearGradient id="prodTrendGrad" x1="0" y1="0" x2="0" y2="1">
+                            <stop offset="0%" stopColor="#2563EB" stopOpacity="0.3" />
+                            <stop offset="100%" stopColor="#2563EB" stopOpacity="0.0" />
+                          </linearGradient>
+                        </defs>
+                        <path d="M 0,45 C 40,45 50,35 90,38 C 130,41 140,15 200,15 L 200,60 L 0,60 Z" fill="url(#prodTrendGrad)" />
+                        <path d="M 0,45 C 40,45 50,35 90,38 C 130,41 140,15 200,15" fill="none" stroke="#2563EB" strokeWidth="2.5" strokeLinecap="round" />
+                        <circle cx="200" cy="15" r="3.5" fill="#2563EB" className="animate-pulse" />
+                      </svg>
+                    </div>
+                  </div>
+
+                  <div className="p-2 bg-emerald-50/80 rounded-xl border border-emerald-100 text-[10px] font-bold text-emerald-700 flex items-center gap-1.5">
+                    <Check className="w-3.5 h-3.5 text-emerald-600 stroke-[3]" />
+                    <span>Performing better than 76% of peers</span>
                   </div>
                 </div>
-                <div className="flex items-baseline gap-2">
-                  <span className="text-2xl font-black text-[#0F172A]">{completedCount} / {tasks.length}</span>
-                  <span className="text-[11px] font-bold text-blue-600 bg-blue-50 px-1.5 py-0.5 rounded-md">{taskProgressPercent}% Done</span>
-                </div>
-                <p className="text-[11px] text-[#475569] mt-1 font-medium">1 Overdue • 1 In-Progress</p>
-              </div>
 
-              {/* 7-Day Curved Sparkline Graph */}
-              <div className="pt-3">
-                <div className="flex items-center justify-between text-[9px] text-slate-400 font-bold mb-1">
-                  <span>VELOCITY TREND</span>
-                  <span className="text-blue-600 font-bold">+18%</span>
-                </div>
-                <svg viewBox="0 0 100 24" className="w-full h-6 overflow-visible">
-                  <defs>
-                    <linearGradient id="sparkBlue" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="0%" stopColor="#2563EB" stopOpacity="0.3" />
-                      <stop offset="100%" stopColor="#2563EB" stopOpacity="0.0" />
-                    </linearGradient>
-                  </defs>
-                  <path d="M0 20 Q 20 16, 40 18 T 70 10 T 90 7 L 100 4 L 100 24 L 0 24 Z" fill="url(#sparkBlue)" />
-                  <path d="M0 20 Q 20 16, 40 18 T 70 10 T 90 7 L 100 4" fill="none" stroke="#2563EB" strokeWidth="2" strokeLinecap="round" />
-                  <circle cx="100" cy="4" r="2.5" fill="#2563EB" className="animate-ping" />
-                  <circle cx="100" cy="4" r="2" fill="#2563EB" />
-                </svg>
-              </div>
-            </div>
+                {/* CARD 3: TODAY'S TASKS */}
+                <div className="bg-white p-5 rounded-3xl border border-slate-200/90 shadow-xs space-y-3 flex flex-col justify-between">
+                  <div>
+                    <div className="flex items-center justify-between">
+                      <h3 className="text-xs font-bold text-slate-800 uppercase tracking-wider">Today's Tasks</h3>
+                      <button
+                        type="button"
+                        onClick={() => setView('tasks')}
+                        className="text-xs font-bold text-blue-600 hover:underline cursor-pointer"
+                      >
+                        View all
+                      </button>
+                    </div>
 
-            {/* KPI 3: Productivity Score */}
-            <div 
-              onClick={() => setView('dashboard')}
-              className="bg-white p-5 rounded-2xl border border-[#E2E8F0] interactive-stat-card cursor-pointer animate-fade-in-up stagger-3 flex flex-col justify-between"
-            >
-              <div>
-                <div className="flex items-center justify-between text-[#475569] mb-2">
-                  <span className="text-xs font-bold uppercase tracking-wider text-[#94A3B8]">Productivity Score</span>
-                  <div className="p-2 rounded-xl bg-indigo-50 text-indigo-600 stat-icon-glow">
-                    <Award className="w-4 h-4" />
+                    <div className="flex items-center gap-4 pt-3">
+                      {/* Circular Gauge */}
+                      <div className="relative w-16 h-16 shrink-0 flex items-center justify-center">
+                        <svg viewBox="0 0 100 100" className="w-full h-full -rotate-90 transform">
+                          <circle cx="50" cy="50" r="40" fill="none" stroke="#E2E8F0" strokeWidth="10" />
+                          <circle
+                            cx="50"
+                            cy="50"
+                            r="40"
+                            fill="none"
+                            stroke="#10B981"
+                            strokeWidth="10"
+                            strokeDasharray="251"
+                            strokeDashoffset="12"
+                            strokeLinecap="round"
+                          />
+                        </svg>
+                        <span className="absolute text-xs font-black text-[#101A36]">95%</span>
+                      </div>
+
+                      {/* Dots Legend */}
+                      <div className="space-y-1 text-[11px] font-medium text-slate-600">
+                        <div className="flex items-center gap-1.5">
+                          <span className="w-2 h-2 rounded-full bg-emerald-500"></span>
+                          <span>Done: <strong className="text-slate-900">20</strong></span>
+                        </div>
+                        <div className="flex items-center gap-1.5">
+                          <span className="w-2 h-2 rounded-full bg-blue-500"></span>
+                          <span>Active: <strong className="text-slate-900">0</strong></span>
+                        </div>
+                        <div className="flex items-center gap-1.5">
+                          <span className="w-2 h-2 rounded-full bg-amber-500"></span>
+                          <span>Pending: <strong className="text-slate-900">1</strong></span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center justify-between border-t border-slate-100 pt-2 text-[10px] uppercase tracking-wider text-slate-400 font-bold">
+                    <span>TOTAL ASSIGNED TASKS</span>
+                    <span className="text-xs text-slate-900 font-black">21</span>
                   </div>
                 </div>
-                <div className="flex items-baseline gap-2">
-                  <span className="text-2xl font-black text-[#0F172A]">{productivityScore} / 100</span>
-                  <span className="text-[11px] font-bold text-indigo-600 flex items-center bg-indigo-50 px-1.5 py-0.5 rounded-md">
-                    <ArrowUpRight className="w-3 h-3 mr-0.5" /> +3.5%
-                  </span>
-                </div>
-                <p className="text-[11px] text-[#475569] mt-1 font-medium">Top 5% Departmental Ranking</p>
+
               </div>
 
-              {/* 7-Day Curved Sparkline Graph */}
-              <div className="pt-3">
-                <div className="flex items-center justify-between text-[9px] text-slate-400 font-bold mb-1">
-                  <span>EFFICIENCY CURVE</span>
-                  <span className="text-indigo-600 font-bold">96.4 PTS</span>
-                </div>
-                <svg viewBox="0 0 100 24" className="w-full h-6 overflow-visible">
-                  <defs>
-                    <linearGradient id="sparkIndigo" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="0%" stopColor="#6366F1" stopOpacity="0.3" />
-                      <stop offset="100%" stopColor="#6366F1" stopOpacity="0.0" />
-                    </linearGradient>
-                  </defs>
-                  <path d="M0 16 Q 25 18, 45 12 T 75 14 T 95 6 L 100 5 L 100 24 L 0 24 Z" fill="url(#sparkIndigo)" />
-                  <path d="M0 16 Q 25 18, 45 12 T 75 14 T 95 6 L 100 5" fill="none" stroke="#6366F1" strokeWidth="2" strokeLinecap="round" />
-                  <circle cx="100" cy="5" r="2.5" fill="#6366F1" className="animate-ping" />
-                  <circle cx="100" cy="5" r="2" fill="#6366F1" />
-                </svg>
-              </div>
-            </div>
+              {/* ROW 2: LEAVE BALANCE | ANNOUNCEMENTS | RECENT ACTIVITY */}
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+                
+                {/* CARD 1: LEAVE BALANCE */}
+                <div className="bg-white p-5 rounded-3xl border border-slate-200/90 shadow-xs space-y-3 flex flex-col justify-between">
+                  <div>
+                    <div className="flex items-center justify-between">
+                      <h3 className="text-xs font-bold text-slate-800 uppercase tracking-wider">Leave Balance</h3>
+                      <button
+                        type="button"
+                        onClick={() => setView('leave')}
+                        className="text-xs font-bold text-blue-600 hover:underline cursor-pointer"
+                      >
+                        View all
+                      </button>
+                    </div>
 
-            {/* KPI 4: Company Notices */}
-            <div 
-              onClick={() => setView('announcements')}
-              className="bg-white p-5 rounded-2xl border border-[#E2E8F0] interactive-stat-card cursor-pointer animate-fade-in-up stagger-4 flex flex-col justify-between"
-            >
-              <div>
-                <div className="flex items-center justify-between text-[#475569] mb-2">
-                  <span className="text-xs font-bold uppercase tracking-wider text-[#94A3B8]">Company Notices</span>
-                  <div className="p-2 rounded-xl bg-amber-50 text-amber-600 stat-icon-glow">
-                    <Bell className="w-4 h-4" />
+                    <div className="space-y-3 pt-3 text-xs">
+                      <div>
+                        <div className="flex justify-between text-slate-700 font-medium mb-1">
+                          <span>Casual Leave</span>
+                          <span className="text-slate-400 font-semibold">0 days taken</span>
+                        </div>
+                        <div className="w-full h-1.5 bg-slate-100 rounded-full overflow-hidden">
+                          <div className="h-full bg-blue-500 rounded-full w-0"></div>
+                        </div>
+                      </div>
+
+                      <div>
+                        <div className="flex justify-between text-slate-700 font-medium mb-1">
+                          <span>Sick Leave</span>
+                          <span className="text-slate-400 font-semibold">0 days taken</span>
+                        </div>
+                        <div className="w-full h-1.5 bg-slate-100 rounded-full overflow-hidden">
+                          <div className="h-full bg-amber-500 rounded-full w-0"></div>
+                        </div>
+                      </div>
+
+                      <div>
+                        <div className="flex justify-between text-slate-700 font-medium mb-1">
+                          <span>Other Leaves</span>
+                          <span className="text-slate-400 font-semibold">0 days taken</span>
+                        </div>
+                        <div className="w-full h-1.5 bg-slate-100 rounded-full overflow-hidden">
+                          <div className="h-full bg-purple-500 rounded-full w-0"></div>
+                        </div>
+                      </div>
+                    </div>
                   </div>
                 </div>
-                <div className="flex items-baseline gap-2">
-                  <span className="text-2xl font-black text-[#0F172A]">3 Total</span>
-                  <span className="text-[11px] font-bold text-amber-700 bg-amber-50 px-1.5 py-0.5 rounded-md">1 Unread</span>
-                </div>
-                <p className="text-[11px] text-[#475569] mt-1 font-medium">Fleet Rollout & Operations SOP</p>
-              </div>
 
-              {/* 7-Day Curved Sparkline Graph */}
-              <div className="pt-3">
-                <div className="flex items-center justify-between text-[9px] text-slate-400 font-bold mb-1">
-                  <span>ACTIVE BROADCASTS</span>
-                  <span className="text-amber-600 font-bold">UPDATED</span>
-                </div>
-                <svg viewBox="0 0 100 24" className="w-full h-6 overflow-visible">
-                  <defs>
-                    <linearGradient id="sparkAmber" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="0%" stopColor="#F59E0B" stopOpacity="0.3" />
-                      <stop offset="100%" stopColor="#F59E0B" stopOpacity="0.0" />
-                    </linearGradient>
-                  </defs>
-                  <path d="M0 14 Q 30 16, 50 10 T 80 14 L 100 8 L 100 24 L 0 24 Z" fill="url(#sparkAmber)" />
-                  <path d="M0 14 Q 30 16, 50 10 T 80 14 L 100 8" fill="none" stroke="#F59E0B" strokeWidth="2" strokeLinecap="round" />
-                  <circle cx="100" cy="8" r="2" fill="#F59E0B" />
-                </svg>
-              </div>
-            </div>
+                {/* CARD 2: ANNOUNCEMENTS */}
+                <div className="bg-white p-5 rounded-3xl border border-slate-200/90 shadow-xs space-y-3 flex flex-col justify-between">
+                  <div>
+                    <div className="flex items-center justify-between">
+                      <h3 className="text-xs font-bold text-slate-800 uppercase tracking-wider">Announcements</h3>
+                      <button
+                        type="button"
+                        onClick={() => setView('announcements')}
+                        className="text-xs font-bold text-blue-600 hover:underline cursor-pointer"
+                      >
+                        View all
+                      </button>
+                    </div>
 
-            {/* KPI 5: Helpdesk Tickets */}
-            <div 
-              onClick={() => setView('helpdesk')}
-              className="bg-white p-5 rounded-2xl border border-[#E2E8F0] interactive-stat-card cursor-pointer animate-fade-in-up stagger-5 flex flex-col justify-between"
-            >
-              <div>
-                <div className="flex items-center justify-between text-[#475569] mb-2">
-                  <span className="text-xs font-bold uppercase tracking-wider text-[#94A3B8]">Helpdesk Tickets</span>
-                  <div className="p-2 rounded-xl bg-purple-50 text-purple-600 stat-icon-glow">
-                    <HelpCircle className="w-4 h-4" />
+                    <div className="space-y-2.5 pt-2 max-h-[160px] overflow-y-auto pr-1">
+                      {announcements.map((anc) => (
+                        <div
+                          key={anc.id}
+                          onClick={() => setSelectedAnnouncement(anc)}
+                          className="p-2.5 rounded-2xl bg-slate-50/80 hover:bg-slate-100/80 border border-slate-200/60 transition cursor-pointer flex items-start gap-2.5"
+                        >
+                          <div className="w-7 h-7 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center shrink-0 mt-0.5">
+                            <Zap className="w-3.5 h-3.5 fill-blue-600" />
+                          </div>
+                          <div className="min-w-0 flex-1">
+                            <h4 className="text-[11px] font-bold text-slate-900 truncate leading-snug">{anc.title}</h4>
+                            <p className="text-[9px] text-slate-400 font-medium mt-0.5">{anc.author.split('(')[0].trim()} • {anc.time}</p>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
                   </div>
                 </div>
-                <div className="flex items-baseline gap-2">
-                  <span className="text-2xl font-black text-[#0F172A]">{submittedTickets.length} Logged</span>
-                  <span className="text-[11px] font-bold text-purple-600 bg-purple-50 px-1.5 py-0.5 rounded-md">1 In-Review</span>
+
+                {/* CARD 3: RECENT ACTIVITY */}
+                <div className="bg-white p-5 rounded-3xl border border-slate-200/90 shadow-xs space-y-3 flex flex-col justify-between">
+                  <div>
+                    <div className="flex items-center justify-between">
+                      <h3 className="text-xs font-bold text-slate-800 uppercase tracking-wider">Recent Activity</h3>
+                      <span className="text-[10px] text-slate-400 font-medium">Today</span>
+                    </div>
+
+                    <div className="space-y-3 pt-2 max-h-[160px] overflow-y-auto pr-1 text-xs">
+                      <div className="flex items-start gap-2.5">
+                        <div className="w-5 h-5 rounded-full bg-slate-100 flex items-center justify-center shrink-0 mt-0.5">
+                          <Clock className="w-3 h-3 text-emerald-500" />
+                        </div>
+                        <div>
+                          <p className="text-[11px] font-bold text-slate-800 leading-snug">Logged in at 10:39 PM</p>
+                          <p className="text-[9px] text-slate-400 font-medium mt-0.5">10:39 PM</p>
+                        </div>
+                      </div>
+
+                      <div className="flex items-start gap-2.5">
+                        <div className="w-5 h-5 rounded-full bg-slate-100 flex items-center justify-center shrink-0 mt-0.5">
+                          <Clock className="w-3 h-3 text-sky-500" />
+                        </div>
+                        <div>
+                          <p className="text-[11px] font-bold text-slate-800 leading-snug">Forced logout due to browser close.</p>
+                          <p className="text-[9px] text-slate-400 font-medium mt-0.5">11:06 AM</p>
+                        </div>
+                      </div>
+
+                      <div className="flex items-start gap-2.5">
+                        <div className="w-5 h-5 rounded-full bg-slate-100 flex items-center justify-center shrink-0 mt-0.5">
+                          <Clock className="w-3 h-3 text-emerald-500" />
+                        </div>
+                        <div>
+                          <p className="text-[11px] font-bold text-slate-800 leading-snug">Logged in at 10:03 AM</p>
+                          <p className="text-[9px] text-slate-400 font-medium mt-0.5">10:03 AM</p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
                 </div>
-                <p className="text-[11px] text-[#475569] mt-1 font-medium">2 Resolved Successfully</p>
+
               </div>
 
-              {/* 7-Day Curved Sparkline Graph */}
-              <div className="pt-3">
-                <div className="flex items-center justify-between text-[9px] text-slate-400 font-bold mb-1">
-                  <span>SLA RESOLUTION</span>
-                  <span className="text-purple-600 font-bold">100%</span>
-                </div>
-                <svg viewBox="0 0 100 24" className="w-full h-6 overflow-visible">
-                  <defs>
-                    <linearGradient id="sparkPurple" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="0%" stopColor="#9333EA" stopOpacity="0.3" />
-                      <stop offset="100%" stopColor="#9333EA" stopOpacity="0.0" />
-                    </linearGradient>
-                  </defs>
-                  <path d="M0 18 Q 20 12, 45 15 T 75 8 L 100 6 L 100 24 L 0 24 Z" fill="url(#sparkPurple)" />
-                  <path d="M0 18 Q 20 12, 45 15 T 75 8 L 100 6" fill="none" stroke="#9333EA" strokeWidth="2" strokeLinecap="round" />
-                  <circle cx="100" cy="6" r="2" fill="#9333EA" />
-                </svg>
-              </div>
             </div>
+
+            {/* ================= RIGHT SIDEBAR / SECONDARY COLUMN (4 COLS) ================= */}
+            <div className="lg:col-span-4 space-y-6">
+
+              {/* WIDGET 1: TODAY'S SCHEDULE */}
+              <div className="bg-white p-5 sm:p-6 rounded-3xl border border-slate-200/90 shadow-xs space-y-4">
+                <div className="flex items-center justify-between">
+                  <h3 className="text-xs font-bold text-slate-800 uppercase tracking-wider">Today's Schedule</h3>
+                  <button
+                    type="button"
+                    onClick={() => setView('tasks')}
+                    className="text-xs font-bold text-blue-600 hover:underline cursor-pointer"
+                  >
+                    View all
+                  </button>
+                </div>
+
+                {/* Weekly Date Selector */}
+                <div className="grid grid-cols-7 gap-1 text-center py-2 border-y border-slate-100">
+                  {[
+                    { day: 'S', date: 9 },
+                    { day: 'M', date: 10 },
+                    { day: 'T', date: 11 },
+                    { day: 'W', date: 12 },
+                    { day: 'T', date: 13 },
+                    { day: 'F', date: 14 },
+                    { day: 'S', date: 15 },
+                  ].map((w) => {
+                    const isSelected = w.date === 13;
+                    return (
+                      <button
+                        key={w.date}
+                        type="button"
+                        className="flex flex-col items-center py-1 cursor-pointer"
+                      >
+                        <span className="text-[9px] font-bold text-slate-400 uppercase">{w.day}</span>
+                        <span className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-extrabold mt-1 transition-all ${
+                          isSelected
+                            ? 'bg-blue-600 text-white shadow-md shadow-blue-500/30'
+                            : 'text-slate-700 hover:bg-slate-100'
+                        }`}>
+                          {w.date}
+                        </span>
+                      </button>
+                    );
+                  })}
+                </div>
+
+                {/* Scheduled Tasks List */}
+                <div className="space-y-2.5 pt-1">
+                  <div
+                    onClick={() => setView('tasks')}
+                    className="p-3 rounded-2xl bg-slate-50/80 hover:bg-slate-100/80 border border-slate-200/60 transition cursor-pointer flex items-center justify-between"
+                  >
+                    <div>
+                      <h4 className="text-xs font-bold text-slate-900 leading-snug">work on Fleet dashboard</h4>
+                      <span className="text-[9px] font-extrabold text-slate-400 uppercase tracking-wider block mt-0.5">TASK DUE</span>
+                    </div>
+                    <span className="text-xs font-bold text-amber-600 bg-amber-50 px-2 py-0.5 rounded-md border border-amber-200/80 shrink-0">
+                      24 Jun
+                    </span>
+                  </div>
+
+                  <div
+                    onClick={() => setView('tasks')}
+                    className="p-3 rounded-2xl bg-slate-50/80 hover:bg-slate-100/80 border border-slate-200/60 transition cursor-pointer flex items-center justify-between"
+                  >
+                    <div>
+                      <h4 className="text-xs font-bold text-slate-900 leading-snug">tms and hrms training</h4>
+                      <span className="text-[9px] font-extrabold text-slate-400 uppercase tracking-wider block mt-0.5">TASK DUE</span>
+                    </div>
+                    <span className="text-xs font-bold text-amber-600 bg-amber-50 px-2 py-0.5 rounded-md border border-amber-200/80 shrink-0">
+                      17 Jun
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              {/* WIDGET 2: QUICK SHORTCUTS */}
+              <div className="bg-white p-5 sm:p-6 rounded-3xl border border-slate-200/90 shadow-xs space-y-3">
+                <h3 className="text-xs font-bold text-slate-800 uppercase tracking-wider">Quick Shortcuts</h3>
+
+                <div className="grid grid-cols-3 gap-2.5 pt-1">
+                  {/* Row 1, Col 1: Check In */}
+                  <button
+                    type="button"
+                    onClick={() => setIsClockedIn(true)}
+                    className="p-3 rounded-2xl bg-slate-50 hover:bg-emerald-50 hover:border-emerald-200 border border-slate-200/80 transition flex flex-col items-center justify-center text-center group cursor-pointer"
+                  >
+                    <div className="w-8 h-8 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center mb-1 group-hover:scale-110 transition-transform">
+                      <Calendar className="w-4 h-4" />
+                    </div>
+                    <span className="text-[10px] font-bold text-slate-700 leading-tight">Check In</span>
+                  </button>
+
+                  {/* Row 1, Col 2: Check Out */}
+                  <button
+                    type="button"
+                    onClick={() => setIsLogoutReportModalOpen(true)}
+                    className="p-3 rounded-2xl bg-slate-50 hover:bg-rose-50 hover:border-rose-200 border border-slate-200/80 transition flex flex-col items-center justify-center text-center group cursor-pointer"
+                  >
+                    <div className="w-8 h-8 rounded-xl bg-rose-50 text-rose-600 flex items-center justify-center mb-1 group-hover:scale-110 transition-transform">
+                      <ArrowUpRight className="w-4 h-4" />
+                    </div>
+                    <span className="text-[10px] font-bold text-slate-700 leading-tight">Check Out</span>
+                  </button>
+
+                  {/* Row 1, Col 3: Logout Report */}
+                  <button
+                    type="button"
+                    onClick={() => setIsLogoutReportModalOpen(true)}
+                    className="p-3 rounded-2xl bg-slate-50 hover:bg-blue-50 hover:border-blue-200 border border-slate-200/80 transition flex flex-col items-center justify-center text-center group cursor-pointer"
+                  >
+                    <div className="w-8 h-8 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center mb-1 group-hover:scale-110 transition-transform">
+                      <FileText className="w-4 h-4" />
+                    </div>
+                    <span className="text-[10px] font-bold text-slate-700 leading-tight">Logout Report</span>
+                  </button>
+
+                  {/* Row 2, Col 1: Request Leave */}
+                  <button
+                    type="button"
+                    onClick={() => setIsLeaveModalOpen(true)}
+                    className="p-3 rounded-2xl bg-slate-50 hover:bg-purple-50 hover:border-purple-200 border border-slate-200/80 transition flex flex-col items-center justify-center text-center group cursor-pointer"
+                  >
+                    <div className="w-8 h-8 rounded-xl bg-purple-50 text-purple-600 flex items-center justify-center mb-1 group-hover:scale-110 transition-transform">
+                      <CalendarRange className="w-4 h-4" />
+                    </div>
+                    <span className="text-[10px] font-bold text-slate-700 leading-tight">Request Leave</span>
+                  </button>
+
+                  {/* Row 2, Col 2: View Tasks */}
+                  <button
+                    type="button"
+                    onClick={() => setView('tasks')}
+                    className="p-3 rounded-2xl bg-slate-50 hover:bg-blue-50 hover:border-blue-200 border border-slate-200/80 transition flex flex-col items-center justify-center text-center group cursor-pointer col-span-2"
+                  >
+                    <div className="w-8 h-8 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center mb-1 group-hover:scale-110 transition-transform">
+                      <CheckSquare className="w-4 h-4" />
+                    </div>
+                    <span className="text-[10px] font-bold text-slate-700 leading-tight">View Tasks</span>
+                  </button>
+                </div>
+              </div>
+
+              {/* WIDGET 3: TODAY'S BIRTHDAY */}
+              <div className="bg-white p-5 sm:p-6 rounded-3xl border border-slate-200/90 shadow-xs space-y-3">
+                <div className="flex items-center gap-2">
+                  <span className="text-base">🎂</span>
+                  <h3 className="text-xs font-bold text-slate-800 uppercase tracking-wider">Today's Birthday</h3>
+                </div>
+
+                <div className="p-4 text-center">
+                  <p className="text-xs text-slate-400 font-medium italic">No birthdays today.</p>
+                </div>
+              </div>
+
+              {/* WIDGET 4: PRODUCTIVITY STREAK / PERFORMANCE CARD */}
+              <div className="bg-gradient-to-br from-blue-50/80 via-sky-50/50 to-indigo-50/60 p-5 sm:p-6 rounded-3xl border border-blue-100 shadow-xs space-y-3 relative overflow-hidden">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <span className="text-xl">🏆</span>
+                    <h4 className="text-xs font-black text-slate-900">Keep up the great work!</h4>
+                  </div>
+                </div>
+
+                <p className="text-xs text-slate-600 font-medium">
+                  You're on a 5-day productivity streak.
+                </p>
+
+                <button
+                  type="button"
+                  onClick={() => setView('reports')}
+                  className="w-full py-2 px-4 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs shadow-xs transition cursor-pointer text-center"
+                >
+                  View Performance
+                </button>
+              </div>
+
+            </div>
+
           </div>
-        </>
+        </div>
       )}
 
       {/* Sub-view Breadcrumb Header when NOT on Dashboard */}
@@ -1340,1132 +1709,10 @@ export default function EmployeeDashboardPage() {
       )}
 
       {/* ========================================================================= */}
-      {/* VIEW 1: MY DASHBOARD (OVERVIEW) */}
-      {/* ========================================================================= */}
-      {activeTab === 'dashboard' && (
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-          {/* Left Column (8 cols): Tasks + Productivity Insights */}
-          <div className="lg:col-span-8 space-y-6">
-            {/* Today's Priority Tasks Card */}
-            <div className="bg-white p-6 rounded-2xl border border-[#E2E8F0] shadow-xs space-y-4">
-              <div className="flex items-center justify-between">
-                <div>
-                  <h3 className="text-base font-extrabold text-[#0F172A]">Today's Priority Tasks</h3>
-                  <p className="text-xs text-[#475569]">Check off items to instantly recalculate productivity metrics</p>
-                </div>
-                <button
-                  onClick={() => setView('tasks')}
-                  className="text-xs font-bold text-[#2563EB] hover:underline flex items-center gap-1 cursor-pointer"
-                >
-                  <span>View All ({tasks.length})</span>
-                  <ChevronRight className="w-3.5 h-3.5" />
-                </button>
-              </div>
-
-              {/* Progress Summary Bar */}
-              <div className="p-3.5 bg-[#F8FAFC] rounded-xl border border-[#E2E8F0] flex items-center justify-between text-xs">
-                <div className="flex items-center gap-2">
-                  <CheckCheck className="w-4 h-4 text-[#2563EB]" />
-                  <span className="font-bold text-[#0F172A]">Shift Task Completion:</span>
-                  <span className="font-mono text-[#475569]">{completedCount} of {tasks.length} items</span>
-                </div>
-                <span className="font-extrabold text-[#2563EB]">{taskProgressPercent}%</span>
-              </div>
-
-              <div className="space-y-2.5">
-                {tasks.slice(0, 4).map((t) => (
-                  <div
-                    key={t.id}
-                    onClick={() => setSelectedTaskForReview(t)}
-                    className={`p-3.5 rounded-xl border transition flex items-center justify-between cursor-pointer ${
-                      t.status === 'COMPLETED'
-                        ? 'bg-slate-50 border-slate-200 opacity-75'
-                        : t.status === 'IN_PROGRESS'
-                        ? 'bg-blue-50/40 border-blue-200 hover:border-blue-300 hover:shadow-xs'
-                        : 'bg-white border-[#E2E8F0] hover:border-blue-300 hover:shadow-xs'
-                    }`}
-                  >
-                    <div className="flex items-center gap-3 truncate">
-                      <div className={`w-6 h-6 rounded-lg flex items-center justify-center shrink-0 border text-[10px] font-bold ${
-                        t.status === 'COMPLETED' ? 'bg-emerald-600 border-emerald-600 text-white' :
-                        t.status === 'IN_PROGRESS' ? 'bg-blue-600 border-blue-600 text-white' :
-                        'bg-amber-100 border-amber-300 text-amber-800'
-                      }`}>
-                        {t.status === 'COMPLETED' ? <Check className="w-3.5 h-3.5" /> : t.status === 'IN_PROGRESS' ? '▶' : '!'}
-                      </div>
-                      <div className="truncate">
-                        <div className="flex items-center gap-2">
-                          <span className={`text-xs font-bold block truncate ${t.status === 'COMPLETED' ? 'line-through text-slate-400' : 'text-[#0F172A]'}`}>
-                            {t.title}
-                          </span>
-                        </div>
-                        <div className="flex items-center gap-2 mt-0.5">
-                          <span className="text-[10px] font-semibold text-slate-500">
-                            By {t.assignedBy.name} ({t.assignedBy.role.split(' ')[0]})
-                          </span>
-                          <span className="text-[10px] text-[#94A3B8] font-mono">• Due: {t.due}</span>
-                          <span className="text-[10px] px-1.5 py-0.2 bg-slate-100 text-[#475569] rounded font-medium">
-                            {t.tag}
-                          </span>
-                          {t.attachedDocuments && t.attachedDocuments.length > 0 && (
-                            <span className="text-[9px] text-blue-600 font-bold">
-                              📎 {t.attachedDocuments.length} doc{t.attachedDocuments.length > 1 ? 's' : ''}
-                            </span>
-                          )}
-                          {t.isOverdue && t.status !== 'COMPLETED' && (
-                            <span className="text-[9px] px-1.5 py-0.2 rounded font-bold bg-rose-50 text-rose-600 border border-rose-200">
-                              OVERDUE
-                            </span>
-                          )}
-                        </div>
-                      </div>
-                    </div>
-
-                    <div className="flex items-center gap-2 shrink-0">
-                      <span className={`text-[9px] font-black px-2 py-0.5 rounded uppercase ${
-                        t.status === 'COMPLETED' ? 'bg-emerald-100 text-emerald-800' :
-                        t.status === 'IN_PROGRESS' ? 'bg-blue-100 text-blue-800' :
-                        'bg-amber-100 text-amber-800'
-                      }`}>
-                        {t.status === 'ASSIGNED' ? 'NEW' : t.status.replace('_', ' ')}
-                      </span>
-                      <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full uppercase ${
-                        t.priority === 'HIGH' ? 'bg-rose-50 text-rose-700 border border-rose-200' : t.priority === 'MEDIUM' ? 'bg-amber-50 text-amber-700 border border-amber-200' : 'bg-slate-100 text-slate-600'
-                      }`}>
-                        {t.priority}
-                      </span>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            {/* Productivity Insights Card with Interactive Curved Spline Area Chart (No Bar Graphs) */}
-            <div className="bg-white p-6 rounded-2xl border border-[#E2E8F0] shadow-xs space-y-5 animate-fade-in-up stagger-2">
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-                <div className="flex items-center gap-2.5">
-                  <div className="p-2 bg-indigo-50 text-indigo-600 rounded-xl stat-icon-glow">
-                    <Award className="w-5 h-5" />
-                  </div>
-                  <div>
-                    <h3 className="text-base font-extrabold text-[#0F172A]">Productivity & Velocity Dynamics</h3>
-                    <p className="text-xs text-[#475569]">Interactive spline area trend vs 90% SLA baseline</p>
-                  </div>
-                </div>
-
-                {/* Timeframe Switcher Tabs */}
-                <div className="flex items-center gap-1 bg-slate-100 p-1 rounded-xl text-xs font-bold self-start sm:self-auto border border-slate-200">
-                  {(['TODAY', 'WEEK', 'MONTH'] as const).map((tf) => (
-                    <button
-                      key={tf}
-                      type="button"
-                      onClick={() => {
-                        setProductivityTimeframe(tf);
-                        setHoveredPointIndex(null);
-                      }}
-                      className={`px-3 py-1 rounded-lg transition cursor-pointer ${
-                        productivityTimeframe === tf
-                          ? 'bg-white text-[#2563EB] shadow-xs'
-                          : 'text-[#64748B] hover:text-[#0F172A]'
-                      }`}
-                    >
-                      {tf === 'TODAY' ? 'Today (Hourly)' : tf === 'WEEK' ? '7 Days' : '30 Days'}
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              {/* Chart Grid: Spline Area Chart (8 cols) + Radial Task Donut (4 cols) */}
-              <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 pt-1">
-                {/* 1. Curved Spline Area Graph */}
-                <div className="lg:col-span-8 p-4 bg-white rounded-2xl border border-slate-200/80 shadow-xs relative">
-                  {/* Legend & Interactive Toggles */}
-                  <div className="flex items-center justify-between text-xs mb-3 flex-wrap gap-2">
-                    <div className="flex items-center gap-3">
-                      <button 
-                        type="button"
-                        onClick={() => setShowVelocityCurve(!showVelocityCurve)}
-                        className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg border transition-all cursor-pointer ${
-                          showVelocityCurve 
-                            ? 'bg-blue-50 border-blue-200 text-blue-700 font-bold' 
-                            : 'bg-slate-50 border-slate-200 text-slate-400 line-through'
-                        }`}
-                        title="Click to toggle Velocity curve"
-                      >
-                        <span className="w-2.5 h-2.5 rounded-full bg-blue-600"></span>
-                        <span>Actual Velocity</span>
-                      </button>
-                      <button 
-                        type="button"
-                        onClick={() => setShowBaselineLine(!showBaselineLine)}
-                        className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg border transition-all cursor-pointer ${
-                          showBaselineLine 
-                            ? 'bg-slate-100 border-slate-300 text-slate-700 font-bold' 
-                            : 'bg-slate-50 border-slate-200 text-slate-400 line-through'
-                        }`}
-                        title="Click to toggle Baseline target"
-                      >
-                        <span className="w-2.5 h-0.5 bg-slate-500"></span>
-                        <span>90% Target Baseline</span>
-                      </button>
-                    </div>
-                    <span className="text-[11px] font-extrabold text-emerald-600 bg-emerald-50 px-2.5 py-1 rounded-lg border border-emerald-200/80 flex items-center gap-1">
-                      <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
-                      +6.2% vs Dept Avg
-                    </span>
-                  </div>
-
-                  {/* SVG Spline Area Graph */}
-                  <div className="relative h-44 w-full">
-                    {/* SVG Canvas */}
-                    <svg viewBox="0 0 500 160" className="w-full h-full overflow-visible">
-                      <defs>
-                        <linearGradient id="productivityGradient" x1="0" y1="0" x2="0" y2="1">
-                          <stop offset="0%" stopColor="#2563EB" stopOpacity="0.35" />
-                          <stop offset="60%" stopColor="#3B82F6" stopOpacity="0.10" />
-                          <stop offset="100%" stopColor="#2563EB" stopOpacity="0.0" />
-                        </linearGradient>
-                        <linearGradient id="laserBeamGradient" x1="0" y1="0" x2="0" y2="1">
-                          <stop offset="0%" stopColor="#2563EB" stopOpacity="0.4" />
-                          <stop offset="100%" stopColor="#2563EB" stopOpacity="0.0" />
-                        </linearGradient>
-                      </defs>
-
-                      {/* Horizontal Grid Lines */}
-                      <line x1="10" y1="30" x2="490" y2="30" stroke="#E2E8F0" strokeDasharray="3 3" />
-                      <line x1="10" y1="75" x2="490" y2="75" stroke="#E2E8F0" strokeDasharray="3 3" />
-                      <line x1="10" y1="120" x2="490" y2="120" stroke="#E2E8F0" strokeDasharray="3 3" />
-
-                      {/* 90% Target Baseline Line & Non-colliding Label */}
-                      {showBaselineLine && (
-                        <g>
-                          <line x1="10" y1="82" x2="490" y2="82" stroke="#94A3B8" strokeWidth="1.5" strokeDasharray="4 4" />
-                          <text x="485" y="77" textAnchor="end" fill="#94A3B8" fontSize="9" fontWeight="bold">90% Target Baseline</text>
-                        </g>
-                      )}
-
-                      {/* Mathematically Aligned Area Fill */}
-                      {showVelocityCurve && productivityTimeframe === 'TODAY' && (
-                        <path
-                          d="M 30,130 C 74,130 74,98 118,98 C 162,98 162,72 206,72 C 250,72 250,55 294,55 C 338,55 338,42 382,42 C 426,42 426,22 470,22 L 470,145 L 30,145 Z"
-                          fill="url(#productivityGradient)"
-                        />
-                      )}
-                      {showVelocityCurve && productivityTimeframe === 'WEEK' && (
-                        <path
-                          d="M 30,68 C 65,68 68,48 103,48 C 140,48 140,75 177,75 C 214,75 214,42 250,42 C 286,42 286,55 323,55 C 360,55 360,28 397,28 C 434,28 434,15 470,15 L 470,145 L 30,145 Z"
-                          fill="url(#productivityGradient)"
-                        />
-                      )}
-                      {showVelocityCurve && productivityTimeframe === 'MONTH' && (
-                        <path
-                          d="M 50,75 C 116,75 116,60 183,60 C 250,60 250,42 316,42 C 383,42 383,28 450,28 L 450,145 L 50,145 Z"
-                          fill="url(#productivityGradient)"
-                        />
-                      )}
-
-                      {/* Mathematically Aligned Curved Stroke Line */}
-                      {showVelocityCurve && productivityTimeframe === 'TODAY' && (
-                        <path
-                          d="M 30,130 C 74,130 74,98 118,98 C 162,98 162,72 206,72 C 250,72 250,55 294,55 C 338,55 338,42 382,42 C 426,42 426,22 470,22"
-                          fill="none"
-                          stroke="#2563EB"
-                          strokeWidth="3"
-                          strokeLinecap="round"
-                          className="chart-line-animated"
-                        />
-                      )}
-                      {showVelocityCurve && productivityTimeframe === 'WEEK' && (
-                        <path
-                          d="M 30,68 C 65,68 68,48 103,48 C 140,48 140,75 177,75 C 214,75 214,42 250,42 C 286,42 286,55 323,55 C 360,55 360,28 397,28 C 434,28 434,15 470,15"
-                          fill="none"
-                          stroke="#2563EB"
-                          strokeWidth="3"
-                          strokeLinecap="round"
-                          className="chart-line-animated"
-                        />
-                      )}
-                      {showVelocityCurve && productivityTimeframe === 'MONTH' && (
-                        <path
-                          d="M 50,75 C 116,75 116,60 183,60 C 250,60 250,42 316,42 C 383,42 383,28 450,28"
-                          fill="none"
-                          stroke="#2563EB"
-                          strokeWidth="3"
-                          strokeLinecap="round"
-                          className="chart-line-animated"
-                        />
-                      )}
-
-                      {/* Current Timeframe Data Points List */}
-                      {(() => {
-                        const pts = productivityTimeframe === 'WEEK' ? [
-                          { x: 30, y: 68, label: 'Mon', fullLabel: 'Monday, Aug 04', val: '92%', count: '4 Tasks', status: '+2% vs Target' },
-                          { x: 103, y: 48, label: 'Tue', fullLabel: 'Tuesday, Aug 05', val: '95%', count: '6 Tasks', status: '+5% vs Target' },
-                          { x: 177, y: 75, label: 'Wed', fullLabel: 'Wednesday, Aug 06', val: '91%', count: '4 Tasks', status: '+1% vs Target' },
-                          { x: 250, y: 42, label: 'Thu', fullLabel: 'Thursday, Aug 07', val: '96%', count: '5 Tasks', status: '+6% vs Target' },
-                          { x: 323, y: 55, label: 'Fri', fullLabel: 'Friday, Aug 08', val: '94%', count: '5 Tasks', status: '+4% vs Target' },
-                          { x: 397, y: 28, label: 'Sat', fullLabel: 'Saturday, Aug 09', val: '98%', count: '6 Tasks', status: '+8% vs Target' },
-                          { x: 470, y: 15, label: 'Today', fullLabel: 'Today (Aug 10)', val: '100%', count: 'Shift Active', status: '+10% Peak' },
-                        ] : productivityTimeframe === 'TODAY' ? [
-                          { x: 30, y: 130, label: '09:00 AM', fullLabel: 'Shift Start', val: '25%', count: 'Clock-in', status: 'On Schedule' },
-                          { x: 118, y: 98, label: '11:00 AM', fullLabel: 'Morning Block', val: '58%', count: 'TSK-4092 Verified', status: '+4% Speed' },
-                          { x: 206, y: 72, label: '01:00 PM', fullLabel: 'Midday Check', val: '76%', count: '2 Tasks Complete', status: 'On Track' },
-                          { x: 294, y: 55, label: '03:00 PM', fullLabel: 'Afternoon Surge', val: '88%', count: 'BMS Audit', status: '+5% Output' },
-                          { x: 382, y: 42, label: '05:00 PM', fullLabel: 'EOD Wrapup', val: '95%', count: '4 Tasks Complete', status: '+8% Output' },
-                          { x: 470, y: 22, label: 'Live Now', fullLabel: 'Current Session', val: '98%', count: 'Active Shift', status: 'Peak Output' },
-                        ] : [
-                          { x: 50, y: 75, label: 'Week 1', fullLabel: 'Jul 01 – Jul 07', val: '90%', count: '22 Tasks', status: 'Target Met' },
-                          { x: 183, y: 60, label: 'Week 2', fullLabel: 'Jul 08 – Jul 14', val: '93%', count: '26 Tasks', status: '+3% Target' },
-                          { x: 316, y: 42, label: 'Week 3', fullLabel: 'Jul 15 – Jul 21', val: '96%', count: '29 Tasks', status: '+6% Target' },
-                          { x: 450, y: 28, label: 'Week 4', fullLabel: 'Jul 22 – Jul 31', val: '98%', count: '31 Tasks', status: '+8% Peak' },
-                        ];
-
-                        const activeIdx = hoveredPointIndex !== null ? hoveredPointIndex : selectedVelocityPoint;
-                        const activePt = activeIdx !== null ? pts[activeIdx] : null;
-
-                        return (
-                          <>
-                            {/* Vertical Laser Beam / Crosshair line for active point */}
-                            {activePt && (
-                              <g className="transition-all duration-200">
-                                <line
-                                  x1={activePt.x}
-                                  y1={activePt.y}
-                                  x2={activePt.x}
-                                  y2="145"
-                                  stroke="#2563EB"
-                                  strokeWidth="1.5"
-                                  strokeDasharray="3 3"
-                                  opacity="0.8"
-                                />
-                                <rect
-                                  x={activePt.x - 6}
-                                  y={activePt.y}
-                                  width="12"
-                                  height={145 - activePt.y}
-                                  fill="url(#laserBeamGradient)"
-                                />
-                              </g>
-                            )}
-
-                            {/* Data Points */}
-                            {pts.map((pt, idx) => {
-                              const isHovered = hoveredPointIndex === idx;
-                              const isSelected = selectedVelocityPoint === idx;
-                              const isActive = isHovered || isSelected;
-
-                              return (
-                                <g
-                                  key={idx}
-                                  className="cursor-pointer"
-                                  onMouseEnter={() => setHoveredPointIndex(idx)}
-                                  onMouseLeave={() => setHoveredPointIndex(null)}
-                                  onClick={() => setSelectedVelocityPoint(isSelected ? null : idx)}
-                                >
-                                  {/* Outer Pulsing Glow */}
-                                  {isActive && (
-                                    <circle
-                                      cx={pt.x}
-                                      cy={pt.y}
-                                      r={14}
-                                      fill="#2563EB"
-                                      opacity="0.18"
-                                      className="animate-pulse"
-                                    />
-                                  )}
-                                  {/* Point Outer Ring */}
-                                  <circle
-                                    cx={pt.x}
-                                    cy={pt.y}
-                                    r={isActive ? 7 : 4.5}
-                                    fill="#FFFFFF"
-                                    stroke={isActive ? '#2563EB' : '#3B82F6'}
-                                    strokeWidth={isActive ? 3.5 : 2.5}
-                                    className="transition-all duration-200 shadow-md"
-                                  />
-                                  {/* Point Center Dot */}
-                                  {isActive && (
-                                    <circle
-                                      cx={pt.x}
-                                      cy={pt.y}
-                                      r={2.5}
-                                      fill="#2563EB"
-                                    />
-                                  )}
-                                </g>
-                              );
-                            })}
-                          </>
-                        );
-                      })()}
-                    </svg>
-
-                    {/* Dynamic Pinned Floating Tooltip */}
-                    {(() => {
-                      const pts = productivityTimeframe === 'WEEK' ? [
-                        { x: 30, y: 68, label: 'Mon', fullLabel: 'Monday, Aug 04', val: '92%', count: '4 Tasks', status: '+2% vs Target' },
-                        { x: 103, y: 48, label: 'Tue', fullLabel: 'Tuesday, Aug 05', val: '95%', count: '6 Tasks', status: '+5% vs Target' },
-                        { x: 177, y: 75, label: 'Wed', fullLabel: 'Wednesday, Aug 06', val: '91%', count: '4 Tasks', status: '+1% vs Target' },
-                        { x: 250, y: 42, label: 'Thu', fullLabel: 'Thursday, Aug 07', val: '96%', count: '5 Tasks', status: '+6% vs Target' },
-                        { x: 323, y: 55, label: 'Fri', fullLabel: 'Friday, Aug 08', val: '94%', count: '5 Tasks', status: '+4% vs Target' },
-                        { x: 397, y: 28, label: 'Sat', fullLabel: 'Saturday, Aug 09', val: '98%', count: '6 Tasks', status: '+8% vs Target' },
-                        { x: 470, y: 15, label: 'Today', fullLabel: 'Today (Aug 10)', val: '100%', count: 'Shift Active', status: '+10% Peak' },
-                      ] : productivityTimeframe === 'TODAY' ? [
-                        { x: 30, y: 130, label: '09:00 AM', fullLabel: 'Shift Start', val: '25%', count: 'Clock-in', status: 'On Schedule' },
-                        { x: 118, y: 98, label: '11:00 AM', fullLabel: 'Morning Block', val: '58%', count: 'TSK-4092 Verified', status: '+4% Speed' },
-                        { x: 206, y: 72, label: '01:00 PM', fullLabel: 'Midday Check', val: '76%', count: '2 Tasks Complete', status: 'On Track' },
-                        { x: 294, y: 55, label: '03:00 PM', fullLabel: 'Afternoon Surge', val: '88%', count: 'BMS Audit', status: '+5% Output' },
-                        { x: 382, y: 42, label: '05:00 PM', fullLabel: 'EOD Wrapup', val: '95%', count: '4 Tasks Complete', status: '+8% Output' },
-                        { x: 470, y: 22, label: 'Live Now', fullLabel: 'Current Session', val: '98%', count: 'Active Shift', status: 'Peak Output' },
-                      ] : [
-                        { x: 50, y: 75, label: 'Week 1', fullLabel: 'Jul 01 – Jul 07', val: '90%', count: '22 Tasks', status: 'Target Met' },
-                        { x: 183, y: 60, label: 'Week 2', fullLabel: 'Jul 08 – Jul 14', val: '93%', count: '26 Tasks', status: '+3% Target' },
-                        { x: 316, y: 42, label: 'Week 3', fullLabel: 'Jul 15 – Jul 21', val: '96%', count: '29 Tasks', status: '+6% Target' },
-                        { x: 450, y: 28, label: 'Week 4', fullLabel: 'Jul 22 – Jul 31', val: '98%', count: '31 Tasks', status: '+8% Peak' },
-                      ];
-
-                      const activeIdx = hoveredPointIndex !== null ? hoveredPointIndex : selectedVelocityPoint;
-                      if (activeIdx === null) return null;
-
-                      const pt = pts[activeIdx];
-                      const leftPercent = (pt.x / 500) * 100;
-                      // Clamp tooltip horizontally so it doesn't overflow edge
-                      const clampedLeft = Math.max(16, Math.min(84, leftPercent));
-
-                      return (
-                        <div 
-                          style={{ left: `${clampedLeft}%` }}
-                          className="absolute -top-3 -translate-x-1/2 -translate-y-full bg-slate-900/95 text-white px-3.5 py-2 rounded-xl text-xs shadow-2xl border border-slate-700/80 pointer-events-none z-30 transition-all duration-200 min-w-[170px]"
-                        >
-                          <div className="flex items-center justify-between border-b border-slate-800 pb-1.5 mb-1.5">
-                            <span className="font-bold text-slate-300 text-[11px]">{pt.fullLabel}</span>
-                            <span className="text-[9px] font-extrabold text-emerald-400 bg-emerald-500/20 border border-emerald-500/30 px-1.5 py-0.2 rounded">
-                              {pt.status}
-                            </span>
-                          </div>
-                          <div className="flex items-baseline justify-between gap-2">
-                            <div>
-                              <p className="text-[10px] text-slate-400 font-medium">Velocity Score</p>
-                              <p className="text-base font-black text-white leading-none mt-0.5">{pt.val}</p>
-                            </div>
-                            <div className="text-right">
-                              <p className="text-[10px] text-slate-400 font-medium">Activity</p>
-                              <p className="text-xs font-bold text-indigo-300 leading-none mt-0.5">{pt.count}</p>
-                            </div>
-                          </div>
-                          {/* Tooltip Arrow */}
-                          <div className="absolute -bottom-1.5 left-1/2 -translate-x-1/2 w-3 h-3 bg-slate-900 rotate-45 border-r border-b border-slate-700/80"></div>
-                        </div>
-                      );
-                    })()}
-                  </div>
-
-                  {/* X-Axis Labels */}
-                  <div className="flex justify-between text-[10px] font-bold text-slate-400 pt-2 px-2">
-                    {productivityTimeframe === 'WEEK' && ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Today'].map((d, i) => (
-                      <span 
-                        key={i} 
-                        onClick={() => setSelectedVelocityPoint(selectedVelocityPoint === i ? null : i)}
-                        className={`cursor-pointer transition-all ${
-                          (hoveredPointIndex === i || selectedVelocityPoint === i) 
-                            ? 'text-blue-600 font-extrabold scale-110' 
-                            : 'hover:text-slate-700'
-                        }`}
-                      >
-                        {d}
-                      </span>
-                    ))}
-                    {productivityTimeframe === 'TODAY' && ['09:00 AM', '11:00 AM', '01:00 PM', '03:00 PM', '05:00 PM', 'Live Now'].map((d, i) => (
-                      <span 
-                        key={i} 
-                        onClick={() => setSelectedVelocityPoint(selectedVelocityPoint === i ? null : i)}
-                        className={`cursor-pointer transition-all ${
-                          (hoveredPointIndex === i || selectedVelocityPoint === i) 
-                            ? 'text-blue-600 font-extrabold scale-110' 
-                            : 'hover:text-slate-700'
-                        }`}
-                      >
-                        {d}
-                      </span>
-                    ))}
-                    {productivityTimeframe === 'MONTH' && ['Week 1', 'Week 2', 'Week 3', 'Week 4'].map((d, i) => (
-                      <span 
-                        key={i} 
-                        onClick={() => setSelectedVelocityPoint(selectedVelocityPoint === i ? null : i)}
-                        className={`cursor-pointer transition-all ${
-                          (hoveredPointIndex === i || selectedVelocityPoint === i) 
-                            ? 'text-blue-600 font-extrabold scale-110' 
-                            : 'hover:text-slate-700'
-                        }`}
-                      >
-                        {d}
-                      </span>
-                    ))}
-                  </div>
-                </div>
-
-                {/* 2. Interactive Radial Donut Activity Gauge */}
-                <div className="lg:col-span-4 p-4 bg-slate-50/70 rounded-2xl border border-slate-200/80 flex flex-col items-center justify-between">
-                  <span className="text-[11px] font-bold text-slate-700 uppercase tracking-wider self-start">
-                    Task Status Breakdown
-                  </span>
-
-                  {/* Circular Radial Donut */}
-                  <div className="relative w-32 h-32 my-1 flex items-center justify-center">
-                    <svg viewBox="0 0 100 100" className="w-full h-full -rotate-90 transform overflow-visible">
-                      {/* Background Track */}
-                      <circle cx="50" cy="50" r="38" fill="none" stroke="#E2E8F0" strokeWidth="9" />
-                      
-                      {/* Completed Segment (Emerald: 60%) */}
-                      <circle
-                        cx="50"
-                        cy="50"
-                        r="38"
-                        fill="none"
-                        stroke="#10B981"
-                        strokeWidth={hoveredDonutSlice === 'COMPLETED' ? 12 : 9}
-                        strokeDasharray="143 238"
-                        strokeDashoffset="0"
-                        strokeLinecap="round"
-                        className="transition-all duration-200 cursor-pointer"
-                        onMouseEnter={() => setHoveredDonutSlice('COMPLETED')}
-                        onMouseLeave={() => setHoveredDonutSlice(null)}
-                      />
-
-                      {/* In Progress Segment (Blue: 20%) */}
-                      <circle
-                        cx="50"
-                        cy="50"
-                        r="38"
-                        fill="none"
-                        stroke="#2563EB"
-                        strokeWidth={hoveredDonutSlice === 'IN_PROGRESS' ? 12 : 9}
-                        strokeDasharray="47 238"
-                        strokeDashoffset="-148"
-                        strokeLinecap="round"
-                        className="transition-all duration-200 cursor-pointer"
-                        onMouseEnter={() => setHoveredDonutSlice('IN_PROGRESS')}
-                        onMouseLeave={() => setHoveredDonutSlice(null)}
-                      />
-
-                      {/* Assigned Segment (Amber: 20%) */}
-                      <circle
-                        cx="50"
-                        cy="50"
-                        r="38"
-                        fill="none"
-                        stroke="#F59E0B"
-                        strokeWidth={hoveredDonutSlice === 'ASSIGNED' ? 12 : 9}
-                        strokeDasharray="40 238"
-                        strokeDashoffset="-200"
-                        strokeLinecap="round"
-                        className="transition-all duration-200 cursor-pointer"
-                        onMouseEnter={() => setHoveredDonutSlice('ASSIGNED')}
-                        onMouseLeave={() => setHoveredDonutSlice(null)}
-                      />
-                    </svg>
-
-                    {/* Center Text Readout */}
-                    <div className="absolute inset-0 flex flex-col items-center justify-center text-center">
-                      <span className="text-lg font-black text-slate-900 leading-none">
-                        {hoveredDonutSlice === 'COMPLETED' ? '60%' : hoveredDonutSlice === 'IN_PROGRESS' ? '20%' : hoveredDonutSlice === 'ASSIGNED' ? '20%' : `${taskProgressPercent}%`}
-                      </span>
-                      <span className="text-[9px] font-bold text-slate-400 mt-0.5">
-                        {hoveredDonutSlice ? hoveredDonutSlice.replace('_', ' ') : 'Done'}
-                      </span>
-                    </div>
-                  </div>
-
-                  {/* Interactive Legend */}
-                  <div className="w-full space-y-1.5 pt-1 text-xs">
-                    <div 
-                      onMouseEnter={() => setHoveredDonutSlice('COMPLETED')}
-                      onMouseLeave={() => setHoveredDonutSlice(null)}
-                      className={`p-1.5 rounded-lg flex items-center justify-between transition cursor-pointer ${
-                        hoveredDonutSlice === 'COMPLETED' ? 'bg-emerald-100/70 font-bold' : 'hover:bg-slate-100'
-                      }`}
-                    >
-                      <div className="flex items-center gap-1.5">
-                        <span className="w-2.5 h-2.5 rounded-full bg-emerald-500"></span>
-                        <span className="text-slate-700 text-[11px]">Completed ({completedCount})</span>
-                      </div>
-                      <span className="font-bold text-emerald-700 text-[11px]">60%</span>
-                    </div>
-
-                    <div 
-                      onMouseEnter={() => setHoveredDonutSlice('IN_PROGRESS')}
-                      onMouseLeave={() => setHoveredDonutSlice(null)}
-                      className={`p-1.5 rounded-lg flex items-center justify-between transition cursor-pointer ${
-                        hoveredDonutSlice === 'IN_PROGRESS' ? 'bg-blue-100/70 font-bold' : 'hover:bg-slate-100'
-                      }`}
-                    >
-                      <div className="flex items-center gap-1.5">
-                        <span className="w-2.5 h-2.5 rounded-full bg-blue-600"></span>
-                        <span className="text-slate-700 text-[11px]">In Progress (1)</span>
-                      </div>
-                      <span className="font-bold text-blue-700 text-[11px]">20%</span>
-                    </div>
-
-                    <div 
-                      onMouseEnter={() => setHoveredDonutSlice('ASSIGNED')}
-                      onMouseLeave={() => setHoveredDonutSlice(null)}
-                      className={`p-1.5 rounded-lg flex items-center justify-between transition cursor-pointer ${
-                        hoveredDonutSlice === 'ASSIGNED' ? 'bg-amber-100/70 font-bold' : 'hover:bg-slate-100'
-                      }`}
-                    >
-                      <div className="flex items-center gap-1.5">
-                        <span className="w-2.5 h-2.5 rounded-full bg-amber-500"></span>
-                        <span className="text-slate-700 text-[11px]">Assigned New (1)</span>
-                      </div>
-                      <span className="font-bold text-amber-700 text-[11px]">20%</span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Right Column (4 cols): Birthday + Quick Broadcast */}
-          <div className="lg:col-span-4 space-y-6">
-            {/* Today's Birthday Widget */}
-            <div className="bg-white p-6 rounded-2xl border border-[#E2E8F0] shadow-xs space-y-3">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2 text-rose-600">
-                  <Gift className="w-4 h-4" />
-                  <h3 className="text-sm font-extrabold text-[#0F172A]">Today's Birthday</h3>
-                </div>
-                <span className="text-[10px] font-bold bg-rose-50 text-rose-700 px-2 py-0.5 rounded-full">Celebration</span>
-              </div>
-
-              <div className="p-4 bg-gradient-to-r from-rose-50 to-pink-50 rounded-xl border border-rose-100 flex items-center justify-between gap-3">
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-full bg-rose-200 flex items-center justify-center font-bold text-rose-700 text-xs border border-rose-300">
-                    VS
-                  </div>
-                  <div>
-                    <p className="text-xs font-bold text-[#0F172A]">Vikram Singh</p>
-                    <p className="text-[10px] text-slate-500">Service Manager (Kakinada)</p>
-                  </div>
-                </div>
-
-                <button
-                  onClick={() => setBirthdayWished(!birthdayWished)}
-                  className={`px-3 py-1.5 rounded-xl text-xs font-bold transition flex items-center gap-1 cursor-pointer ${
-                    birthdayWished ? 'bg-emerald-600 text-white' : 'bg-rose-600 hover:bg-rose-700 text-white shadow-xs'
-                  }`}
-                >
-                  <Heart className="w-3.5 h-3.5" />
-                  <span>{birthdayWished ? 'Wished!' : 'Wish 🎉'}</span>
-                </button>
-              </div>
-            </div>
-
-            {/* Latest Broadcast Preview */}
-            <div className="bg-white p-6 rounded-2xl border border-[#E2E8F0] shadow-xs space-y-3">
-              <div className="flex items-center justify-between">
-                <h3 className="text-sm font-extrabold text-[#0F172A]">Latest Company Broadcast</h3>
-                <span className="text-[10px] font-bold bg-amber-50 text-amber-700 px-2 py-0.5 rounded-full">New</span>
-              </div>
-              <div className="p-4 bg-[#F8FAFC] rounded-xl border border-[#E2E8F0] space-y-2">
-                <h4 className="text-xs font-bold text-[#0F172A]">{announcements[0].title}</h4>
-                <p className="text-[11px] text-[#475569] leading-relaxed line-clamp-2">
-                  {announcements[0].summary}
-                </p>
-                <button
-                  onClick={() => setSelectedAnnouncement(announcements[0])}
-                  className="text-xs font-bold text-[#2563EB] hover:underline pt-1 inline-flex items-center gap-1 cursor-pointer"
-                >
-                  <span>Read full notice</span>
-                  <ChevronRight className="w-3 h-3" />
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* ========================================================================= */}
-      {/* VIEW 2: MY DAILY TASKS WORKSPACE (CENTRAL EXECUTIVE ASSIGNMENT) */}
+      {/* VIEW 2: TASKS MODULE (NATIVE TMS TASK HUB) */}
       {/* ========================================================================= */}
       {activeTab === 'tasks' && (
-        <div className="bg-white p-6 sm:p-8 rounded-2xl border border-[#E2E8F0] shadow-xs space-y-6">
-          {/* Header & Filter Pills */}
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-            <div>
-              <div className="flex items-center gap-2">
-                <h2 className="text-xl font-extrabold text-[#0F172A]">Assigned Tasks & Operations Queue</h2>
-                <span className="px-2.5 py-0.5 rounded-full text-[10px] font-extrabold bg-blue-50 text-blue-700 border border-blue-200">
-                  {tasks.filter((t) => t.status === 'ASSIGNED').length} New Pending
-                </span>
-              </div>
-              <p className="text-xs text-[#475569] mt-0.5">
-                Tasks assigned by Executive Leadership (CEO, COO, CTO, HR). Review specs, accept tasks, and submit verified completion proof.
-              </p>
-            </div>
-
-            {/* Filter Pills */}
-            <div className="flex items-center gap-1 bg-slate-100 p-1 rounded-xl text-xs font-bold overflow-x-auto">
-              {(
-                [
-                  { id: 'ALL', label: `All (${tasks.length})` },
-                  { id: 'ASSIGNED', label: `Assigned (${tasks.filter((t) => t.status === 'ASSIGNED').length})` },
-                  { id: 'IN_PROGRESS', label: `In Progress (${tasks.filter((t) => t.status === 'IN_PROGRESS').length})` },
-                  { id: 'COMPLETED', label: `Completed (${tasks.filter((t) => t.status === 'COMPLETED').length})` },
-                  { id: 'HIGH', label: `High Priority` },
-                  { id: 'OVERDUE', label: `Overdue` },
-                ] as const
-              ).map((f) => (
-                <button
-                  key={f.id}
-                  onClick={() => setTaskFilter(f.id as any)}
-                  className={`px-3 py-1.5 rounded-lg transition cursor-pointer whitespace-nowrap ${
-                    taskFilter === f.id ? 'bg-white text-[#2563EB] shadow-xs' : 'text-[#475569] hover:text-[#0F172A]'
-                  }`}
-                >
-                  {f.label}
-                </button>
-              ))}
-            </div>
-          </div>
-
-          {/* Action Notification Toast */}
-          {taskActionToast && (
-            <div className="p-4 bg-blue-50 border border-blue-200 text-blue-900 rounded-2xl text-xs font-bold flex items-center justify-between animate-in fade-in slide-in-from-top-2 duration-200 shadow-xs">
-              <div className="flex items-center gap-2">
-                <CheckCircle2 className="w-4 h-4 text-blue-600" />
-                <span>{taskActionToast}</span>
-              </div>
-              <span className="text-[10px] bg-blue-100 text-blue-800 px-2 py-0.5 rounded-full font-bold">Updated</span>
-            </div>
-          )}
-
-          {/* Executive Leadership Dispatch Matrix Banner */}
-          <div className="p-4 sm:p-5 bg-gradient-to-r from-slate-50 via-blue-50/40 to-slate-50 rounded-2xl border border-slate-200/80 flex flex-col md:flex-row md:items-center justify-between gap-4">
-            <div className="flex items-center gap-3.5">
-              <div className="p-3 bg-white border border-slate-200 rounded-xl shadow-2xs shrink-0">
-                <ShieldCheck className="w-5 h-5 text-blue-600" />
-              </div>
-              <div>
-                <h4 className="text-xs font-black text-slate-900 uppercase tracking-wide">
-                  Executive Task Dispatch Matrix
-                </h4>
-                <p className="text-[11px] text-slate-500 mt-0.5">
-                  Tasks are assigned directly by <strong>CEO (Strategy)</strong>, <strong>COO (Operations)</strong>, <strong>CTO (Technology)</strong>, and <strong>HR (People Ops)</strong>.
-                </p>
-              </div>
-            </div>
-
-            <div className="flex items-center gap-2 shrink-0">
-              <span className="text-[10px] font-bold text-slate-400">Assigners:</span>
-              <div className="flex -space-x-2">
-                <img
-                  src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=crop&q=80&w=100"
-                  title="Sri Hari Kolusu (CEO)"
-                  className="w-7 h-7 rounded-full border-2 border-white ring-1 ring-amber-400"
-                  alt="CEO"
-                />
-                <img
-                  src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&q=80&w=100"
-                  title="Rajesh Varma (COO)"
-                  className="w-7 h-7 rounded-full border-2 border-white ring-1 ring-blue-400"
-                  alt="COO"
-                />
-                <img
-                  src="https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&q=80&w=100"
-                  title="Vikram Roy (CTO)"
-                  className="w-7 h-7 rounded-full border-2 border-white ring-1 ring-purple-400"
-                  alt="CTO"
-                />
-                <img
-                  src="https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&q=80&w=100"
-                  title="Pooja Reddy (Head of HR)"
-                  className="w-7 h-7 rounded-full border-2 border-white ring-1 ring-pink-400"
-                  alt="HR"
-                />
-              </div>
-            </div>
-          </div>
-
-          {/* Assigned Tasks List */}
-          <div className="space-y-3.5">
-            {filteredTasks.length === 0 ? (
-              <div className="p-12 text-center bg-slate-50 rounded-2xl border border-slate-200">
-                <CheckCircle2 className="w-8 h-8 text-slate-300 mx-auto mb-2" />
-                <h4 className="text-sm font-bold text-slate-700">No tasks in this view</h4>
-                <p className="text-xs text-slate-400 mt-1">Select another filter tab above or check back later.</p>
-              </div>
-            ) : (
-              filteredTasks.map((t) => {
-                const isExpanded = expandedTaskId === t.id;
-                const checklist = taskChecklistState[t.id] || [
-                  t.status === 'COMPLETED',
-                  t.status === 'COMPLETED',
-                  t.status === 'COMPLETED',
-                ];
-                const completedStepsCount = checklist.filter(Boolean).length;
-                const progressPct = Math.round((completedStepsCount / 3) * 100);
-
-                return (
-                  <div
-                    key={t.id}
-                    className={`rounded-2xl border transition-all duration-300 transform ${
-                      t.status === 'COMPLETED'
-                        ? 'bg-slate-50/70 border-slate-200 border-l-4 border-l-emerald-500 hover:shadow-md'
-                        : t.status === 'IN_PROGRESS'
-                        ? 'bg-white border-blue-200 border-l-4 border-l-blue-600 shadow-2xs hover:shadow-lg hover:-translate-y-0.5 hover:border-blue-300'
-                        : 'bg-white border-slate-200 border-l-4 border-l-amber-500 hover:shadow-lg hover:-translate-y-0.5 hover:border-amber-300'
-                    }`}
-                  >
-                    {/* Main Task Summary Row (Clickable) */}
-                    <div
-                      onClick={() => setExpandedTaskId(isExpanded ? null : t.id)}
-                      className="p-5 cursor-pointer select-none"
-                    >
-                      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
-                        {/* Left: Task Info & Assigner */}
-                        <div className="space-y-2.5 flex-1">
-                          {/* Assigner & Badge Row */}
-                          <div className="flex items-center gap-2 flex-wrap">
-                            <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-slate-100/90 border border-slate-200/80 shadow-2xs">
-                              <img
-                                src={t.assignedBy.avatar}
-                                alt={t.assignedBy.name}
-                                className="w-4 h-4 rounded-full object-cover ring-1 ring-slate-300"
-                              />
-                              <span className="text-[11px] font-bold text-slate-800">
-                                Assigned by {t.assignedBy.name}
-                              </span>
-                              <span className="text-[10px] text-slate-500 font-semibold">
-                                ({t.assignedBy.role.split('(')[0].trim()})
-                              </span>
-                            </div>
-
-                            {/* Click to Copy Task ID */}
-                            <button
-                              type="button"
-                              onClick={(e) => handleCopyTaskId(e, t.id)}
-                              className="font-mono text-xs font-bold text-slate-700 bg-slate-100 hover:bg-blue-50 hover:text-blue-700 px-2 py-0.5 rounded-md border border-slate-200 transition cursor-pointer flex items-center gap-1"
-                              title="Click to copy task ID"
-                            >
-                              <span>{t.id}</span>
-                              {copiedTaskId === t.id ? (
-                                <span className="text-[9px] text-emerald-600 font-black">✓ Copied</span>
-                              ) : (
-                                <span className="text-[10px] text-slate-400">📋</span>
-                              )}
-                            </button>
-
-                            <span className="text-[10px] px-2 py-0.5 bg-slate-100 text-[#475569] rounded-md font-bold">
-                              {t.tag}
-                            </span>
-
-                            {t.isOverdue && t.status !== 'COMPLETED' && (
-                              <span className="text-[9px] px-2 py-0.5 rounded font-black bg-rose-50 text-rose-600 border border-rose-200 animate-pulse">
-                                OVERDUE
-                              </span>
-                            )}
-
-                            <span
-                              className={`text-[9px] font-black uppercase px-2 py-0.5 rounded-md ${
-                                t.priority === 'HIGH' || t.priority === 'URGENT'
-                                  ? 'bg-rose-100 text-rose-800 border border-rose-200'
-                                  : t.priority === 'MEDIUM'
-                                  ? 'bg-amber-100 text-amber-800 border border-amber-200'
-                                  : 'bg-slate-100 text-slate-700'
-                              }`}
-                            >
-                              {t.priority} PRIORITY
-                            </span>
-                          </div>
-
-                          {/* Title & Description */}
-                          <div>
-                            <h3
-                              className={`text-sm font-extrabold transition flex items-center gap-2 ${
-                                t.status === 'COMPLETED' ? 'line-through text-slate-400' : 'text-[#0F172A] hover:text-blue-600'
-                              }`}
-                            >
-                              <span>{t.title}</span>
-                              <span className="text-xs text-slate-400 font-normal no-underline">
-                                {isExpanded ? '▲' : '▼'}
-                              </span>
-                            </h3>
-                            <p className="text-xs text-[#475569] mt-1 leading-relaxed line-clamp-2">
-                              {t.description}
-                            </p>
-                          </div>
-
-                          {/* Meta: Deadline & Interactive Attached Document Chips */}
-                          <div className="flex items-center gap-4 text-xs pt-1 flex-wrap">
-                            <div className="flex items-center gap-1.5 text-slate-600 font-medium">
-                              <Clock className="w-3.5 h-3.5 text-slate-400" />
-                              <span>Deadline: <strong className="text-slate-900">{t.deadline}</strong></span>
-                            </div>
-
-                            {t.attachedDocuments && t.attachedDocuments.length > 0 && (
-                              <button
-                                type="button"
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  setSelectedDocumentForView(t.attachedDocuments![0]);
-                                }}
-                                className="flex items-center gap-1.5 text-blue-600 font-bold hover:text-blue-800 bg-blue-50/70 hover:bg-blue-100/80 px-2.5 py-0.5 rounded-lg border border-blue-200/80 transition cursor-pointer"
-                                title="Click to view first reference document in lightbox"
-                              >
-                                <FileText className="w-3.5 h-3.5" />
-                                <span>{t.attachedDocuments.length} Reference Document{t.attachedDocuments.length > 1 ? 's' : ''}</span>
-                                <span className="text-[10px] text-blue-500 font-normal underline">Preview 👁️</span>
-                              </button>
-                            )}
-
-                            {t.status === 'IN_PROGRESS' && t.acceptedAt && (
-                              <span className="text-[11px] text-emerald-600 font-semibold flex items-center gap-1">
-                                <span>✓ Accepted {t.acceptedAt}</span>
-                                <span className="text-[10px] bg-emerald-50 text-emerald-700 px-1.5 py-0.2 rounded border border-emerald-200">
-                                  {progressPct}% Done
-                                </span>
-                              </span>
-                            )}
-
-                            {t.status === 'COMPLETED' && t.completionProof && (
-                              <span className="text-[11px] text-emerald-700 font-bold bg-emerald-50 px-2 py-0.5 rounded-md border border-emerald-200">
-                                ✓ Proof Submitted {t.completionProof.submittedAt}
-                              </span>
-                            )}
-                          </div>
-                        </div>
-
-                        {/* Right: Status Pill & Action Buttons */}
-                        <div className="flex flex-row lg:flex-col items-end justify-between lg:justify-center gap-2.5 shrink-0 pt-2 lg:pt-0 border-t lg:border-t-0 border-slate-100">
-                          <span
-                            className={`text-[10px] font-black uppercase tracking-wider px-2.5 py-1 rounded-full border ${
-                              t.status === 'COMPLETED'
-                                ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
-                                : t.status === 'IN_PROGRESS'
-                                ? 'bg-blue-50 text-blue-700 border-blue-200'
-                                : 'bg-amber-50 text-amber-700 border-amber-200'
-                            }`}
-                          >
-                            {t.status === 'ASSIGNED' ? 'Pending Review' : t.status.replace('_', ' ')}
-                          </span>
-
-                          <div className="flex items-center gap-2">
-                            {/* If ASSIGNED: Review & Accept */}
-                            {t.status === 'ASSIGNED' && (
-                              <>
-                                <button
-                                  type="button"
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    setSelectedTaskForReview(t);
-                                  }}
-                                  className="px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-bold transition cursor-pointer flex items-center gap-1 hover:scale-105 active:scale-95"
-                                >
-                                  <Eye className="w-3.5 h-3.5" />
-                                  <span>Details</span>
-                                </button>
-                                <button
-                                  type="button"
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    handleAcceptTask(t.id);
-                                  }}
-                                  className="px-3.5 py-1.5 bg-[#2563EB] hover:bg-blue-700 text-white rounded-xl text-xs font-bold transition cursor-pointer flex items-center gap-1.5 shadow-xs hover:scale-105 active:scale-95"
-                                >
-                                  <Check className="w-3.5 h-3.5" />
-                                  <span>Accept Task</span>
-                                </button>
-                              </>
-                            )}
-
-                            {/* If IN_PROGRESS: Submit Proof & Complete */}
-                            {t.status === 'IN_PROGRESS' && (
-                              <>
-                                <button
-                                  type="button"
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    setSelectedTaskForReview(t);
-                                  }}
-                                  className="px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-bold transition cursor-pointer flex items-center gap-1 hover:scale-105 active:scale-95"
-                                >
-                                  <Eye className="w-3.5 h-3.5" />
-                                  <span>Details</span>
-                                </button>
-                                <button
-                                  type="button"
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    handleOpenProofModal(t);
-                                  }}
-                                  className="px-3.5 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold transition cursor-pointer flex items-center gap-1.5 shadow-xs hover:scale-105 active:scale-95"
-                                >
-                                  <Upload className="w-3.5 h-3.5" />
-                                  <span>Submit Proof & Complete</span>
-                                </button>
-                              </>
-                            )}
-
-                            {/* If COMPLETED: View Proof */}
-                            {t.status === 'COMPLETED' && (
-                              <button
-                                type="button"
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  setSelectedTaskForReview(t);
-                                }}
-                                className="px-3.5 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-800 rounded-xl text-xs font-bold transition cursor-pointer flex items-center gap-1.5 border border-slate-200 hover:scale-105 active:scale-95"
-                              >
-                                <FileText className="w-3.5 h-3.5 text-emerald-600" />
-                                <span>View Submitted Proof</span>
-                              </button>
-                            )}
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* Interactive Expandable Details & Checklist Drawer */}
-                    {isExpanded && (
-                      <div className="px-5 pb-5 pt-3 border-t border-slate-200/80 bg-slate-50/50 space-y-4 animate-in fade-in slide-in-from-top-2 duration-200 rounded-b-2xl">
-                        {/* 1. Live Milestone Checklist */}
-                        <div className="p-4 bg-white rounded-xl border border-slate-200 space-y-2.5 shadow-2xs">
-                          <div className="flex items-center justify-between">
-                            <div className="flex items-center gap-2">
-                              <CheckCircle2 className="w-4 h-4 text-blue-600" />
-                              <h4 className="text-xs font-extrabold text-slate-900 uppercase tracking-wide">
-                                Task Execution Checklist
-                              </h4>
-                            </div>
-                            <span className="text-[11px] font-bold text-blue-600 bg-blue-50 px-2 py-0.5 rounded-full border border-blue-200">
-                              {completedStepsCount} of 3 Milestones Complete ({progressPct}%)
-                            </span>
-                          </div>
-
-                          {/* Progress bar */}
-                          <div className="w-full bg-slate-100 h-2 rounded-full overflow-hidden">
-                            <div
-                              className="bg-blue-600 h-full rounded-full transition-all duration-300"
-                              style={{ width: `${progressPct}%` }}
-                            ></div>
-                          </div>
-
-                          {/* Interactive Checklist Items */}
-                          <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 pt-1 text-xs">
-                            {[
-                              { label: '1. Review Specs & Docs', sub: 'Study attached SOP guides' },
-                              { label: '2. Field/Technical Execution', sub: 'Conduct diagnostic checks' },
-                              { label: '3. Submit Proof Artifacts', sub: 'Attach verified logs' },
-                            ].map((step, idx) => (
-                              <div
-                                key={idx}
-                                onClick={(e) => toggleTaskChecklist(e, t.id, idx)}
-                                className={`p-2.5 rounded-lg border transition cursor-pointer flex items-start gap-2 ${
-                                  checklist[idx]
-                                    ? 'bg-emerald-50/70 border-emerald-200 text-emerald-900'
-                                    : 'bg-slate-50 border-slate-200 hover:bg-slate-100 text-slate-700'
-                                }`}
-                              >
-                                <input
-                                  type="checkbox"
-                                  checked={checklist[idx]}
-                                  onChange={() => {}}
-                                  className="mt-0.5 w-4 h-4 accent-blue-600 cursor-pointer rounded"
-                                />
-                                <div>
-                                  <p className={`font-bold text-[11px] ${checklist[idx] ? 'line-through text-emerald-800' : ''}`}>
-                                    {step.label}
-                                  </p>
-                                  <p className="text-[10px] text-slate-500">{step.sub}</p>
-                                </div>
-                              </div>
-                            ))}
-                          </div>
-                        </div>
-
-                        {/* 2. Interactive Reference Documents Shelf */}
-                        {t.attachedDocuments && t.attachedDocuments.length > 0 && (
-                          <div className="space-y-2">
-                            <h4 className="text-[11px] font-extrabold text-slate-700 uppercase tracking-wider flex items-center gap-1.5">
-                              <FileText className="w-3.5 h-3.5 text-blue-600" />
-                              <span>Attached Reference Documents (Click to Read):</span>
-                            </h4>
-                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                              {t.attachedDocuments.map((doc, docIdx) => (
-                                <div
-                                  key={docIdx}
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    setSelectedDocumentForView(doc);
-                                  }}
-                                  className="p-3 bg-white hover:bg-blue-50/60 rounded-xl border border-slate-200 hover:border-blue-300 transition cursor-pointer flex items-center justify-between gap-2 shadow-2xs group"
-                                >
-                                  <div className="flex items-center gap-2.5 min-w-0">
-                                    <div className="p-2 bg-blue-100/70 text-blue-700 rounded-lg group-hover:scale-105 transition shrink-0">
-                                      <FileText className="w-4 h-4" />
-                                    </div>
-                                    <div className="min-w-0">
-                                      <p className="text-xs font-bold text-slate-900 truncate group-hover:text-blue-700">
-                                        {doc.name}
-                                      </p>
-                                      <p className="text-[10px] text-slate-500">
-                                        {doc.type} • {doc.size}
-                                      </p>
-                                    </div>
-                                  </div>
-                                  <span className="text-[11px] font-bold text-blue-600 group-hover:underline shrink-0">
-                                    Read 👁️
-                                  </span>
-                                </div>
-                              ))}
-                            </div>
-                          </div>
-                        )}
-
-                        {/* 3. Submitted Completion Proof Box (if completed) */}
-                        {t.status === 'COMPLETED' && t.completionProof && (
-                          <div className="p-4 bg-emerald-50/60 rounded-xl border border-emerald-200 space-y-2">
-                            <div className="flex items-center justify-between">
-                              <span className="text-xs font-black text-emerald-800 flex items-center gap-1.5">
-                                <CheckCircle2 className="w-4 h-4 text-emerald-600" />
-                                Verified Completion Proof
-                              </span>
-                              <span className="text-[10px] text-emerald-700 font-bold bg-white px-2 py-0.5 rounded border border-emerald-200">
-                                Logged: {t.completionProof.hoursSpent || '2.0 hrs'}
-                              </span>
-                            </div>
-                            <p className="text-xs text-emerald-900 leading-relaxed font-medium">
-                              "{t.completionProof.description}"
-                            </p>
-                            {t.completionProof.uploadedDocuments && t.completionProof.uploadedDocuments.length > 0 && (
-                              <div className="flex items-center gap-2 pt-1">
-                                <span className="text-[10px] font-bold text-emerald-800">Proof Files:</span>
-                                {t.completionProof.uploadedDocuments.map((doc, pIdx) => (
-                                  <button
-                                    key={pIdx}
-                                    type="button"
-                                    onClick={(e) => {
-                                      e.stopPropagation();
-                                      setSelectedDocumentForView(doc);
-                                    }}
-                                    className="px-2.5 py-1 bg-white hover:bg-emerald-100 text-emerald-800 rounded-lg text-xs font-bold border border-emerald-200 flex items-center gap-1 transition cursor-pointer"
-                                  >
-                                    <FileText className="w-3 h-3 text-emerald-600" />
-                                    <span>{doc.name} (Preview 👁️)</span>
-                                  </button>
-                                ))}
-                              </div>
-                            )}
-                          </div>
-                        )}
-                      </div>
-                    )}
-                  </div>
-                );
-              })
-            )}
-          </div>
-        </div>
+        <TmsTasksView />
       )}
 
       {/* ========================================================================= */}
@@ -3178,519 +2425,31 @@ export default function EmployeeDashboardPage() {
 
 
       {/* ========================================================================= */}
-      {/* VIEW 5: LEAVE & TIME OFF */}
+      {/* VIEW 5: LEAVE MANAGEMENT (NATIVE TMS LEAVE MODULE) */}
       {/* ========================================================================= */}
       {activeTab === 'leave' && (
-        <div className="bg-white p-6 sm:p-8 rounded-2xl border border-[#E2E8F0] shadow-xs space-y-6">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-            <div>
-              <h2 className="text-xl font-extrabold text-[#0F172A]">Leave Balance & Time Off</h2>
-              <p className="text-xs text-[#475569] mt-0.5">Track your available paid time off and submit leave applications</p>
-            </div>
-            <button
-              onClick={() => setIsLeaveModalOpen(true)}
-              className="px-4 py-2 bg-[#2563EB] hover:bg-blue-700 text-white rounded-xl text-xs font-bold transition cursor-pointer flex items-center gap-2 shadow-xs"
-            >
-              <Plus className="w-4 h-4" />
-              <span>Apply for Leave</span>
-            </button>
-          </div>
-
-          {/* Leave Balances (Interactive Radial Meter Cards) */}
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
-            {/* Casual Leave Ring Meter */}
-            <div
-              onClick={() => setSelectedLeaveCategory(selectedLeaveCategory === 'CASUAL' ? null : 'CASUAL')}
-              className={`p-5 rounded-2xl border transition-all duration-200 cursor-pointer transform hover:-translate-y-0.5 hover:shadow-md flex items-center justify-between ${
-                selectedLeaveCategory === 'CASUAL'
-                  ? 'bg-blue-50/50 border-blue-300 ring-2 ring-blue-200'
-                  : 'bg-[#F8FAFC] border-[#E2E8F0] hover:border-blue-200'
-              }`}
-            >
-              <div className="space-y-1">
-                <span className="text-xs font-bold text-[#94A3B8] uppercase">Casual Leave (CL)</span>
-                <p className="text-3xl font-black text-[#0F172A]">{leaveBalances.casual.available} Days</p>
-                <p className="text-xs text-[#475569]">Used: {leaveBalances.casual.used} of {leaveBalances.casual.total} allocated</p>
-                <div className="flex items-center gap-2 mt-1">
-                  <span className="text-[10px] font-bold text-blue-600 bg-blue-50 px-2 py-0.5 rounded-full border border-blue-200">
-                    50% Remaining
-                  </span>
-                  <span className="text-[10px] text-slate-400 font-bold">
-                    {selectedLeaveCategory === 'CASUAL' ? '▲ Less' : '▼ Details'}
-                  </span>
-                </div>
-              </div>
-
-              {/* Radial Meter */}
-              <div className="relative w-16 h-16 shrink-0">
-                <svg viewBox="0 0 36 36" className="w-full h-full -rotate-90">
-                  <circle cx="18" cy="18" r="14" fill="none" stroke="#E2E8F0" strokeWidth="3.5" />
-                  <circle
-                    cx="18"
-                    cy="18"
-                    r="14"
-                    fill="none"
-                    stroke="#2563EB"
-                    strokeWidth="3.5"
-                    strokeDasharray="88"
-                    strokeDashoffset="44"
-                    strokeLinecap="round"
-                    className="transition-all duration-500"
-                  />
-                </svg>
-                <div className="absolute inset-0 flex items-center justify-center text-[10px] font-black text-[#2563EB]">
-                  50%
-                </div>
-              </div>
-            </div>
-
-            {/* Sick Leave Ring Meter */}
-            <div
-              onClick={() => setSelectedLeaveCategory(selectedLeaveCategory === 'SICK' ? null : 'SICK')}
-              className={`p-5 rounded-2xl border transition-all duration-200 cursor-pointer transform hover:-translate-y-0.5 hover:shadow-md flex items-center justify-between ${
-                selectedLeaveCategory === 'SICK'
-                  ? 'bg-emerald-50/50 border-emerald-300 ring-2 ring-emerald-200'
-                  : 'bg-[#F8FAFC] border-[#E2E8F0] hover:border-emerald-200'
-              }`}
-            >
-              <div className="space-y-1">
-                <span className="text-xs font-bold text-[#94A3B8] uppercase">Sick Leave (SL)</span>
-                <p className="text-3xl font-black text-[#0F172A]">{leaveBalances.sick.available} Days</p>
-                <p className="text-xs text-[#475569]">Used: {leaveBalances.sick.used} of {leaveBalances.sick.total} allocated</p>
-                <div className="flex items-center gap-2 mt-1">
-                  <span className="text-[10px] font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200">
-                    87.5% Remaining
-                  </span>
-                  <span className="text-[10px] text-slate-400 font-bold">
-                    {selectedLeaveCategory === 'SICK' ? '▲ Less' : '▼ Details'}
-                  </span>
-                </div>
-              </div>
-
-              {/* Radial Meter */}
-              <div className="relative w-16 h-16 shrink-0">
-                <svg viewBox="0 0 36 36" className="w-full h-full -rotate-90">
-                  <circle cx="18" cy="18" r="14" fill="none" stroke="#E2E8F0" strokeWidth="3.5" />
-                  <circle
-                    cx="18"
-                    cy="18"
-                    r="14"
-                    fill="none"
-                    stroke="#10B981"
-                    strokeWidth="3.5"
-                    strokeDasharray="88"
-                    strokeDashoffset="11"
-                    strokeLinecap="round"
-                    className="transition-all duration-500"
-                  />
-                </svg>
-                <div className="absolute inset-0 flex items-center justify-center text-[10px] font-black text-[#10B981]">
-                  88%
-                </div>
-              </div>
-            </div>
-
-            {/* Earned Leave Ring Meter */}
-            <div
-              onClick={() => setSelectedLeaveCategory(selectedLeaveCategory === 'EARNED' ? null : 'EARNED')}
-              className={`p-5 rounded-2xl border transition-all duration-200 cursor-pointer transform hover:-translate-y-0.5 hover:shadow-md flex items-center justify-between ${
-                selectedLeaveCategory === 'EARNED'
-                  ? 'bg-indigo-50/50 border-indigo-300 ring-2 ring-indigo-200'
-                  : 'bg-[#F8FAFC] border-[#E2E8F0] hover:border-indigo-200'
-              }`}
-            >
-              <div className="space-y-1">
-                <span className="text-xs font-bold text-[#94A3B8] uppercase">Earned Leave (EL)</span>
-                <p className="text-3xl font-black text-[#0F172A]">{leaveBalances.earned.available} Days</p>
-                <p className="text-xs text-[#475569]">Used: {leaveBalances.earned.used} of {leaveBalances.earned.total} allocated</p>
-                <div className="flex items-center gap-2 mt-1">
-                  <span className="text-[10px] font-bold text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded-full border border-indigo-200">
-                    77.8% Remaining
-                  </span>
-                  <span className="text-[10px] text-slate-400 font-bold">
-                    {selectedLeaveCategory === 'EARNED' ? '▲ Less' : '▼ Details'}
-                  </span>
-                </div>
-              </div>
-
-              {/* Radial Meter */}
-              <div className="relative w-16 h-16 shrink-0">
-                <svg viewBox="0 0 36 36" className="w-full h-full -rotate-90">
-                  <circle cx="18" cy="18" r="14" fill="none" stroke="#E2E8F0" strokeWidth="3.5" />
-                  <circle
-                    cx="18"
-                    cy="18"
-                    r="14"
-                    fill="none"
-                    stroke="#6366F1"
-                    strokeWidth="3.5"
-                    strokeDasharray="88"
-                    strokeDashoffset="20"
-                    strokeLinecap="round"
-                    className="transition-all duration-500"
-                  />
-                </svg>
-                <div className="absolute inset-0 flex items-center justify-center text-[10px] font-black text-[#6366F1]">
-                  78%
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Interactive Leave Policy Drawer (Visible when a balance card is clicked) */}
-          {selectedLeaveCategory && (
-            <div className="p-4 bg-slate-50 rounded-2xl border border-slate-200 animate-in fade-in slide-in-from-top-2 duration-150 space-y-2">
-              <div className="flex items-center justify-between">
-                <h4 className="text-xs font-black text-slate-900 uppercase tracking-wide flex items-center gap-2">
-                  <CalendarRange className="w-4 h-4 text-blue-600" />
-                  {selectedLeaveCategory === 'CASUAL' && 'Casual Leave (CL) Quota & Guidelines'}
-                  {selectedLeaveCategory === 'SICK' && 'Sick Leave (SL) Medical Policy & Encashment'}
-                  {selectedLeaveCategory === 'EARNED' && 'Earned Leave (EL) Vacation Accrual Rules'}
-                </h4>
-                <button
-                  type="button"
-                  onClick={() => setSelectedLeaveCategory(null)}
-                  className="text-xs font-bold text-slate-400 hover:text-slate-600 cursor-pointer"
-                >
-                  ✕ Close
-                </button>
-              </div>
-
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-1 text-xs">
-                {selectedLeaveCategory === 'CASUAL' && (
-                  <>
-                    <div className="p-3 bg-white rounded-xl border border-slate-200"><p className="text-slate-500 text-[10px]">Annual Allowance</p><p className="font-bold text-slate-900 text-sm">8 Days Total</p></div>
-                    <div className="p-3 bg-white rounded-xl border border-slate-200"><p className="text-slate-500 text-[10px]">Notice Period</p><p className="font-bold text-blue-600 text-sm">24h Prior Notice</p></div>
-                    <div className="p-3 bg-white rounded-xl border border-slate-200"><p className="text-slate-500 text-[10px]">Lapse Policy</p><p className="font-bold text-slate-900 text-sm">Resets Dec 31</p></div>
-                  </>
-                )}
-                {selectedLeaveCategory === 'SICK' && (
-                  <>
-                    <div className="p-3 bg-white rounded-xl border border-slate-200"><p className="text-slate-500 text-[10px]">Annual Allowance</p><p className="font-bold text-slate-900 text-sm">9 Days Total</p></div>
-                    <div className="p-3 bg-white rounded-xl border border-slate-200"><p className="text-slate-500 text-[10px]">Medical Certificate</p><p className="font-bold text-emerald-600 text-sm">Required for &gt; 2 Days</p></div>
-                    <div className="p-3 bg-white rounded-xl border border-slate-200"><p className="text-slate-500 text-[10px]">Unused Balance</p><p className="font-bold text-slate-900 text-sm">Carry Forward Allowed</p></div>
-                  </>
-                )}
-                {selectedLeaveCategory === 'EARNED' && (
-                  <>
-                    <div className="p-3 bg-white rounded-xl border border-slate-200"><p className="text-slate-500 text-[10px]">Annual Allowance</p><p className="font-bold text-slate-900 text-sm">15 Days Accrued</p></div>
-                    <div className="p-3 bg-white rounded-xl border border-slate-200"><p className="text-slate-500 text-[10px]">Advance Planning</p><p className="font-bold text-indigo-600 text-sm">14 Days Prior Approval</p></div>
-                    <div className="p-3 bg-white rounded-xl border border-slate-200"><p className="text-slate-500 text-[10px]">Encashment</p><p className="font-bold text-slate-900 text-sm">Max 30 Days Cumulative</p></div>
-                  </>
-                )}
-              </div>
-            </div>
-          )}
-
-          {/* Recent Leave History (Interactive Expandable Cards) */}
-          <div className="space-y-3.5 pt-2">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-              <div>
-                <h3 className="text-sm font-extrabold text-[#0F172A]">Recent Leave Requests & Status</h3>
-                <p className="text-xs text-slate-500">Click any card to inspect approval timeline, reason, and attached certificates</p>
-              </div>
-
-              {/* Leave Filter Tabs */}
-              <div className="flex items-center gap-1 bg-slate-100 p-1 rounded-xl text-xs font-bold overflow-x-auto self-start sm:self-auto">
-                {(
-                  [
-                    { id: 'ALL', label: `All (${recentLeaveRequestsList.length})` },
-                    { id: 'CASUAL', label: 'Casual' },
-                    { id: 'SICK', label: 'Sick' },
-                    { id: 'EARNED', label: 'Earned' },
-                  ] as const
-                ).map((f) => (
-                  <button
-                    key={f.id}
-                    type="button"
-                    onClick={() => setLeaveFilterTab(f.id as any)}
-                    className={`px-3 py-1 rounded-lg transition cursor-pointer text-xs ${
-                      leaveFilterTab === f.id ? 'bg-white text-blue-600 shadow-2xs' : 'text-slate-600 hover:text-slate-900'
-                    }`}
-                  >
-                    {f.label}
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            <div className="space-y-3">
-              {recentLeaveRequestsList
-                .filter((r) => leaveFilterTab === 'ALL' || r.category === leaveFilterTab)
-                .map((req) => {
-                  const isExpanded = expandedLeaveId === req.id;
-                  return (
-                    <div
-                      key={req.id}
-                      className={`rounded-2xl border transition-all duration-300 transform ${
-                        req.status === 'APPROVED'
-                          ? 'bg-white border-slate-200 border-l-4 border-l-emerald-500 hover:shadow-lg hover:-translate-y-0.5'
-                          : 'bg-white border-slate-200 border-l-4 border-l-amber-500 hover:shadow-lg hover:-translate-y-0.5'
-                      }`}
-                    >
-                      {/* Clickable Header Row */}
-                      <div
-                        onClick={() => setExpandedLeaveId(isExpanded ? null : req.id)}
-                        className="p-5 cursor-pointer select-none"
-                      >
-                        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-                          <div className="space-y-1 flex-1">
-                            <div className="flex items-center gap-2 flex-wrap">
-                              <span className="font-mono text-xs font-bold text-slate-700 bg-slate-100 px-2 py-0.5 rounded-md border border-slate-200">
-                                {req.id}
-                              </span>
-                              <span className="text-[10px] px-2 py-0.5 bg-blue-50 text-blue-700 font-bold rounded-md border border-blue-200">
-                                {req.category} LEAVE
-                              </span>
-                              <span className="text-[11px] text-slate-400 font-medium">Applied {req.appliedOn}</span>
-                            </div>
-
-                            <h4 className="text-sm font-extrabold text-[#0F172A] hover:text-blue-600 transition flex items-center gap-2">
-                              <span>{req.title}</span>
-                              <span className="text-xs text-slate-400 font-normal">{isExpanded ? '▲' : '▼'}</span>
-                            </h4>
-
-                            <div className="flex items-center gap-3 text-xs text-slate-500 pt-0.5">
-                              <span className="font-semibold text-slate-800 flex items-center gap-1">
-                                <Calendar className="w-3.5 h-3.5 text-blue-600" />
-                                {req.dates}
-                              </span>
-                              <span>•</span>
-                              <span>{req.duration}</span>
-                            </div>
-                          </div>
-
-                          <div className="flex items-center gap-3 shrink-0">
-                            <span className="px-3 py-1 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 font-black text-xs">
-                              {req.status}
-                            </span>
-                            <span className="text-xs font-bold text-blue-600 bg-blue-50 px-2.5 py-1 rounded-xl border border-blue-100">
-                              {isExpanded ? 'Hide Details' : 'View Audit & Slip 👁️'}
-                            </span>
-                          </div>
-                        </div>
-                      </div>
-
-                      {/* Interactive Expandable Drawer */}
-                      {isExpanded && (
-                        <div className="px-5 pb-5 pt-3 border-t border-slate-200/80 bg-slate-50/50 space-y-4 animate-in fade-in slide-in-from-top-2 duration-200 rounded-b-2xl text-xs">
-                          {/* 1. Reason Note */}
-                          <div className="p-3.5 bg-white rounded-xl border border-slate-200 space-y-1">
-                            <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Leave Justification & Scope</span>
-                            <p className="text-xs text-slate-800 leading-relaxed font-medium">"{req.reason}"</p>
-                          </div>
-
-                          {/* 2. Approval Audit Timeline */}
-                          <div className="p-4 bg-white rounded-xl border border-slate-200 space-y-3">
-                            <div className="flex items-center justify-between">
-                              <span className="text-xs font-black text-slate-900 uppercase tracking-wide flex items-center gap-1.5">
-                                <ShieldCheck className="w-4 h-4 text-emerald-600" />
-                                Multi-Step Executive Approval Audit
-                              </span>
-                              <span className="text-[10px] font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200">
-                                ✓ Fully Authorized
-                              </span>
-                            </div>
-
-                            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                              {req.timeline.map((step, sIdx) => (
-                                <div key={sIdx} className="p-2.5 rounded-lg bg-slate-50 border border-slate-200 flex items-start gap-2">
-                                  <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
-                                  <div>
-                                    <p className="font-bold text-[11px] text-slate-900">{step.label}</p>
-                                    <p className="text-[10px] text-slate-500">{step.time}</p>
-                                  </div>
-                                </div>
-                              ))}
-                            </div>
-                          </div>
-
-                          {/* 3. Approver Contact & Document Shelf */}
-                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                            <div className="p-3 bg-white rounded-xl border border-slate-200 flex items-center gap-3">
-                              <img
-                                src={req.approvedBy.avatar}
-                                alt={req.approvedBy.name}
-                                className="w-9 h-9 rounded-full object-cover ring-1 ring-slate-200"
-                              />
-                              <div>
-                                <span className="text-[10px] text-slate-400 font-bold uppercase">Authorized By</span>
-                                <p className="font-bold text-slate-900 text-xs">{req.approvedBy.name}</p>
-                                <p className="text-[10px] text-slate-500">{req.approvedBy.role}</p>
-                              </div>
-                            </div>
-
-                            {req.attachedDoc && (
-                              <div
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  setSelectedDocumentForView(req.attachedDoc);
-                                }}
-                                className="p-3 bg-white hover:bg-blue-50/60 rounded-xl border border-slate-200 hover:border-blue-300 transition cursor-pointer flex items-center justify-between gap-2 shadow-2xs group"
-                              >
-                                <div className="flex items-center gap-2 min-w-0">
-                                  <FileText className="w-4 h-4 text-blue-600 shrink-0 group-hover:scale-105 transition" />
-                                  <div className="min-w-0">
-                                    <p className="text-xs font-bold text-slate-900 truncate group-hover:text-blue-700">{req.attachedDoc.name}</p>
-                                    <p className="text-[10px] text-slate-500">{req.attachedDoc.size}</p>
-                                  </div>
-                                </div>
-                                <span className="text-[11px] font-bold text-blue-600 group-hover:underline shrink-0">
-                                  Read 👁️
-                                </span>
-                              </div>
-                            )}
-                          </div>
-                        </div>
-                      )}
-                    </div>
-                  );
-                })}
-            </div>
-          </div>
-        </div>
+        <TmsEmployeeLeaveView />
       )}
 
       {/* ========================================================================= */}
-      {/* VIEW 6: DAILY LOGOUT REPORTS */}
+      {/* VIEW 6: LOGOUT REPORTS & SESSION HISTORY (NATIVE TMS MODULE) */}
       {/* ========================================================================= */}
       {activeTab === 'logout-reports' && (
-        <div className="bg-white p-6 sm:p-8 rounded-2xl border border-[#E2E8F0] shadow-xs space-y-6">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-            <div>
-              <h2 className="text-xl font-extrabold text-[#0F172A]">Daily Logout Reports & EOD Handover</h2>
-              <p className="text-xs text-[#475569] mt-0.5">End-of-day summary submitted to reporting manager and operations desk</p>
-            </div>
-            <div className="flex items-center gap-2 px-3.5 py-2 bg-blue-50 border border-blue-200 text-blue-800 rounded-xl text-xs font-bold shadow-2xs">
-              <Clock className="w-3.5 h-3.5 text-blue-600" />
-              <span>Collected Automatically on Shift Logout</span>
-            </div>
-          </div>
-
-          <div className="space-y-3">
-            {logoutReportsList.map((rep) => {
-              const isExpanded = expandedLogoutReportId === rep.id;
-              return (
-                <div
-                  key={rep.id}
-                  className="rounded-2xl border border-slate-200 border-l-4 border-l-blue-600 bg-white hover:shadow-md transition-all duration-200"
-                >
-                  <div
-                    onClick={() => setExpandedLogoutReportId(isExpanded ? null : rep.id)}
-                    className="p-5 cursor-pointer select-none"
-                  >
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-2 flex-wrap">
-                        <span className="font-mono font-bold text-xs text-[#2563EB] bg-blue-50 px-2 py-0.5 rounded-md border border-blue-200">
-                          {rep.id}
-                        </span>
-                        <span className="text-xs font-bold text-[#0F172A]">• {rep.date}</span>
-                        <span className="text-[10px] text-slate-400 font-mono">Shift Net: {rep.hours}</span>
-                      </div>
-                      <div className="flex items-center gap-3">
-                        <span className="px-2.5 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 font-bold text-[10px]">
-                          {rep.status}
-                        </span>
-                        <span className="text-xs text-slate-400">{isExpanded ? '▲' : '▼'}</span>
-                      </div>
-                    </div>
-
-                    <div className="text-xs text-[#475569] space-y-1 pt-2">
-                      <p><strong className="text-[#0F172A]">Completed Work:</strong> {rep.completed}</p>
-                      <p><strong className="text-[#0F172A]">Blockers / Issues:</strong> {rep.blockers}</p>
-                    </div>
-                  </div>
-
-                  {isExpanded && (
-                    <div className="px-5 pb-5 pt-2 border-t border-slate-100 bg-slate-50/50 space-y-3 text-xs animate-in fade-in duration-150 rounded-b-2xl">
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                        <div className="p-3 bg-white rounded-xl border border-slate-200">
-                          <span className="text-[10px] font-bold text-slate-400 uppercase">Pending / In-Flight</span>
-                          <p className="font-medium text-slate-800 mt-0.5">{rep.pending || 'None'}</p>
-                        </div>
-                        <div className="p-3 bg-white rounded-xl border border-slate-200">
-                          <span className="text-[10px] font-bold text-slate-400 uppercase">Tomorrow's Execution Target</span>
-                          <p className="font-medium text-slate-800 mt-0.5">{rep.tomorrowPlan || 'Follow operations queue'}</p>
-                        </div>
-                      </div>
-
-                      <div className="flex items-center justify-between pt-1 text-[11px] text-slate-500">
-                        <span>Audited by: <strong className="text-slate-900">{rep.reviewedBy || 'Operations Lead'}</strong></span>
-                        <span className="text-emerald-700 font-bold">✓ Signed off {rep.verifiedAt || 'EOD'}</span>
-                      </div>
-                    </div>
-                  )}
-                </div>
-              );
-            })}
-          </div>
-        </div>
+        <TmsEmployeeSessionHistoryView />
       )}
 
       {/* ========================================================================= */}
-      {/* VIEW 7: NOTICE BOARD & ANNOUNCEMENTS */}
+      {/* VIEW 7: ANNOUNCEMENTS (NATIVE TMS MODULE) */}
       {/* ========================================================================= */}
       {activeTab === 'announcements' && (
-        <div className="bg-white p-6 sm:p-8 rounded-2xl border border-[#E2E8F0] shadow-xs space-y-6">
-          <div>
-            <h2 className="text-xl font-extrabold text-[#0F172A]">Company & Operations Notice Board</h2>
-            <p className="text-xs text-[#475569] mt-0.5">Official company broadcasts, executive updates, and workplace announcements</p>
-          </div>
+        <TmsEmployeeAnnouncementsView />
+      )}
 
-          <div className="space-y-4">
-            {announcements.map((ann) => (
-              <div 
-                key={ann.id} 
-                onClick={() => {
-                  setAnnouncements(prev => prev.map(a => a.id === ann.id ? { ...a, isUnread: false } : a));
-                  setSelectedAnnouncement(ann);
-                }}
-                className={`p-5 rounded-2xl border transition-all duration-300 transform cursor-pointer group ${
-                  ann.isUnread 
-                    ? 'bg-white border-blue-200 border-l-4 border-l-blue-500 hover:shadow-lg hover:-translate-y-0.5' 
-                    : 'bg-[#F8FAFC] border-[#E2E8F0] border-l-4 border-l-transparent hover:bg-white hover:border-slate-300 hover:shadow-lg hover:-translate-y-0.5'
-                }`}
-              >
-                <div className="space-y-2.5">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      <span className={`text-[10px] font-bold px-2.5 py-0.5 rounded-full border ${
-                        ann.category === 'EXECUTIVE' ? 'bg-indigo-50 text-indigo-700 border-indigo-200' :
-                        ann.category === 'HR BULLETIN' ? 'bg-emerald-50 text-emerald-700 border-emerald-200' :
-                        'bg-blue-50 text-blue-700 border-blue-200'
-                      }`}>
-                        {ann.category}
-                      </span>
-                      {ann.isUnread && (
-                        <span className="flex h-2 w-2 relative">
-                          <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span>
-                          <span className="relative inline-flex rounded-full h-2 w-2 bg-blue-600"></span>
-                        </span>
-                      )}
-                    </div>
-                    <span className="text-[11px] text-slate-400 font-medium">{ann.time}</span>
-                  </div>
-                  <h3 className="text-sm font-bold text-[#0F172A] group-hover:text-blue-600 transition-colors">{ann.title}</h3>
-                  <p className="text-xs text-[#475569] leading-relaxed">
-                    {ann.summary}
-                  </p>
-                  <div className="pt-3 border-t border-slate-200/60 flex items-center justify-between text-xs">
-                    <div className="flex items-center gap-1.5 text-slate-500 font-medium">
-                      <div className="w-5 h-5 rounded-full bg-slate-200 flex items-center justify-center text-[9px] font-bold text-slate-600 shrink-0">
-                        {ann.author.charAt(0)}
-                      </div>
-                      <span className="truncate max-w-[150px] sm:max-w-none">Issued by: {ann.author}</span>
-                    </div>
-                    <span className="font-bold text-[#2563EB] flex items-center gap-1 transition-transform group-hover:translate-x-1 shrink-0">
-                      <span>View Full Broadcast</span>
-                      <ChevronRight className="w-3.5 h-3.5" />
-                    </span>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
+      {/* ========================================================================= */}
+      {/* VIEW 8: EXPORT REPORTS (NATIVE TMS MODULE) */}
+      {/* ========================================================================= */}
+      {activeTab === 'reports' && (
+        <TmsEmployeeReportsView />
       )}
 
       {/* ========================================================================= */}
@@ -4222,96 +2981,10 @@ export default function EmployeeDashboardPage() {
       )}
 
       {/* ========================================================================= */}
-      {/* VIEW 10: NOTIFICATIONS CENTER */}
+      {/* VIEW 10: NOTIFICATIONS CENTER (NATIVE TMS MODULE) */}
       {/* ========================================================================= */}
       {activeTab === 'notifications' && (
-        <div className="bg-white p-6 sm:p-8 rounded-2xl border border-[#E2E8F0] shadow-xs space-y-6">
-          <div className="flex items-center justify-between">
-            <div>
-              <h2 className="text-xl font-extrabold text-[#0F172A]">Notification Center</h2>
-              <p className="text-xs text-[#475569] mt-0.5">Stay informed on tasks, attendance updates, and company broadcasts</p>
-            </div>
-            <button 
-              onClick={() => setNotifications(prev => prev.map(n => ({ ...n, read: true })))}
-              className="text-xs font-bold text-[#2563EB] hover:underline cursor-pointer"
-            >
-              Mark All as Read
-            </button>
-          </div>
-
-          <div className="space-y-3">
-            {/* Ticket Submission Notifications with Priority Color Badges */}
-            {submittedTickets.map((tkt) => {
-              const priorityColor = tkt.priority === 'URGENT' ? 'bg-red-50 text-red-900 border-red-200' :
-                tkt.priority === 'HIGH' ? 'bg-amber-50 text-amber-900 border-amber-200' :
-                tkt.priority === 'NORMAL' ? 'bg-blue-50 text-blue-900 border-blue-200' :
-                'bg-slate-50 text-slate-900 border-slate-200';
-              const badgeColor = tkt.priority === 'URGENT' ? 'bg-red-600 text-white' :
-                tkt.priority === 'HIGH' ? 'bg-amber-500 text-white' :
-                tkt.priority === 'NORMAL' ? 'bg-blue-600 text-white' :
-                'bg-slate-500 text-white';
-
-              return (
-                <div
-                  key={`notif-${tkt.id}`}
-                  onClick={() => setSelectedTicketDetail(tkt)}
-                  className={`p-5 rounded-2xl border transition-all duration-300 transform flex items-start justify-between gap-3 cursor-pointer group hover:shadow-lg hover:-translate-y-0.5 border-l-4 ${
-                    tkt.priority === 'URGENT' ? 'border-l-red-500 hover:border-red-300 ' :
-                    tkt.priority === 'HIGH' ? 'border-l-amber-500 hover:border-amber-300 ' :
-                    tkt.priority === 'NORMAL' ? 'border-l-blue-500 hover:border-blue-300 ' :
-                    'border-l-slate-400 hover:border-slate-300 '
-                  } ${priorityColor}`}
-                >
-                  <div className="space-y-1">
-                    <div className="flex items-center gap-2">
-                      <span className={`text-[9px] font-black uppercase px-2 py-0.5 rounded-md ${badgeColor}`}>
-                        {tkt.priority}
-                      </span>
-                      <span className="font-mono text-xs font-bold text-[#0F172A]">{tkt.id}</span>
-                      <span className="text-[10px] text-slate-500 font-bold">• {tkt.category}</span>
-                    </div>
-                    <p className="text-xs font-bold text-[#0F172A]">{tkt.subject}</p>
-                    <p className="text-xs text-[#475569] leading-relaxed">{tkt.description}</p>
-                    <span className="text-[10px] text-slate-400 font-medium block pt-0.5">
-                      Submitted {tkt.date} • Dispatched to Admin, COO & CTO
-                    </span>
-                  </div>
-                </div>
-              );
-            })}
-
-            {notifications.map((n) => (
-              <div 
-                key={n.id} 
-                onClick={() => {
-                  if (!n.read) {
-                    setNotifications(prev => prev.map(notif => notif.id === n.id ? { ...notif, read: true } : notif));
-                  }
-                }}
-                className={`p-5 rounded-2xl border transition-all duration-300 transform flex items-start justify-between gap-3 cursor-pointer group hover:shadow-lg hover:-translate-y-0.5 ${
-                  n.read ? 'bg-white border-[#E2E8F0] border-l-4 border-l-transparent hover:border-slate-300' : 'bg-blue-50/50 border-blue-200 border-l-4 border-l-blue-500 hover:border-blue-400'
-                }`}
-              >
-                <div className="space-y-1.5 w-full">
-                  <div className="flex items-center gap-2">
-                    <span className="text-xs font-bold text-[#0F172A] group-hover:text-blue-600 transition-colors">{n.title}</span>
-                    <span className="text-[10px] px-2 py-0.5 bg-slate-100 text-slate-600 font-bold rounded-full">
-                      {n.category}
-                    </span>
-                    {!n.read && (
-                      <span className="flex h-2.5 w-2.5 relative ml-1">
-                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span>
-                        <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-blue-600"></span>
-                      </span>
-                    )}
-                  </div>
-                  <p className="text-xs text-[#475569] leading-relaxed">{n.desc}</p>
-                  <span className="text-[10px] text-slate-400 font-medium block pt-0.5">{n.time}</span>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
+        <TmsEmployeeNotificationsView onTabNavigate={(tab) => setActiveTab(tab)} />
       )}
 
       {/* ========================================================================= */}

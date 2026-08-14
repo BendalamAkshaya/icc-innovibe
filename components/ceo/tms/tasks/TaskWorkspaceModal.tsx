@@ -13,18 +13,14 @@ import {
   Trash2,
   CheckCircle2,
   Clock,
-  AlertCircle,
   Paperclip,
   Send,
   Plus,
   Calendar,
-  User,
-  Shield,
-  FileText,
   MessageSquare,
-  Activity,
-  UserCheck,
   ChevronRight,
+  Flame,
+  ArrowUpRight,
 } from 'lucide-react';
 
 interface TaskWorkspaceModalProps {
@@ -126,180 +122,169 @@ export function TaskWorkspaceModal({ taskId, onClose, onTaskUpdated }: TaskWorks
     }
   };
 
-  const getPriorityBadgeStyle = (priority: Task['priority']) => {
-    switch (priority) {
-      case 'URGENT':
-        return 'bg-rose-500/20 text-rose-300 border-rose-500/40';
-      case 'HIGH':
-        return 'bg-amber-500/20 text-amber-300 border-amber-500/40';
-      case 'MEDIUM':
-        return 'bg-amber-500/10 text-amber-200 border-amber-500/30';
-      default:
-        return 'bg-slate-700/50 text-slate-300 border-slate-600';
-    }
-  };
-
-  const getStatusBadgeStyle = (status: Task['status']) => {
-    switch (status) {
-      case 'COMPLETED':
-        return 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40';
-      case 'UNDER_REVIEW':
-        return 'bg-amber-500/20 text-amber-300 border-amber-500/40';
-      case 'IN_PROGRESS':
-        return 'bg-sky-500/20 text-sky-300 border-sky-500/40';
-      default:
-        return 'bg-slate-700/50 text-slate-300 border-slate-600';
-    }
-  };
-
   return (
-    <div className="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-md flex items-center justify-center p-3 lg:p-6 overflow-y-auto animate-in fade-in duration-200 font-sans">
-      <div className="bg-slate-900 border border-slate-800 rounded-3xl w-full max-w-6xl max-h-[92vh] flex flex-col lg:flex-row overflow-hidden shadow-2xl text-slate-100">
+    <div className="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-3 sm:p-6 overflow-y-auto font-sans animate-in fade-in duration-200">
+      <div className="bg-[#0B1329] border border-slate-800 rounded-3xl w-full max-w-6xl max-h-[92vh] flex flex-col lg:flex-row overflow-hidden shadow-2xl text-slate-100">
+        
         {isLoading || !task ? (
-          <div className="p-12 text-center text-slate-400 font-apfel text-xs w-full">
+          <div className="p-12 text-center text-slate-400 font-bold text-xs w-full">
             Loading Task Workspace...
           </div>
         ) : (
           <>
-            {/* Left Workspace (70%) */}
-            <div className="flex-1 p-6 lg:p-8 overflow-y-auto space-y-6 border-b lg:border-b-0 lg:border-r border-slate-800 text-left">
-              {/* Header Bar */}
-              <div className="flex items-start justify-between gap-4">
-                <div className="space-y-1.5">
-                  <div className="flex items-center gap-2 font-apfel text-xs">
-                    <span className="px-2.5 py-0.5 rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/30 font-extrabold text-[10px]">
-                      {task.category.replace('_', ' ')}
-                    </span>
-                    <span className="text-slate-500">•</span>
-                    <span className="text-slate-400 font-mono text-[11px]">{task.id}</span>
-                  </div>
-                  <h2 className="font-gotham text-xl lg:text-2xl font-extrabold text-white tracking-tight leading-snug">
-                    {task.title}
-                  </h2>
+            {/* Left Main Workspace (70%) */}
+            <div className="flex-1 p-6 sm:p-8 overflow-y-auto space-y-6 border-b lg:border-b-0 lg:border-r border-slate-800/80 text-left">
+              
+              {/* Top Header Breadcrumb & Title */}
+              <div className="flex items-center justify-between gap-4">
+                <div className="flex items-center gap-2 text-xs font-bold">
+                  <span className="px-3 py-1 rounded-xl bg-blue-600/30 text-blue-400 border border-blue-500/40 text-[10px] font-black uppercase tracking-wider">
+                    {task.assignee.role || task.category.replace('_', ' ')} TASK
+                  </span>
+                  <ChevronRight className="w-3.5 h-3.5 text-slate-500" />
+                  <h2 className="text-lg sm:text-xl font-black text-white tracking-tight">{task.title}</h2>
                 </div>
 
-                <div className="flex items-center gap-2 shrink-0">
-                  <button
-                    onClick={handleDeleteTask}
-                    className="p-2 rounded-xl text-slate-400 hover:text-rose-400 hover:bg-rose-500/10 transition-colors"
-                    title="Delete Task"
-                  >
-                    <Trash2 className="h-4 w-4" />
-                  </button>
-                  <button
-                    onClick={onClose}
-                    className="p-2 rounded-xl text-slate-400 hover:text-white hover:bg-slate-800 transition-colors"
-                    title="Close"
-                  >
-                    <X className="h-5 w-5" />
-                  </button>
-                </div>
+                <button
+                  onClick={onClose}
+                  className="p-2 rounded-xl text-slate-400 hover:text-white hover:bg-slate-800 transition cursor-pointer shrink-0"
+                >
+                  <X className="w-5 h-5" />
+                </button>
               </div>
 
-              {/* Status & Priority Row */}
-              <div className="flex flex-wrap items-center gap-3 font-apfel text-xs pt-1 border-t border-slate-800/80">
+              {/* Status & Priority Line */}
+              <div className="p-3 bg-[#030712] rounded-2xl border border-slate-800/80 flex items-center gap-6 text-xs font-bold">
                 <div className="flex items-center gap-2">
-                  <span className="text-slate-400 font-sans text-xs">Status:</span>
-                  <span className={`px-2.5 py-1 rounded-xl font-extrabold border ${getStatusBadgeStyle(task.status)}`}>
-                    {task.status.replace('_', ' ')}
+                  <span className="text-slate-400">Status:</span>
+                  <span className="px-2.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/40 text-[10px] font-black flex items-center gap-1">
+                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
+                    <span>{task.status.replace('_', ' ')}</span>
                   </span>
                 </div>
 
                 <div className="flex items-center gap-2">
-                  <span className="text-slate-400 font-sans text-xs">Priority:</span>
-                  <span className={`px-2.5 py-1 rounded-xl font-extrabold border ${getPriorityBadgeStyle(task.priority)}`}>
-                    {task.priority}
-                  </span>
-                </div>
-
-                <div className="flex items-center gap-2">
-                  <span className="text-slate-400 font-sans text-xs">Department:</span>
-                  <span className="px-2.5 py-1 rounded-xl bg-slate-800 text-slate-300 font-semibold">
-                    {task.department}
+                  <span className="text-slate-400">Priority:</span>
+                  <span className="px-2.5 py-0.5 rounded-full bg-amber-500/20 text-amber-400 border border-amber-500/40 text-[10px] font-black flex items-center gap-1">
+                    <ArrowUpRight className="w-3 h-3 stroke-[2.5]" />
+                    <span>{task.priority}</span>
                   </span>
                 </div>
               </div>
 
-              {/* Description Panel */}
-              <div className="bg-slate-950/60 p-5 rounded-2xl border border-slate-800 space-y-2">
-                <h3 className="font-gotham text-xs font-bold text-amber-400 uppercase tracking-wider">
-                  Task Description & Requirements
-                </h3>
-                <p className="font-sans text-xs text-slate-300 font-normal leading-relaxed whitespace-pre-wrap">
+              {/* Description / Deliverables */}
+              <div className="space-y-2">
+                <label className="block text-[10px] font-black uppercase text-slate-400 tracking-wider">DESCRIPTION / DELIVERABLES</label>
+                <div className="p-4 bg-[#030712] rounded-2xl border border-slate-800 text-xs text-slate-300 font-medium leading-relaxed">
                   {task.description}
-                </p>
+                </div>
               </div>
 
-              {/* Team Members */}
+              {/* Team Members Section */}
               <div className="space-y-3">
-                <h3 className="font-gotham text-xs font-bold text-slate-400 uppercase tracking-wider">
-                  Team Members & Ownership
-                </h3>
-
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                  {/* Owner */}
-                  <div className="p-3 rounded-2xl bg-slate-950/40 border border-slate-800 flex items-center gap-3">
-                    <img
-                      src={task.owner.avatar}
-                      alt={task.owner.name}
-                      onError={(e) => {
-                        e.currentTarget.onerror = null;
-                        e.currentTarget.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(task.owner.name)}&background=fef3c7&color=92400e`;
-                      }}
-                      className="h-9 w-9 rounded-full object-cover border border-slate-700"
-                    />
+                <label className="block text-[10px] font-black uppercase text-slate-400 tracking-wider">TEAM MEMBERS</label>
+                
+                {/* Created By (Owner) */}
+                <div className="p-4 bg-[#030712] rounded-2xl border border-slate-800 space-y-2">
+                  <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest block">CREATED BY (OWNER)</span>
+                  <div className="flex items-center gap-3">
+                    <div className="w-9 h-9 rounded-full bg-blue-600 text-white font-extrabold text-xs flex items-center justify-center border border-blue-400">
+                      {task.owner.name.charAt(0)}
+                    </div>
                     <div>
-                      <span className="font-apfel text-[9px] font-extrabold text-amber-400 uppercase tracking-wider block">Task Owner / Assignor</span>
-                      <p className="font-gotham text-xs font-bold text-white">{task.owner.name}</p>
-                      <p className="text-[10px] text-slate-400">{task.owner.role}</p>
+                      <h4 className="text-xs font-black text-white">{task.owner.name}</h4>
+                      <p className="text-[10px] text-slate-400 font-medium">Role: {task.owner.role}</p>
                     </div>
                   </div>
+                </div>
 
-                  {/* Assignee */}
-                  <div className="p-3 rounded-2xl bg-slate-950/40 border border-slate-800 flex items-center gap-3">
-                    <img
-                      src={task.assignee.avatar}
-                      alt={task.assignee.name}
-                      onError={(e) => {
-                        e.currentTarget.onerror = null;
-                        e.currentTarget.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(task.assignee.name)}&background=fef3c7&color=92400e`;
-                      }}
-                      className="h-9 w-9 rounded-full object-cover border border-slate-700"
-                    />
-                    <div>
-                      <span className="font-apfel text-[9px] font-extrabold text-emerald-400 uppercase tracking-wider block">Primary Assignee</span>
-                      <p className="font-gotham text-xs font-bold text-white">{task.assignee.name}</p>
-                      <p className="text-[10px] text-slate-400">{task.assignee.role}</p>
+                {/* Collaborators & Individual Progress Grid */}
+                <div className="space-y-2 pt-1">
+                  <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest block">COLLABORATORS & INDIVIDUAL PROGRESS</span>
+                  
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    {/* Collaborator Card 1 */}
+                    <div className="p-3 rounded-2xl bg-[#030712] border border-slate-800 flex items-center justify-between gap-3">
+                      <div className="flex items-center gap-2.5 min-w-0">
+                        <div className="w-8 h-8 rounded-full bg-slate-800 text-slate-300 font-black text-xs flex items-center justify-center shrink-0">
+                          G
+                        </div>
+                        <div className="min-w-0">
+                          <h5 className="text-xs font-bold text-white truncate">Geetha Sowmya...</h5>
+                          <p className="text-[9px] text-slate-400 truncate">Backend Engineer • Inf...</p>
+                        </div>
+                      </div>
+                      <span className="px-2 py-0.5 rounded-md bg-emerald-500/20 text-emerald-400 border border-emerald-500/40 text-[9px] font-black shrink-0">
+                        COMPLETED
+                      </span>
+                    </div>
+
+                    {/* Collaborator Card 2 (Current User) */}
+                    <div className="p-3 rounded-2xl bg-[#030712] border border-blue-500/50 flex items-center justify-between gap-3 relative">
+                      <div className="flex items-center gap-2.5 min-w-0">
+                        <div className="w-8 h-8 rounded-full bg-blue-600 text-white font-black text-xs flex items-center justify-center shrink-0">
+                          S
+                        </div>
+                        <div className="min-w-0">
+                          <h5 className="text-xs font-bold text-white truncate">Sri Varun Tej Ch...</h5>
+                          <p className="text-[9px] text-slate-400 truncate">IT Intern • Information ...</p>
+                        </div>
+                      </div>
+                      <div className="flex flex-col items-end gap-1 shrink-0">
+                        <span className="px-2 py-0.5 rounded-md bg-emerald-500/20 text-emerald-400 border border-emerald-500/40 text-[9px] font-black">
+                          COMPLETED
+                        </span>
+                        <span className="px-1.5 py-0.2 rounded bg-blue-600 text-white text-[8px] font-black uppercase">
+                          CURRENT USER
+                        </span>
+                      </div>
+                    </div>
+
+                    {/* Collaborator Card 3 */}
+                    <div className="p-3 rounded-2xl bg-[#030712] border border-slate-800 flex items-center justify-between gap-3">
+                      <div className="flex items-center gap-2.5 min-w-0">
+                        <div className="w-8 h-8 rounded-full bg-slate-800 text-slate-300 font-black text-xs flex items-center justify-center shrink-0">
+                          B
+                        </div>
+                        <div className="min-w-0">
+                          <h5 className="text-xs font-bold text-white truncate">Bendalam Aksha...</h5>
+                          <p className="text-[9px] text-slate-400 truncate">Automation Engineer • ...</p>
+                        </div>
+                      </div>
+                      <span className="px-2 py-0.5 rounded-md bg-emerald-500/20 text-emerald-400 border border-emerald-500/40 text-[9px] font-black shrink-0">
+                        COMPLETED
+                      </span>
                     </div>
                   </div>
                 </div>
               </div>
 
-              {/* Checklist Subtasks */}
-              <div className="space-y-3">
+              {/* Subtasks Checklist */}
+              <div className="space-y-3 pt-2">
                 <div className="flex items-center justify-between">
-                  <h3 className="font-gotham text-xs font-bold text-slate-400 uppercase tracking-wider">
-                    Task Deliverables Checklist ({task.subtasks.filter((s) => s.completed).length} / {task.subtasks.length})
-                  </h3>
-                  <span className="font-apfel text-xs font-bold text-amber-400">{task.progressPercent}% Completed</span>
+                  <label className="block text-[10px] font-black uppercase text-slate-400 tracking-wider">
+                    SUBTASKS CHECKLIST ({task.subtasks.filter((s) => s.completed).length} / {task.subtasks.length})
+                  </label>
+                  <span className="text-xs font-extrabold text-blue-400">{task.progressPercent}%</span>
                 </div>
 
-                {/* Progress Bar */}
-                <div className="w-full bg-slate-800 h-2 rounded-full overflow-hidden">
-                  <div className="h-full bg-gradient-to-r from-amber-500 to-emerald-500 rounded-full transition-all" style={{ width: `${task.progressPercent}%` }} />
+                <div className="w-full bg-slate-900 h-2 rounded-full overflow-hidden">
+                  <div className="h-full bg-blue-600 rounded-full transition-all" style={{ width: `${task.progressPercent}%` }} />
                 </div>
 
-                {/* Subtask Items */}
                 <div className="space-y-2">
                   {task.subtasks.map((st) => (
                     <div
                       key={st.id}
                       onClick={() => handleToggleSubtask(st.id)}
-                      className="p-3 rounded-2xl bg-slate-950/40 border border-slate-800 hover:border-slate-700 cursor-pointer flex items-center gap-3 transition-colors"
+                      className="p-3 rounded-2xl bg-[#030712] border border-slate-800 hover:border-slate-700 cursor-pointer flex items-center gap-3 transition"
                     >
-                      <div className={`h-5 w-5 rounded-lg border flex items-center justify-center transition-colors ${st.completed ? 'bg-emerald-500 border-emerald-400 text-white' : 'border-slate-700 bg-slate-900'}`}>
-                        {st.completed && <CheckCircle2 className="h-3.5 w-3.5" />}
-                      </div>
+                      <input
+                        type="checkbox"
+                        checked={st.completed}
+                        onChange={() => {}}
+                        className="w-4 h-4 accent-blue-600 cursor-pointer"
+                      />
                       <span className={`text-xs font-medium ${st.completed ? 'line-through text-slate-500' : 'text-slate-200'}`}>
                         {st.title}
                       </span>
@@ -307,122 +292,82 @@ export function TaskWorkspaceModal({ taskId, onClose, onTaskUpdated }: TaskWorks
                   ))}
                 </div>
 
-                {/* Add Subtask Input */}
                 <form onSubmit={handleAddSubtask} className="flex items-center gap-2 pt-1">
                   <input
                     type="text"
                     value={newSubtaskTitle}
                     onChange={(e) => setNewSubtaskTitle(e.target.value)}
-                    placeholder="+ Add subtask deliverable..."
-                    className="flex-1 bg-slate-950 border border-slate-800 rounded-xl px-3.5 py-2 text-xs text-white placeholder-slate-500 outline-none focus:border-amber-500"
+                    placeholder="+ Add deliverable..."
+                    className="flex-1 bg-[#030712] border border-slate-800 rounded-2xl px-4 py-2 text-xs text-white placeholder-slate-500 outline-none focus:border-blue-500"
                   />
-                  <button type="submit" className="px-3.5 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 font-apfel text-xs font-bold transition-colors">
+                  <button type="submit" className="px-4 py-2 rounded-2xl bg-slate-800 hover:bg-slate-700 text-white text-xs font-bold transition cursor-pointer">
                     Add
                   </button>
                 </form>
               </div>
 
-              {/* Timeline & History */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 font-apfel text-xs pt-2 border-t border-slate-800">
-                <div className="p-3 rounded-2xl bg-slate-950/40 border border-slate-800 space-y-1">
-                  <span className="text-[10px] text-slate-500 uppercase tracking-wider block">Created Date</span>
-                  <p className="font-bold text-slate-200">{task.timeline.createdDate}</p>
+              {/* Task Dates & Delete */}
+              <div className="flex items-center justify-between pt-4 border-t border-slate-800 text-xs">
+                <div className="flex items-center gap-4 text-slate-400 font-medium">
+                  <span>Created: <strong className="text-white">{task.timeline.createdDate}</strong></span>
+                  <span>Target: <strong className="text-amber-400">{task.timeline.targetDeadline}</strong></span>
                 </div>
-                <div className="p-3 rounded-2xl bg-slate-950/40 border border-slate-800 space-y-1">
-                  <span className="text-[10px] text-amber-400 uppercase tracking-wider block">Target Deadline</span>
-                  <p className="font-bold text-amber-300">{task.timeline.targetDeadline}</p>
-                </div>
-              </div>
 
-              {/* Attachments (Future Ready) */}
-              <div className="space-y-2">
-                <h3 className="font-gotham text-xs font-bold text-slate-400 uppercase tracking-wider">
-                  Attachments & Files
-                </h3>
-                {task.attachments.length === 0 ? (
-                  <div className="p-4 rounded-2xl border border-dashed border-slate-800 bg-slate-950/30 text-center text-slate-500 text-xs font-sans">
-                    No attachments uploaded. Drag & drop files here to upload.
-                  </div>
-                ) : (
-                  <div className="space-y-2">
-                    {task.attachments.map((att) => (
-                      <div key={att.id} className="p-3 rounded-2xl bg-slate-950/60 border border-slate-800 flex items-center justify-between text-xs">
-                        <div className="flex items-center gap-2.5">
-                          <Paperclip className="h-4 w-4 text-amber-400" />
-                          <div>
-                            <p className="font-bold text-slate-200">{att.filename}</p>
-                            <span className="text-[10px] text-slate-500">{att.size} • {att.uploadedAt}</span>
-                          </div>
-                        </div>
-                        <button className="text-amber-400 hover:underline text-[11px] font-bold">Download</button>
-                      </div>
-                    ))}
-                  </div>
-                )}
+                <button
+                  onClick={handleDeleteTask}
+                  className="px-3 py-1.5 rounded-xl bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 text-xs font-bold border border-rose-500/30 transition cursor-pointer flex items-center gap-1.5"
+                >
+                  <Trash2 className="w-3.5 h-3.5" />
+                  <span>Delete Task</span>
+                </button>
               </div>
             </div>
 
-            {/* Right Workspace (30%) - Discussion Workspace */}
-            <div className="w-full lg:w-96 p-6 flex flex-col justify-between bg-slate-950/80 space-y-4">
+            {/* Right Pane (30%) - Ecosystem Discussion Workspace */}
+            <div className="w-full lg:w-96 p-6 sm:p-8 flex flex-col justify-between bg-[#070D1F] space-y-4">
               <div>
-                <div className="flex items-center justify-between pb-3 border-b border-slate-800">
-                  <div className="flex items-center gap-2">
-                    <MessageSquare className="h-4 w-4 text-amber-400" />
-                    <h3 className="font-gotham text-sm font-extrabold text-white">Ecosystem Discussion</h3>
-                  </div>
-                  <span className="flex h-2 w-2 relative">
-                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-                    <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
-                  </span>
+                <div className="flex items-center gap-2 pb-3 border-b border-slate-800/80">
+                  <MessageSquare className="w-4 h-4 text-blue-400" />
+                  <h3 className="text-sm font-black text-white">Ecosystem Discussion</h3>
                 </div>
 
                 {/* Messages Stream */}
-                <div className="space-y-3.5 my-4 max-h-[50vh] lg:max-h-[60vh] overflow-y-auto pr-1">
+                <div className="space-y-3 my-4 max-h-[55vh] overflow-y-auto pr-1">
                   {comments.length === 0 ? (
-                    <div className="p-6 text-center text-slate-500 text-xs font-sans">
-                      No discussions yet. Start the conversation below.
+                    <div className="p-8 text-center text-slate-500 text-xs font-medium space-y-2">
+                      <div className="w-10 h-10 rounded-full bg-slate-900 flex items-center justify-center mx-auto text-slate-600">
+                        <MessageSquare className="w-5 h-5" />
+                      </div>
+                      <p>No workspace discussion yet.</p>
                     </div>
                   ) : (
                     comments.map((msg) => (
-                      <div key={msg.id} className="p-3.5 rounded-2xl bg-slate-900 border border-slate-800 space-y-1.5 text-left">
+                      <div key={msg.id} className="p-3.5 rounded-2xl bg-[#030712] border border-slate-800 space-y-1 text-left">
                         <div className="flex items-center justify-between">
-                          <div className="flex items-center gap-2">
-                            <img
-                              src={msg.avatar}
-                              alt={msg.author}
-                              onError={(e) => {
-                                e.currentTarget.onerror = null;
-                                e.currentTarget.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(msg.author)}&background=fef3c7&color=92400e`;
-                              }}
-                              className="h-6 w-6 rounded-full object-cover border border-slate-700"
-                            />
-                            <span className="font-gotham text-xs font-bold text-white">{msg.author}</span>
-                          </div>
-                          <span className="font-apfel text-[9px] text-slate-500">{msg.timestamp}</span>
+                          <span className="text-xs font-bold text-white">{msg.author}</span>
+                          <span className="text-[9px] text-slate-500">{msg.timestamp}</span>
                         </div>
-                        <p className="font-sans text-xs text-slate-300 font-normal leading-relaxed">
-                          {msg.message}
-                        </p>
+                        <p className="text-xs text-slate-300 font-normal leading-relaxed">{msg.message}</p>
                       </div>
                     ))
                   )}
                 </div>
               </div>
 
-              {/* Bottom Input Bar */}
+              {/* Bottom Comment Input */}
               <form onSubmit={handleSendComment} className="flex items-center gap-2 pt-2 border-t border-slate-800">
-                <button type="button" className="p-2 rounded-xl text-slate-500 hover:text-slate-300 hover:bg-slate-800">
-                  <Paperclip className="h-4 w-4" />
+                <button type="button" className="p-2.5 rounded-2xl text-slate-400 hover:text-white hover:bg-slate-800 transition cursor-pointer">
+                  <Paperclip className="w-4 h-4" />
                 </button>
                 <input
                   type="text"
                   value={newComment}
                   onChange={(e) => setNewComment(e.target.value)}
-                  placeholder="Type a message or updates..."
-                  className="flex-1 bg-slate-900 border border-slate-800 rounded-xl px-3.5 py-2 text-xs text-white placeholder-slate-500 outline-none focus:border-amber-500"
+                  placeholder="Ask a question or type comment..."
+                  className="flex-1 bg-[#030712] border border-slate-800 rounded-2xl px-4 py-2.5 text-xs text-white placeholder-slate-500 outline-none focus:border-blue-500"
                 />
-                <button type="submit" className="p-2 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-white shadow-md">
-                  <Send className="h-4 w-4" />
+                <button type="submit" className="p-2.5 rounded-2xl bg-[#2563EB] hover:bg-blue-700 text-white shadow-md shadow-blue-500/20 transition cursor-pointer shrink-0">
+                  <Send className="w-4 h-4 stroke-[2.5]" />
                 </button>
               </form>
             </div>

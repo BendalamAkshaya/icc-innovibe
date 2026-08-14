@@ -32,6 +32,9 @@ export interface AnnouncementRecord {
   id: string;
   title: string;
   message: string;
+  fromBadge?: string; // e.g. "Admin", "Information Technology Intern"
+  postedBy?: string;  // e.g. "Sri Hari Kolusu", "Srinivas Thalada (Information Technology Intern Head)"
+  timeAgo?: string;   // e.g. "about 2 months ago", "2 months ago", "3 months ago"
   senderId: string;
   senderName: string;
   senderRole: string;
@@ -57,6 +60,9 @@ export interface AnnouncementRecord {
 export interface CreateAnnouncementPayload {
   title: string;
   message: string;
+  fromBadge?: string;
+  postedBy?: string;
+  timeAgo?: string;
   senderId?: string;
   senderName?: string;
   senderRole?: string;
