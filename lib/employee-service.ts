@@ -27,6 +27,10 @@ export class EmployeeService {
     return EmployeeRepository.deleteEmployee(id);
   }
 
+  static onEmployeesUpdated(callback: (records: EmployeeRecord[]) => void): () => void {
+    return EmployeeRepository.onEmployeesUpdated(callback);
+  }
+
   static async getKpis(): Promise<EmployeeKpis> {
     return EmployeeRepository.getKpis();
   }

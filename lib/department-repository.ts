@@ -85,6 +85,8 @@ const seedDepartments: DepartmentItem[] = [
   },
 ];
 
+export const EVENT_DEPARTMENTS_UPDATED = 'innovibe:departments_updated';
+
 export class DepartmentRepository {
   /**
    * Helper: Read from localStorage
@@ -119,9 +121,23 @@ export class DepartmentRepository {
     if (typeof window === 'undefined') return;
     try {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+      window.dispatchEvent(new CustomEvent(EVENT_DEPARTMENTS_UPDATED, { detail: data }));
     } catch (e) {
       console.error('Failed to save departments to localStorage:', e);
     }
+  }
+
+  static onDepartmentsUpdated(callback: (records: DepartmentItem[]) => void): () => void {
+    if (typeof window === 'undefined') return () => {};
+    const handler = () => {
+      callback(DepartmentRepository.getDepartments());
+    };
+    window.addEventListener(EVENT_DEPARTMENTS_UPDATED, handler);
+    window.addEventListener('storage', handler);
+    return () => {
+      window.removeEventListener(EVENT_DEPARTMENTS_UPDATED, handler);
+      window.removeEventListener('storage', handler);
+    };
   }
 
   /**

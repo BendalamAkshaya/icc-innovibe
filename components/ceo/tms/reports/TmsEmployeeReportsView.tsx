@@ -3,22 +3,47 @@
 import React, { useState } from 'react';
 import { ReportType, ExportFormat, DateRangeOption, ReportConfig } from '../../../../lib/report-models';
 import { ReportService } from '../../../../lib/report-service';
-import { Download, FileText, FileSpreadsheet, CheckCircle2, RefreshCw } from 'lucide-react';
+import { useRole } from '../../../../components/RoleContext';
+import { Download, FileText, FileSpreadsheet, CheckCircle2, AlertCircle, RefreshCw } from 'lucide-react';
 
 export function TmsEmployeeReportsView() {
+  const { currentProfile } = useRole();
+  const cp = currentProfile as any;
+  const activeEmpId = cp?.employeeId || currentProfile?.email || 'EMP-102';
+  const activeEmpName = cp?.fullName || currentProfile?.name || 'Sri Varun Tej Chavitina';
+  const activeDept = cp?.department || cp?.departmentName || 'Technology';
+  const activeDesig = cp?.designation || 'Senior EV Systems Engineer';
+
   const [reportType, setReportType] = useState<ReportType>('ATTENDANCE');
   const [dateRangeOption, setDateRangeOption] = useState<DateRangeOption>('LAST_30_DAYS');
-  const [specificDate, setSpecificDate] = useState('2026-08-13');
-  const [startDate, setStartDate] = useState('2026-07-15');
-  const [endDate, setEndDate] = useState('2026-08-13');
+  const [specificDate, setSpecificDate] = useState('2026-08-16');
+  const [startDate, setStartDate] = useState('2026-08-01');
+  const [endDate, setEndDate] = useState('2026-08-16');
   const [exportFormat, setExportFormat] = useState<ExportFormat>('PDF');
 
   const [isGenerating, setIsGenerating] = useState(false);
   const [successMessage, setSuccessMessage] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   const handleGenerateAndDownload = async () => {
-    setIsGenerating(true);
+    setErrorMessage(null);
     setSuccessMessage(false);
+
+    // Date range validation for custom range
+    if (dateRangeOption === 'CUSTOM_RANGE') {
+      if (!startDate || !endDate) {
+        setErrorMessage('Please select both Start Date and End Date.');
+        return;
+      }
+      const s = new Date(startDate);
+      const e = new Date(endDate);
+      if (e < s) {
+        setErrorMessage('End Date cannot be before Start Date. Please select a valid date range.');
+        return;
+      }
+    }
+
+    setIsGenerating(true);
 
     const config: ReportConfig = {
       reportType,
@@ -27,23 +52,33 @@ export function TmsEmployeeReportsView() {
       startDate,
       endDate,
       exportFormat,
-      employeeId: 'EMP-102',
-      employeeSelection: 'ENTIRE_ORG',
+      employeeId: activeEmpId,
+      employeeName: activeEmpName,
+      departmentName: activeDept,
+      designation: activeDesig,
       includeInactive: true,
       includeArchived: false,
     };
 
     setTimeout(async () => {
       try {
+        const reportData = await ReportService.generate(config);
+        if (reportData.recordCount === 0) {
+          setIsGenerating(false);
+          setErrorMessage('No records found for the selected date range. Please try expanding your dates.');
+          return;
+        }
+
         await ReportService.export(config);
         setIsGenerating(false);
         setSuccessMessage(true);
-        setTimeout(() => setSuccessMessage(false), 4000);
-      } catch (err) {
+        setTimeout(() => setSuccessMessage(false), 4500);
+      } catch (err: any) {
         console.error('Failed to generate report:', err);
         setIsGenerating(false);
+        setErrorMessage(err.message || 'Failed to generate report. Please try again.');
       }
-    }, 600);
+    }, 500);
   };
 
   return (
@@ -55,7 +90,7 @@ export function TmsEmployeeReportsView() {
           My Reports
         </h1>
         <p className="text-xs sm:text-sm text-slate-500 font-medium">
-          Download your personal attendance and productivity history.
+          Download your personal attendance, productivity metrics, and tasks history.
         </p>
       </div>
 
@@ -69,7 +104,7 @@ export function TmsEmployeeReportsView() {
               Generate Export Reports
             </h2>
             <p className="text-xs text-slate-500 font-semibold mt-0.5">
-              Configure and download secure reports based on your portal scope.
+              Configure and download secure reports for {activeEmpName} ({activeEmpId}).
             </p>
           </div>
 
@@ -77,6 +112,13 @@ export function TmsEmployeeReportsView() {
             <div className="px-3.5 py-1.5 rounded-xl bg-emerald-50 text-emerald-800 border border-emerald-200 text-xs font-bold flex items-center gap-2 animate-in fade-in">
               <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
               <span>Report Generated & Downloaded Successfully!</span>
+            </div>
+          )}
+
+          {errorMessage && (
+            <div className="px-3.5 py-1.5 rounded-xl bg-rose-50 text-rose-800 border border-rose-200 text-xs font-bold flex items-center gap-2 animate-in fade-in">
+              <AlertCircle className="w-4 h-4 text-rose-600 shrink-0" />
+              <span>{errorMessage}</span>
             </div>
           )}
         </div>

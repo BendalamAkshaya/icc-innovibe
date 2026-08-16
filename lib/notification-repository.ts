@@ -185,20 +185,54 @@ export class NotificationRepository {
     this.saveToStorage(updated);
   }
 
+  static addNotification(notif: Omit<NotificationRecord, 'id' | 'createdAt' | 'timeAgo' | 'isRead'>): NotificationRecord {
+    const list = this.loadFromStorage();
+    const currentDate = new Date().toLocaleDateString('en-US', { month: 'short', day: '2-digit', year: 'numeric' });
+    const record: NotificationRecord = {
+      id: `NOTIF-${Date.now()}-${Math.floor(Math.random() * 1000)}`,
+      isRead: false,
+      timeAgo: 'Just now',
+      createdAt: currentDate,
+      ...notif,
+    };
+    list.unshift(record);
+    this.saveToStorage(list);
+    return record;
+  }
+
+  static onNotificationsChanged(callback: () => void): () => void {
+    if (typeof window === 'undefined') return () => {};
+    const handler = () => callback();
+    window.addEventListener(NOTIFICATION_EVENT, handler);
+    window.addEventListener('storage', handler);
+    return () => {
+      window.removeEventListener(NOTIFICATION_EVENT, handler);
+      window.removeEventListener('storage', handler);
+    };
+  }
+
   static dispatchNotificationsForAnnouncement(announcement: AnnouncementRecord): void {
     const list = this.loadFromStorage();
     const currentDate = new Date().toLocaleDateString('en-US', { month: 'short', day: '2-digit', year: 'numeric' });
 
+    let targetEmpId = 'EMP-102';
+    let targetEmpName = 'Sri Varun Tej Chavitina';
+
+    if (announcement.targetAudience === 'SPECIFIC_EMPLOYEE' && announcement.targetEmployeeId) {
+      targetEmpId = announcement.targetEmployeeId;
+      targetEmpName = announcement.targetEmployeeName || 'Employee Recipient';
+    }
+
     const newNotification: NotificationRecord = {
       id: `NOTIF-${Math.floor(207 + Math.random() * 800)}`,
       announcementId: announcement.id,
-      employeeId: announcement.targetEmployeeId || 'EMP-102',
-      employeeName: announcement.targetEmployeeName || 'Sri Varun Tej Chavitina',
-      title: announcement.title,
-      messagePreview: announcement.message.slice(0, 100),
+      employeeId: targetEmpId,
+      employeeName: targetEmpName,
+      title: `Announcement: ${announcement.title}`,
+      messagePreview: announcement.message.slice(0, 120),
       type: 'ANNOUNCEMENT',
       isRead: false,
-      priority: announcement.priority,
+      priority: announcement.priority === 'CRITICAL' || announcement.priority === 'IMPORTANT' ? 'IMPORTANT' : 'NORMAL',
       timeAgo: 'Just now',
       createdAt: currentDate,
       linkTab: 'announcements',

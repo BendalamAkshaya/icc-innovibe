@@ -72,6 +72,10 @@ export function TmsAttendanceView() {
 
   useEffect(() => {
     loadAttendanceData();
+    const unsubscribe = AttendanceService.onAttendanceUpdated(() => {
+      loadAttendanceData();
+    });
+    return () => unsubscribe();
   }, [dateSelection, selectedDepartment, selectedRole, selectedStatus, searchQuery]);
 
   const handleExport = async (format: 'PDF' | 'EXCEL' | 'CSV') => {

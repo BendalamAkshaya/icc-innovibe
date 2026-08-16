@@ -26,4 +26,8 @@ export class DepartmentService {
   static async delete(id: string): Promise<boolean> {
     return DepartmentRepository.deleteDepartment(id);
   }
+
+  static onDepartmentsUpdated(callback: (records: DepartmentItem[]) => void): () => void {
+    return DepartmentRepository.onDepartmentsUpdated(callback);
+  }
 }

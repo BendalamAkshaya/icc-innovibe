@@ -35,6 +35,10 @@ export class LeaveService {
     return LeaveRepository.cancelLeave(id);
   }
 
+  static onLeaveUpdated(callback: (requests: LeaveRequest[]) => void): () => void {
+    return LeaveRepository.onLeaveUpdated(callback);
+  }
+
   static async getKpis(): Promise<LeaveKpis> {
     return LeaveRepository.getKpis();
   }

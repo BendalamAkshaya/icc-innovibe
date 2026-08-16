@@ -55,6 +55,10 @@ export function TmsEmployeesView() {
 
   useEffect(() => {
     loadData();
+    const unsubscribe = EmployeeService.onEmployeesUpdated(() => {
+      loadData();
+    });
+    return () => unsubscribe();
   }, []);
 
   const handleDeleteEmployee = async (id: string, name: string) => {

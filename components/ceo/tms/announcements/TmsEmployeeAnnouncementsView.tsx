@@ -3,22 +3,32 @@
 import React, { useState, useEffect } from 'react';
 import { AnnouncementRecord } from '../../../../lib/announcement-models';
 import { AnnouncementService } from '../../../../lib/announcement-service';
-import { Megaphone, Calendar, Download, Image as ImageIcon, FileText, Volume2 } from 'lucide-react';
+import { useRole } from '../../../../components/RoleContext';
+import { Megaphone, Calendar, Download, Image as ImageIcon, FileText, Volume2, User, Building2 } from 'lucide-react';
 
 export function TmsEmployeeAnnouncementsView() {
+  const { currentProfile } = useRole();
+  const cp = currentProfile as any;
+  const activeEmpId = cp?.employeeId || currentProfile?.email || 'EMP-102';
+  const activeDept = cp?.department || cp?.departmentName || 'Technology';
+
   const [announcements, setAnnouncements] = useState<AnnouncementRecord[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
   const loadAnnouncements = async () => {
     setIsLoading(true);
-    const list = await AnnouncementService.getAll();
+    const list = await AnnouncementService.getForUser(activeEmpId, activeDept);
     setAnnouncements(list);
     setIsLoading(false);
   };
 
   useEffect(() => {
     loadAnnouncements();
-  }, []);
+    const unsubscribe = AnnouncementService.onAnnouncementUpdated(() => {
+      loadAnnouncements();
+    });
+    return () => unsubscribe();
+  }, [activeEmpId, activeDept]);
 
   const handleDownloadAttachment = (dataUrl?: string, filename?: string) => {
     if (!dataUrl || dataUrl === '#') {

@@ -1,11 +1,16 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { LeaveRequest, LeaveType, LEAVE_TYPE_LABELS } from '../../../../lib/leave-models';
 import { LeaveService } from '../../../../lib/leave-service';
+import { useRole } from '../../../../components/RoleContext';
 import { Calendar, Clock, CheckCircle2, AlertCircle, ChevronDown, FileText, Info } from 'lucide-react';
 
 export function TmsEmployeeLeaveView() {
+  const { currentProfile } = useRole();
+  const cp = currentProfile as any;
+  const activeEmpId = cp?.employeeId || currentProfile?.email || 'EMP-102';
+
   const [leaveHistory, setLeaveHistory] = useState<LeaveRequest[]>([]);
   const [leaveType, setLeaveType] = useState<LeaveType | ''>('');
   const [startDate, setStartDate] = useState('');
@@ -16,17 +21,32 @@ export function TmsEmployeeLeaveView() {
   const [toastMessage, setToastMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
   const [selectedLeaveDetail, setSelectedLeaveDetail] = useState<LeaveRequest | null>(null);
 
+  // Dynamic duration calculation
+  const calculatedDays = useMemo(() => {
+    if (!startDate || !endDate) return 0;
+    const start = new Date(startDate);
+    const end = new Date(endDate);
+    if (isNaN(start.getTime()) || isNaN(end.getTime())) return 0;
+    if (end < start) return -1;
+    const diffTime = Math.abs(end.getTime() - start.getTime());
+    return Math.ceil(diffTime / (1000 * 60 * 60 * 24)) + 1;
+  }, [startDate, endDate]);
+
   // Load Leave History via Service Layer
   const loadLeaveData = async () => {
     setIsLoading(true);
-    const history = await LeaveService.getAll({ employeeId: 'EMP-102' });
+    const history = await LeaveService.getAll({ employeeId: activeEmpId });
     setLeaveHistory(history);
     setIsLoading(false);
   };
 
   useEffect(() => {
     loadLeaveData();
-  }, []);
+    const unsubscribe = LeaveService.onLeaveUpdated(() => {
+      loadLeaveData();
+    });
+    return () => unsubscribe();
+  }, [activeEmpId]);
 
   // Handle Submit New Leave Request
   const handleSubmit = async (e: React.FormEvent) => {
@@ -42,7 +62,7 @@ export function TmsEmployeeLeaveView() {
       setToastMessage({ type: 'error', text: 'Please select both start and end dates.' });
       return;
     }
-    if (new Date(endDate) < new Date(startDate)) {
+    if (calculatedDays <= 0) {
       setToastMessage({ type: 'error', text: 'End date cannot be earlier than start date.' });
       return;
     }
@@ -51,29 +71,23 @@ export function TmsEmployeeLeaveView() {
       return;
     }
 
-    // 2. Calculate Days
-    const start = new Date(startDate);
-    const end = new Date(endDate);
-    const diffTime = Math.abs(end.getTime() - start.getTime());
-    const totalDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)) + 1;
-
     setIsSubmitting(true);
 
     try {
       await LeaveService.create({
-        employeeId: 'EMP-102',
-        employeeName: 'Sri Varun Tej Chavitina',
-        departmentId: 'DEP-1',
-        departmentName: 'Technology',
-        role: 'Information Technology Intern',
+        employeeId: activeEmpId,
+        employeeName: currentProfile?.name || 'Employee',
+        departmentId: cp?.departmentId || 'DEP-101',
+        departmentName: cp?.department || cp?.departmentName || 'Operations',
+        role: cp?.designation || currentProfile?.role || 'Employee',
         leaveType: leaveType as LeaveType,
         startDate,
         endDate,
-        totalDays,
+        totalDays: calculatedDays,
         reason: reason.trim(),
       });
 
-      setToastMessage({ type: 'success', text: 'Leave request submitted successfully!' });
+      setToastMessage({ type: 'success', text: 'Leave request submitted successfully to CEO for approval!' });
       setLeaveType('');
       setStartDate('');
       setEndDate('');
@@ -93,21 +107,21 @@ export function TmsEmployeeLeaveView() {
     switch (status) {
       case 'APPROVED':
         return (
-          <span className="px-3 py-1 rounded-full bg-emerald-100/90 text-emerald-700 text-[10px] font-black tracking-wider uppercase border border-emerald-200/80">
-            APPROVED
+          <span className="px-3 py-1 rounded-full bg-emerald-100/90 text-emerald-800 text-[10px] font-black tracking-wider uppercase border border-emerald-300 flex items-center gap-1">
+            <span>🟢</span> APPROVED
           </span>
         );
       case 'REJECTED':
         return (
-          <span className="px-3 py-1 rounded-full bg-rose-100/90 text-rose-700 text-[10px] font-black tracking-wider uppercase border border-rose-200/80">
-            REJECTED
+          <span className="px-3 py-1 rounded-full bg-rose-100/90 text-rose-800 text-[10px] font-black tracking-wider uppercase border border-rose-300 flex items-center gap-1">
+            <span>🔴</span> REJECTED
           </span>
         );
       case 'PENDING':
       default:
         return (
-          <span className="px-3 py-1 rounded-full bg-amber-100/90 text-amber-700 text-[10px] font-black tracking-wider uppercase border border-amber-200/80">
-            PENDING
+          <span className="px-3 py-1 rounded-full bg-amber-100/90 text-amber-800 text-[10px] font-black tracking-wider uppercase border border-amber-300 flex items-center gap-1">
+            <span>🟡</span> PENDING
           </span>
         );
     }
@@ -119,10 +133,10 @@ export function TmsEmployeeLeaveView() {
       {/* Header */}
       <div className="space-y-1">
         <h1 className="text-2xl lg:text-3xl font-black text-[#0F172A] tracking-tight">
-          Leave Management
+          Leave Management Portal
         </h1>
         <p className="text-xs sm:text-sm text-slate-500 font-medium">
-          Apply for leave and view your request history.
+          Apply for leaves and track real-time approval status from executive management.
         </p>
       </div>
 
@@ -154,7 +168,7 @@ export function TmsEmployeeLeaveView() {
         
         {/* Left Column: New Request Card */}
         <div className="lg:col-span-5 bg-white p-6 sm:p-8 rounded-3xl border border-slate-200/90 shadow-xs space-y-6">
-          <h2 className="text-lg font-black text-[#0F172A] tracking-tight">New Request</h2>
+          <h2 className="text-lg font-black text-[#0F172A] tracking-tight">Apply for Leave</h2>
 
           <form onSubmit={handleSubmit} className="space-y-4 text-xs font-sans">
             
@@ -165,13 +179,17 @@ export function TmsEmployeeLeaveView() {
                 <select
                   value={leaveType}
                   onChange={(e) => setLeaveType(e.target.value as LeaveType)}
-                  className="w-full px-4 py-3 rounded-2xl bg-white border border-slate-200 text-slate-700 text-xs font-medium focus:border-blue-600 outline-none appearance-none cursor-pointer pr-10"
+                  className="w-full px-4 py-3 rounded-2xl bg-white border border-slate-200 text-slate-700 text-xs font-semibold focus:border-blue-600 outline-none appearance-none cursor-pointer pr-10"
                 >
-                  <option value="">Select type...</option>
-                  <option value="SICK_LEAVE">Sick Leave</option>
+                  <option value="">Select leave category...</option>
                   <option value="CASUAL_LEAVE">Casual Leave</option>
+                  <option value="SICK_LEAVE">Sick Leave</option>
                   <option value="PAID_TIME_OFF">Paid Time Off (PTO)</option>
                   <option value="UNPAID_LEAVE">Unpaid Leave</option>
+                  <option value="COMPENSATORY_OFF">Compensatory Off</option>
+                  <option value="EMERGENCY_LEAVE">Emergency Leave</option>
+                  <option value="MATERNITY_LEAVE">Maternity Leave</option>
+                  <option value="PATERNITY_LEAVE">Paternity Leave</option>
                 </select>
                 <ChevronDown className="w-4 h-4 text-slate-400 absolute right-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
               </div>
@@ -185,7 +203,6 @@ export function TmsEmployeeLeaveView() {
                   type="date"
                   value={startDate}
                   onChange={(e) => setStartDate(e.target.value)}
-                  placeholder="dd-mm-yyyy"
                   className="w-full px-3.5 py-2.5 rounded-2xl bg-white border border-slate-200 text-slate-700 text-xs font-medium focus:border-blue-600 outline-none cursor-pointer"
                 />
               </div>
@@ -196,20 +213,41 @@ export function TmsEmployeeLeaveView() {
                   type="date"
                   value={endDate}
                   onChange={(e) => setEndDate(e.target.value)}
-                  placeholder="dd-mm-yyyy"
                   className="w-full px-3.5 py-2.5 rounded-2xl bg-white border border-slate-200 text-slate-700 text-xs font-medium focus:border-blue-600 outline-none cursor-pointer"
                 />
               </div>
             </div>
 
+            {/* Calculated Duration Banner */}
+            {startDate && endDate && (
+              <div
+                className={`p-3.5 rounded-2xl border text-xs font-bold flex items-center justify-between transition-all ${
+                  calculatedDays > 0
+                    ? 'bg-blue-50/80 border-blue-200 text-blue-900'
+                    : 'bg-rose-50 border-rose-200 text-rose-900'
+                }`}
+              >
+                <span>{calculatedDays > 0 ? 'Duration:' : 'Validation Error:'}</span>
+                <span
+                  className={`px-3 py-1 rounded-xl text-xs font-black shadow-2xs ${
+                    calculatedDays > 0 ? 'bg-white text-blue-600 border border-blue-100' : 'bg-rose-600 text-white'
+                  }`}
+                >
+                  {calculatedDays > 0
+                    ? `${calculatedDays} ${calculatedDays === 1 ? 'day' : 'days'}`
+                    : '⚠ End Date cannot be before Start Date'}
+                </span>
+              </div>
+            )}
+
             {/* Reason */}
             <div>
-              <label className="block text-xs font-bold text-slate-700 mb-1.5">Reason</label>
+              <label className="block text-xs font-bold text-slate-700 mb-1.5">Reason / Justification</label>
               <textarea
                 value={reason}
                 onChange={(e) => setReason(e.target.value)}
                 rows={4}
-                placeholder="Provide a brief reason..."
+                placeholder="Explain the purpose of your leave request..."
                 className="w-full px-4 py-3 rounded-2xl bg-slate-50/50 border border-slate-200 text-slate-700 text-xs font-medium placeholder-slate-400 focus:border-blue-600 outline-none leading-relaxed resize-none"
               />
             </div>
@@ -217,10 +255,10 @@ export function TmsEmployeeLeaveView() {
             {/* Submit Request Button */}
             <button
               type="submit"
-              disabled={isSubmitting}
-              className="w-full py-3.5 rounded-2xl bg-[#2563EB] hover:bg-blue-700 text-white font-bold text-xs shadow-md shadow-blue-500/20 transition cursor-pointer mt-2"
+              disabled={isSubmitting || calculatedDays <= 0}
+              className="w-full py-3.5 rounded-2xl bg-[#2563EB] hover:bg-blue-700 disabled:opacity-50 text-white font-bold text-xs shadow-md shadow-blue-500/20 transition cursor-pointer mt-2"
             >
-              {isSubmitting ? 'Submitting...' : 'Submit Request'}
+              {isSubmitting ? 'Submitting Leave Request...' : 'Submit Leave Request'}
             </button>
 
           </form>
@@ -228,7 +266,12 @@ export function TmsEmployeeLeaveView() {
 
         {/* Right Column: Leave History Card */}
         <div className="lg:col-span-7 bg-white p-6 sm:p-8 rounded-3xl border border-slate-200/90 shadow-xs space-y-4">
-          <h2 className="text-lg font-black text-[#0F172A] tracking-tight mb-4">Leave History</h2>
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-lg font-black text-[#0F172A] tracking-tight">My Leave History</h2>
+            <span className="text-xs font-bold text-slate-400 bg-slate-100 px-3 py-1 rounded-full">
+              {leaveHistory.length} Total Requests
+            </span>
+          </div>
 
           {isLoading ? (
             <div className="p-12 text-center text-slate-400 font-bold text-xs">
@@ -237,7 +280,7 @@ export function TmsEmployeeLeaveView() {
           ) : leaveHistory.length === 0 ? (
             <div className="p-12 text-center bg-slate-50 rounded-2xl border border-slate-200 space-y-2">
               <Calendar className="w-8 h-8 text-slate-300 mx-auto" />
-              <p className="text-xs font-bold text-slate-600">No leave requests yet.</p>
+              <p className="text-xs font-bold text-slate-600">No leave requests submitted yet.</p>
             </div>
           ) : (
             <div className="space-y-3.5">
@@ -245,35 +288,47 @@ export function TmsEmployeeLeaveView() {
                 <div
                   key={item.id}
                   onClick={() => setSelectedLeaveDetail(item)}
-                  className="p-4 sm:p-5 rounded-2xl bg-[#F8FAFC]/90 border border-slate-200/70 hover:border-blue-300 transition cursor-pointer flex items-center justify-between gap-4 group"
+                  className="p-5 rounded-2xl bg-[#F8FAFC]/90 border border-slate-200/70 hover:border-blue-300 transition cursor-pointer space-y-3 group"
                 >
-                  {/* Left Side: Icon + Details */}
-                  <div className="flex items-center gap-4 min-w-0">
-                    <div className="w-11 h-11 rounded-2xl bg-blue-50 text-blue-600 flex items-center justify-center shrink-0 border border-blue-100/80 group-hover:bg-blue-600 group-hover:text-white transition">
-                      <Calendar className="w-5 h-5 stroke-[2.5]" />
-                    </div>
+                  <div className="flex items-start justify-between gap-4">
+                    {/* Left Side: Icon + Details */}
+                    <div className="flex items-start gap-4 min-w-0">
+                      <div className="w-11 h-11 rounded-2xl bg-blue-50 text-blue-600 flex items-center justify-center shrink-0 border border-blue-100/80 group-hover:bg-blue-600 group-hover:text-white transition mt-0.5">
+                        <Calendar className="w-5 h-5 stroke-[2.5]" />
+                      </div>
 
-                    <div className="min-w-0">
-                      <h3 className="text-xs font-black text-slate-900 uppercase tracking-wider group-hover:text-blue-600 transition truncate">
-                        {LEAVE_TYPE_LABELS[item.leaveType] || item.leaveType.replace('_', ' ')}
-                      </h3>
-                      <div className="text-xs text-slate-500 font-medium flex items-center gap-1.5 mt-1">
-                        <Clock className="w-3.5 h-3.5 text-slate-400 shrink-0" />
-                        <span>{item.startDate} to {item.endDate}</span>
+                      <div className="min-w-0 space-y-1">
+                        <h3 className="text-xs font-black text-slate-900 uppercase tracking-wider group-hover:text-blue-600 transition truncate">
+                          {LEAVE_TYPE_LABELS[item.leaveType] || item.leaveType.replace('_', ' ')}
+                        </h3>
+                        <div className="text-xs text-slate-600 font-bold flex items-center gap-1.5">
+                          <Clock className="w-3.5 h-3.5 text-slate-400 shrink-0" />
+                          <span>{item.startDate} → {item.endDate}</span>
+                          <span className="text-[11px] font-black text-blue-600 px-2 py-0.5 rounded-md bg-blue-50 border border-blue-100">
+                            {item.totalDays} {item.totalDays === 1 ? 'day' : 'days'}
+                          </span>
+                        </div>
+                        <p className="text-xs text-slate-500 line-clamp-1 italic font-normal">
+                          Reason: {item.reason}
+                        </p>
                       </div>
                     </div>
+
+                    {/* Right Side: Status Badge */}
+                    <div className="shrink-0">
+                      {getStatusBadge(item.status)}
+                    </div>
                   </div>
 
-                  {/* Right Side: Status Badge & Rejection Reason */}
-                  <div className="flex flex-col items-end justify-center shrink-0">
-                    {getStatusBadge(item.status)}
-                    
-                    {item.status === 'REJECTED' && item.rejectionReason && (
-                      <span className="text-[11px] font-bold text-rose-600 mt-1.5 text-right">
-                        Rejection Reason: {item.rejectionReason}
+                  {/* Rejection Reason Callout Box */}
+                  {item.status === 'REJECTED' && item.rejectionReason && (
+                    <div className="p-3 bg-rose-50/90 rounded-xl border border-rose-200/80 text-rose-900 text-xs space-y-0.5">
+                      <span className="text-[10px] font-black text-rose-700 uppercase tracking-wider block">
+                        REJECTION REASON
                       </span>
-                    )}
-                  </div>
+                      <p className="font-bold text-rose-900 leading-snug">{item.rejectionReason}</p>
+                    </div>
+                  )}
                 </div>
               ))}
             </div>

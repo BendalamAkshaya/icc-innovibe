@@ -109,6 +109,9 @@ const seedLeaveRequests: LeaveRequest[] = [
   },
 ];
 
+export const EVENT_LEAVE_UPDATED = 'innovibe:leave_updated';
+import { NotificationRepository } from './notification-repository';
+
 export class LeaveRepository {
   private static loadFromStorage(): LeaveRequest[] {
     if (typeof window === 'undefined') return seedLeaveRequests;
@@ -137,9 +140,23 @@ export class LeaveRepository {
     if (typeof window === 'undefined') return;
     try {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+      window.dispatchEvent(new CustomEvent(EVENT_LEAVE_UPDATED, { detail: data }));
     } catch (e) {
       console.error('Failed to save leave requests to localStorage:', e);
     }
+  }
+
+  static onLeaveUpdated(callback: (requests: LeaveRequest[]) => void): () => void {
+    if (typeof window === 'undefined') return () => {};
+    const handler = () => {
+      callback(LeaveRepository.getLeaveRequests());
+    };
+    window.addEventListener(EVENT_LEAVE_UPDATED, handler);
+    window.addEventListener('storage', handler);
+    return () => {
+      window.removeEventListener(EVENT_LEAVE_UPDATED, handler);
+      window.removeEventListener('storage', handler);
+    };
   }
 
   static getLeaveRequests(filters?: LeaveFilterParams): LeaveRequest[] {
@@ -148,7 +165,7 @@ export class LeaveRepository {
     if (!filters) return list;
 
     if (filters.employeeId) {
-      list = list.filter((l) => l.employeeId === filters.employeeId || l.employeeName.includes('Sri Varun'));
+      list = list.filter((l) => l.employeeId === filters.employeeId || l.employeeId?.toLowerCase() === filters.employeeId?.toLowerCase());
     }
 
     if (filters.searchQuery && filters.searchQuery.trim() !== '') {
@@ -190,7 +207,7 @@ export class LeaveRepository {
   static getLeaveHistory(employeeId?: string): LeaveRequest[] {
     const list = this.loadFromStorage();
     if (employeeId) {
-      return list.filter((l) => l.employeeId === employeeId || l.employeeName.includes('Sri Varun'));
+      return list.filter((l) => l.employeeId === employeeId || l.employeeId?.toLowerCase() === employeeId.toLowerCase());
     }
     return list;
   }
@@ -212,16 +229,27 @@ export class LeaveRepository {
       startDate: payload.startDate,
       endDate: payload.endDate,
       totalDays: payload.totalDays,
-      status: 'APPROVED', // Default to APPROVED or PENDING based on workflow
+      status: 'PENDING',
       appliedDate: new Date().toISOString().split('T')[0],
-      approvedBy: 'Srinivas Thalada (DEPARTMENT)',
-      approvedDate: new Date().toISOString().split('T')[0],
       createdAt: new Date().toISOString().split('T')[0],
       updatedAt: new Date().toISOString().split('T')[0],
     };
 
     list.unshift(newReq);
     this.saveToStorage(list);
+
+    try {
+      NotificationRepository.addNotification({
+        employeeId: 'EMP-101',
+        employeeName: 'Sri Hari Kolusu (CEO)',
+        title: 'New Leave Request Submitted',
+        messagePreview: `${payload.employeeName} applied for ${payload.leaveType.replace('_', ' ')} (${payload.totalDays} days)`,
+        type: 'LEAVE_SUBMITTED',
+        priority: 'IMPORTANT',
+        linkTab: 'leave',
+      });
+    } catch (e) {}
+
     return newReq;
   }
 
@@ -240,6 +268,19 @@ export class LeaveRepository {
 
     list[idx] = updated;
     this.saveToStorage(list);
+
+    try {
+      NotificationRepository.addNotification({
+        employeeId: updated.employeeId,
+        employeeName: updated.employeeName,
+        title: 'Leave Request Approved',
+        messagePreview: `Your leave request for ${updated.leaveType.replace('_', ' ')} starting ${updated.startDate} has been approved by ${approvedBy}.`,
+        type: 'LEAVE_APPROVED',
+        priority: 'IMPORTANT',
+        linkTab: 'leave',
+      });
+    } catch (e) {}
+
     return updated;
   }
 
@@ -257,6 +298,19 @@ export class LeaveRepository {
 
     list[idx] = updated;
     this.saveToStorage(list);
+
+    try {
+      NotificationRepository.addNotification({
+        employeeId: updated.employeeId,
+        employeeName: updated.employeeName,
+        title: 'Leave Request Rejected',
+        messagePreview: `Your leave request for ${updated.leaveType.replace('_', ' ')} starting ${updated.startDate} was rejected: ${rejectionReason}.`,
+        type: 'LEAVE_APPROVED',
+        priority: 'IMPORTANT',
+        linkTab: 'leave',
+      });
+    } catch (e) {}
+
     return updated;
   }
 

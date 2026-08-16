@@ -44,7 +44,7 @@ export function TmsTasksView() {
   // Filter States
   const [activeSegment, setActiveSegment] = useState<
     'ASSIGNED_TO_ME' | 'ASSIGNED_BY_ME' | 'PENDING_ACTIONS' | 'OVERDUE' | 'ACHIEVEMENTS' | 'ALL'
-  >('ASSIGNED_TO_ME');
+  >('ALL');
 
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedPriority, setSelectedPriority] = useState<TaskPriority | 'ALL'>('ALL');
@@ -77,6 +77,10 @@ export function TmsTasksView() {
 
   useEffect(() => {
     loadTasksData();
+    const unsubscribe = TmsTaskService.onTasksUpdated(() => {
+      loadTasksData();
+    });
+    return () => unsubscribe();
   }, [activeSegment, searchQuery, selectedPriority, selectedStatus, selectedCategory]);
 
   const getPriorityBadge = (priority: TaskPriority) => {
@@ -439,7 +443,10 @@ export function TmsTasksView() {
       <CreateTaskModal
         isOpen={isCreateModalOpen}
         onClose={() => setIsCreateModalOpen(false)}
-        onTaskCreated={loadTasksData}
+        onTaskCreated={() => {
+          setActiveSegment('ALL');
+          loadTasksData();
+        }}
       />
     </div>
   );

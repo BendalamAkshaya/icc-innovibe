@@ -37,8 +37,12 @@ export function LeaveDetailModal({ leave, onClose, onActionComplete }: LeaveDeta
   };
 
   const handleReject = async () => {
+    if (!note.trim()) {
+      alert('Please provide a reason for rejection in the Executive Review Notes box before rejecting.');
+      return;
+    }
     setIsSubmitting(true);
-    await LeaveService.reject(leave.id, note.trim() || 'Operational workload priority');
+    await LeaveService.reject(leave.id, note.trim());
     setIsSubmitting(false);
     onActionComplete();
     onClose();

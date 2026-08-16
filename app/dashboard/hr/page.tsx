@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { GlobalFilterProvider } from '../../../lib/global-filter-context';
 import { DrillDownModal } from '../../../components/ceo/common/DrillDownModal';
@@ -150,7 +150,9 @@ function HRDashboardContent() {
 export default function HRDashboard() {
   return (
     <GlobalFilterProvider>
-      <HRDashboardContent />
+      <Suspense fallback={<div className="p-6 text-xs text-slate-500 font-bold">Loading HR Workspace...</div>}>
+        <HRDashboardContent />
+      </Suspense>
     </GlobalFilterProvider>
   );
 }

@@ -1,10 +1,12 @@
 'use client';
 
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, Suspense } from 'react';
 import { useRole } from '@/components/RoleContext';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { createCrossRoleTicketNotification, TicketPriority } from '@/lib/ticketNotifications';
 import { TmsTasksView } from '@/components/ceo/tms/tasks/TmsTasksView';
+import { CreateTaskModal } from '@/components/ceo/tms/tasks/CreateTaskModal';
+import { TmsTaskService } from '@/lib/tms-service';
 import { TmsEmployeeLeaveView } from '@/components/ceo/tms/leave/TmsEmployeeLeaveView';
 import { TmsEmployeeSessionHistoryView } from '@/components/ceo/tms/logout/TmsEmployeeSessionHistoryView';
 import { TmsEmployeeAnnouncementsView } from '@/components/ceo/tms/announcements/TmsEmployeeAnnouncementsView';
@@ -110,7 +112,7 @@ export interface AssignedTask {
   } | null;
 }
 
-export default function EmployeeDashboardPage() {
+function EmployeeDashboardContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { currentProfile } = useRole();
@@ -316,6 +318,95 @@ export default function EmployeeDashboardPage() {
   ];
 
   const [tasks, setTasks] = useState<AssignedTask[]>(initialAssignedTasks);
+
+  // Dynamic TMS Tasks loader: Loads tasks assigned to the active logged-in employee
+  useEffect(() => {
+    const loadDynamicTasks = async () => {
+      const allTmsTasks = await TmsTaskService.getTasks();
+      const cp = currentProfile as any;
+      const empId = cp?.employeeId || currentProfile?.id || 'EMP-102';
+      const empName = currentProfile?.name || 'Sri Varun Tej';
+      const empEmail = currentProfile?.email || 'varuntej@innovibe.in';
+
+      const assignedToThisEmp = allTmsTasks.filter((t) => {
+        if (t.assignees && t.assignees.length > 0) {
+          return t.assignees.some(
+            (a) =>
+              a.employeeId === empId ||
+              a.email === empEmail ||
+              a.employeeName.toLowerCase().includes(empName.toLowerCase())
+          );
+        }
+        return (
+          t.assignee.id === empId ||
+          t.assignee.email === empEmail ||
+          t.assignee.name.toLowerCase().includes(empName.toLowerCase()) ||
+          t.assignedToMe
+        );
+      });
+
+      if (assignedToThisEmp.length > 0) {
+        const mapped: AssignedTask[] = assignedToThisEmp.map((t) => {
+          const empAssigneeObj = t.assignees?.find(
+            (a) =>
+              a.employeeId === empId ||
+              a.email === empEmail ||
+              a.employeeName.toLowerCase().includes(empName.toLowerCase())
+          );
+
+          const currentStatus = empAssigneeObj ? empAssigneeObj.status : (t.status === 'COMPLETED' ? 'COMPLETED' : t.status === 'IN_PROGRESS' ? 'IN_PROGRESS' : 'ASSIGNED');
+          const isCompleted = currentStatus === 'COMPLETED';
+
+          const proof = empAssigneeObj?.completionProof ? {
+            submittedAt: empAssigneeObj.completionProof.submittedAt,
+            description: empAssigneeObj.completionProof.description,
+            hoursSpent: empAssigneeObj.completionProof.hoursSpent || '2.0 hrs',
+            uploadedDocuments: (empAssigneeObj.completionProof.uploadedDocuments || []).map((d: any) => ({
+              name: d.filename || d.name || 'document.pdf',
+              size: d.size || '1.0 MB',
+              type: d.mimeType || d.type || 'PDF',
+            })),
+          } : null;
+
+          return {
+            id: t.id,
+            title: t.title,
+            description: t.description,
+            assignedBy: {
+              name: t.owner.name,
+              role: t.owner.role,
+              department: t.owner.department,
+              avatar: t.owner.avatar,
+            },
+            deadline: t.timeline.targetDeadline,
+            due: t.timeline.targetDeadline,
+            priority: t.priority as any,
+            tag: t.category.replace('_', ' '),
+            status: currentStatus as any,
+            completed: isCompleted,
+            isOverdue: t.status === 'OVERDUE',
+            attachedDocuments: (t.attachments || []).map((att) => ({
+              name: att.filename,
+              size: att.size,
+              type: att.mimeType || 'Document',
+            })),
+            acceptedAt: empAssigneeObj?.acceptedAt || null,
+            completionProof: proof as any,
+          };
+        });
+
+        setTasks(mapped);
+      }
+    };
+
+    loadDynamicTasks();
+
+    const unsubscribe = TmsTaskService.onTasksUpdated(() => {
+      loadDynamicTasks();
+    });
+
+    return () => unsubscribe();
+  }, [currentProfile]);
   const [selectedTaskForReview, setSelectedTaskForReview] = useState<any | null>(null);
   const [selectedTaskForProof, setSelectedTaskForProof] = useState<any | null>(null);
   const [proofDescription, setProofDescription] = useState('');
@@ -394,6 +485,126 @@ export default function EmployeeDashboardPage() {
     }
   }, [tasks]);
 
+  // Notifications State
+  const [notifications, setNotifications] = useState([
+    { id: 1, title: 'New Task Assigned', category: 'Tasks', time: '15 mins ago', read: false, desc: 'Review SOP Checklist for 5kW BLDC Hub Motor Assembly assigned by Rajesh Varma.' },
+    { id: 2, title: 'Leave Approved', category: 'Leave', time: '2 hours ago', read: false, desc: 'Your Casual Leave request for Aug 22 has been approved by HR.' },
+    { id: 3, title: 'Shift Clock-In Verified', category: 'Attendance', time: '5 hours ago', read: true, desc: 'Biometric on-time clock-in logged at 09:15 AM.' },
+    { id: 4, title: 'Helpdesk Ticket Updated', category: 'Helpdesk', time: 'Yesterday', read: true, desc: 'Ticket #TKT-8842 has been assigned to Hardware Support Engineer.' },
+    { id: 5, title: 'Executive Notice Published', category: 'Announcements', time: 'Yesterday', read: true, desc: 'New fleet expansion protocol is now live on the notice board.' },
+  ]);
+
+  // Assigned Task Handlers (Review -> Accept -> Execute -> Submit Proof -> Complete)
+  const handleAcceptTask = async (taskId: string) => {
+    const cp = currentProfile as any;
+    const empId = cp?.employeeId || currentProfile?.id || 'EMP-102';
+
+    // Update central TMS Task Service for this specific employee
+    await TmsTaskService.updateAssigneeStatus(taskId, empId, 'ACCEPTED');
+
+    const updated = tasks.map((t) => {
+      if (t.id === taskId) {
+        return {
+          ...t,
+          status: 'IN_PROGRESS' as const,
+          completed: false,
+          acceptedAt: `Today, ${new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} IST`,
+        };
+      }
+      return t;
+    });
+    setTasks(updated);
+
+    if (selectedTaskForReview?.id === taskId) {
+      setSelectedTaskForReview((prev: any) => ({
+        ...prev,
+        status: 'IN_PROGRESS',
+        acceptedAt: `Today, ${new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} IST`,
+      }));
+    }
+    setTaskActionToast('Task accepted! Moved to your In Progress operational queue.');
+    setTimeout(() => setTaskActionToast(''), 3500);
+  };
+
+  const handleOpenProofModal = (task: any) => {
+    setSelectedTaskForProof(task);
+    setProofDescription('');
+    setProofHoursSpent('2.0 hrs');
+    setProofUploadedFiles([]);
+  };
+
+  const handleProofFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (files && files.length > 0) {
+      const newFiles = Array.from(files).map((f) => ({
+        name: f.name,
+        size: f.size > 1024 * 1024 ? `${(f.size / (1024 * 1024)).toFixed(1)} MB` : `${Math.round(f.size / 1024)} KB`,
+        type: f.name.endsWith('.pdf') ? 'PDF' : f.name.endsWith('.xlsx') ? 'Spreadsheet' : 'Document',
+      }));
+      setProofUploadedFiles((prev) => [...prev, ...newFiles]);
+    }
+  };
+
+  const handleSubmitTaskProof = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!selectedTaskForProof) return;
+    if (!proofDescription.trim()) return;
+
+    const cp = currentProfile as any;
+    const empId = cp?.employeeId || currentProfile?.id || 'EMP-102';
+
+    const proofAttachments = (proofUploadedFiles.length > 0 ? proofUploadedFiles : [{ name: 'task_completion_report.pdf', size: '1.4 MB', type: 'PDF' }]).map((f, idx) => ({
+      id: `ATT-${Date.now()}-${idx}`,
+      filename: f.name,
+      size: f.size,
+      url: '#',
+      mimeType: f.type,
+      uploadedAt: new Date().toLocaleDateString('en-US', { month: 'short', day: '2-digit', year: 'numeric' }),
+    }));
+
+    const proofData = {
+      submittedAt: `Today, ${new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} IST`,
+      description: proofDescription.trim(),
+      uploadedDocuments: proofAttachments,
+      hoursSpent: proofHoursSpent,
+    };
+
+    // Update central TMS Task Service with completion proof for this specific employee
+    await TmsTaskService.submitAssigneeCompletion(selectedTaskForProof.id, empId, proofData);
+
+    const updated = tasks.map((t) => {
+      if (t.id === selectedTaskForProof.id) {
+        return {
+          ...t,
+          status: 'COMPLETED' as const,
+          completed: true,
+          completionProof: {
+            submittedAt: proofData.submittedAt,
+            description: proofData.description,
+            uploadedDocuments: proofUploadedFiles,
+            hoursSpent: proofData.hoursSpent,
+          },
+        };
+      }
+      return t;
+    });
+
+    setTasks(updated);
+
+    if (selectedTaskForReview?.id === selectedTaskForProof.id) {
+      setSelectedTaskForReview((prev: any) => ({
+        ...prev,
+        status: 'COMPLETED',
+        completed: true,
+        completionProof: proofData,
+      }));
+    }
+
+    setSelectedTaskForProof(null);
+    setTaskActionToast('Completion proof submitted! Task verified and marked as complete.');
+    setTimeout(() => setTaskActionToast(''), 3500);
+  };
+
   // Dynamic Attendance & Logout Data based on selected Range
   const attendanceChartData = useMemo(() => {
     if (attendanceTimeRange === '1W') {
@@ -442,6 +653,7 @@ export default function EmployeeDashboardPage() {
   }, [attendanceTimeRange, customStartDate, customEndDate, workingDuration]);
 
   // Modals State
+  const [isEmployeeCreateTaskModalOpen, setIsEmployeeCreateTaskModalOpen] = useState(false);
   const [isLeaveModalOpen, setIsLeaveModalOpen] = useState(false);
   const [isLogoutReportModalOpen, setIsLogoutReportModalOpen] = useState(false);
   const [isTicketModalOpen, setIsTicketModalOpen] = useState(false);
@@ -471,45 +683,48 @@ export default function EmployeeDashboardPage() {
   const [docUploadSuccessMsg, setDocUploadSuccessMsg] = useState<string>('');
 
   // Dynamic Logged-in Employee Profile State
-  const defaultProfileData = useMemo(() => ({
-    fullName: currentProfile?.name || 'Sneha Patel',
-    email: currentProfile?.email || 'employee@innovibemobility.com',
-    primaryPhone: '+91 98450 12345',
-    dob: '1996-08-14',
-    gender: 'Female',
-    streetAddress: '42, 12th Main Road, 4th Block, Koramangala',
-    city: 'Bengaluru',
-    state: 'Karnataka',
-    pincode: '560034',
-    emergencyContactName: 'Ananya Patel',
-    emergencyContactPhone: '+91 98450 67890',
-    fatherName: 'Ramesh Patel',
-    motherName: 'Sunita Patel',
-    aadhaarNumber: 'XXXX-XXXX-4829',
-    panNumber: 'ABCDE1234F',
-    professionalDesignation: 'Operations Specialist',
-    role: currentProfile?.role === 'EMPLOYEE' ? 'Operations Specialist' : (currentProfile?.role || 'Operations Specialist'),
-    department: 'EV Fleet Operations & Logistics',
-    employeeId: 'INV-OPS-2024-042',
-    joinedDate: 'January 15, 2024',
-    reportingManager: 'Rajesh Varma (Chief Operating Officer)',
-    workLocation: 'Bengaluru Central Hub (Koramangala)',
-    maritalStatus: 'Single',
-    bloodGroup: 'O+',
-    employmentType: 'Full-Time Regular',
-    workMode: 'Hybrid Model',
-    aadhaarAttachment: 'Uploaded & Verified',
-    panAttachment: 'Uploaded & Verified',
-    resumePdf: 'Uploaded & Verified',
-    degreeCertificate: 'Uploaded & Verified',
-    languagesKnown: 'English, Hindi, Kannada',
-    linkedinUrl: 'https://linkedin.com/in/snehapatel-ops',
-    priorWorkExperience: '3.5 Years in EV Fleet Logistics',
-    highestEducation: 'B.Tech / B.E. in Electrical & Electronics',
-    professionalBio: 'Operations specialist focused on fleet telemetry, battery cell analytics, and depot EV charging logistics.',
-    alternatePhone: '+91 98765 43210',
-    coreTechnicalSkills: 'EV Telemetry, Fleet Logistics, Battery Analytics, SOP Audit',
-  }), [currentProfile]);
+  const defaultProfileData = useMemo(() => {
+    const cp = currentProfile as any;
+    return {
+      fullName: currentProfile?.name || 'Employee',
+      email: currentProfile?.email || 'employee@innovibe.in',
+      primaryPhone: cp?.phone || '+91 98450 12345',
+      dob: '1996-08-14',
+      gender: 'Male',
+      streetAddress: '42, 12th Main Road, 4th Block, Koramangala',
+      city: 'Bengaluru',
+      state: 'Karnataka',
+      pincode: '560034',
+      emergencyContactName: 'Family Contact',
+      emergencyContactPhone: cp?.phone || '+91 98450 67890',
+      fatherName: 'Parent Contact',
+      motherName: 'Parent Contact',
+      aadhaarNumber: 'XXXX-XXXX-4829',
+      panNumber: 'ABCDE1234F',
+      professionalDesignation: cp?.designation || 'Specialist',
+      role: cp?.designation || currentProfile?.role || 'Employee',
+      department: cp?.department || cp?.departmentName || 'Operations',
+      employeeId: cp?.employeeId || 'EMP-102',
+      joinedDate: cp?.joiningDate || 'January 15, 2024',
+      reportingManager: 'Department Head',
+      workLocation: 'Bengaluru Central Hub',
+      maritalStatus: 'Single',
+      bloodGroup: 'O+',
+      employmentType: 'Full-Time Regular',
+      workMode: 'Hybrid Model',
+      aadhaarAttachment: 'Uploaded & Verified',
+      panAttachment: 'Uploaded & Verified',
+      resumePdf: 'Uploaded & Verified',
+      degreeCertificate: 'Uploaded & Verified',
+      languagesKnown: 'English, Hindi',
+      linkedinUrl: 'https://linkedin.com/in/innovibe-team',
+      priorWorkExperience: '3.5 Years Experience',
+      highestEducation: 'B.Tech / B.E.',
+      professionalBio: `${cp?.designation || 'Team Member'} in ${cp?.department || 'Operations'} focused on enterprise deliverable execution.`,
+      alternatePhone: cp?.phone || '+91 98765 43210',
+      coreTechnicalSkills: 'Operations, Workflow Management, TMS Integration',
+    };
+  }, [currentProfile]);
 
   const [profileData, setProfileData] = useState(defaultProfileData);
   const [tempProfileData, setTempProfileData] = useState(defaultProfileData);
@@ -522,9 +737,12 @@ export default function EmployeeDashboardPage() {
       if (saved) {
         try {
           const parsed = JSON.parse(saved);
-          setProfileData(parsed);
-          setTempProfileData(parsed);
-        } catch (e) {}
+          setProfileData({ ...defaultProfileData, ...parsed });
+          setTempProfileData({ ...defaultProfileData, ...parsed });
+        } catch (e) {
+          setProfileData(defaultProfileData);
+          setTempProfileData(defaultProfileData);
+        }
       } else {
         setProfileData(defaultProfileData);
         setTempProfileData(defaultProfileData);
@@ -811,105 +1029,6 @@ export default function EmployeeDashboardPage() {
     },
   ]);
 
-  // Notifications State
-  const [notifications, setNotifications] = useState([
-    { id: 1, title: 'New Task Assigned', category: 'Tasks', time: '15 mins ago', read: false, desc: 'Review SOP Checklist for 5kW BLDC Hub Motor Assembly assigned by Rajesh Varma.' },
-    { id: 2, title: 'Leave Approved', category: 'Leave', time: '2 hours ago', read: false, desc: 'Your Casual Leave request for Aug 22 has been approved by HR.' },
-    { id: 3, title: 'Shift Clock-In Verified', category: 'Attendance', time: '5 hours ago', read: true, desc: 'Biometric on-time clock-in logged at 09:15 AM.' },
-    { id: 4, title: 'Helpdesk Ticket Updated', category: 'Helpdesk', time: 'Yesterday', read: true, desc: 'Ticket #TKT-8842 has been assigned to Hardware Support Engineer.' },
-    { id: 5, title: 'Executive Notice Published', category: 'Announcements', time: 'Yesterday', read: true, desc: 'New fleet expansion protocol is now live on the notice board.' },
-  ]);
-
-  // Assigned Task Handlers (Review -> Accept -> Execute -> Submit Proof -> Complete)
-  const handleAcceptTask = (taskId: string) => {
-    const updated = tasks.map((t) => {
-      if (t.id === taskId) {
-        return {
-          ...t,
-          status: 'IN_PROGRESS' as const,
-          completed: false,
-          acceptedAt: `Today, ${(() => { const u=new Date(); const i=new Date(u.getTime()+u.getTimezoneOffset()*60000+5.5*3600000); const h=i.getHours()%12||12; const m=i.getMinutes().toString().padStart(2,'0'); const ap=i.getHours()>=12?'PM':'AM'; return `${h}:${m} ${ap} IST`; })()}`,
-        };
-      }
-      return t;
-    });
-    setTasks(updated);
-    if (typeof window !== 'undefined') {
-      localStorage.setItem(`icc_employee_tasks_${currentProfile?.email || 'default'}`, JSON.stringify(updated));
-    }
-    if (selectedTaskForReview?.id === taskId) {
-      setSelectedTaskForReview((prev: any) => ({
-        ...prev,
-        status: 'IN_PROGRESS',
-        acceptedAt: `Today, ${(() => { const u=new Date(); const i=new Date(u.getTime()+u.getTimezoneOffset()*60000+5.5*3600000); const h=i.getHours()%12||12; const m=i.getMinutes().toString().padStart(2,'0'); const ap=i.getHours()>=12?'PM':'AM'; return `${h}:${m} ${ap} IST`; })()}`,
-      }));
-    }
-    setTaskActionToast('Task accepted! Moved to your In Progress operational queue.');
-    setTimeout(() => setTaskActionToast(''), 3500);
-  };
-
-  const handleOpenProofModal = (task: any) => {
-    setSelectedTaskForProof(task);
-    setProofDescription('');
-    setProofHoursSpent('2.0 hrs');
-    setProofUploadedFiles([]);
-  };
-
-  const handleProofFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = e.target.files;
-    if (files && files.length > 0) {
-      const newFiles = Array.from(files).map((f) => ({
-        name: f.name,
-        size: f.size > 1024 * 1024 ? `${(f.size / (1024 * 1024)).toFixed(1)} MB` : `${Math.round(f.size / 1024)} KB`,
-        type: f.name.endsWith('.pdf') ? 'PDF' : f.name.endsWith('.xlsx') ? 'Spreadsheet' : 'Document',
-      }));
-      setProofUploadedFiles((prev) => [...prev, ...newFiles]);
-    }
-  };
-
-  const handleSubmitTaskProof = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!selectedTaskForProof) return;
-    if (!proofDescription.trim()) return;
-
-    const proofData = {
-      submittedAt: `Today, ${(() => { const u=new Date(); const i=new Date(u.getTime()+u.getTimezoneOffset()*60000+5.5*3600000); const h=i.getHours()%12||12; const m=i.getMinutes().toString().padStart(2,'0'); const ap=i.getHours()>=12?'PM':'AM'; return `${h}:${m} ${ap} IST`; })()}`,
-      description: proofDescription.trim(),
-      uploadedDocuments: proofUploadedFiles.length > 0 ? proofUploadedFiles : [{ name: 'task_completion_report.pdf', size: '1.4 MB', type: 'PDF' }],
-      hoursSpent: proofHoursSpent,
-    };
-
-    const updated = tasks.map((t) => {
-      if (t.id === selectedTaskForProof.id) {
-        return {
-          ...t,
-          status: 'COMPLETED' as const,
-          completed: true,
-          completionProof: proofData,
-        };
-      }
-      return t;
-    });
-
-    setTasks(updated);
-    if (typeof window !== 'undefined') {
-      localStorage.setItem(`icc_employee_tasks_${currentProfile?.email || 'default'}`, JSON.stringify(updated));
-    }
-
-    if (selectedTaskForReview?.id === selectedTaskForProof.id) {
-      setSelectedTaskForReview((prev: any) => ({
-        ...prev,
-        status: 'COMPLETED',
-        completed: true,
-        completionProof: proofData,
-      }));
-    }
-
-    setSelectedTaskForProof(null);
-    setTaskActionToast('Completion proof submitted! Task verified and marked as complete.');
-    setTimeout(() => setTaskActionToast(''), 3500);
-  };
-
   const handleApplyLeave = (e: React.FormEvent) => {
     e.preventDefault();
     if (!leaveReason.trim()) return;
@@ -1053,6 +1172,14 @@ export default function EmployeeDashboardPage() {
             </div>
 
             <div className="flex items-center gap-3">
+              <button
+                type="button"
+                onClick={() => setIsEmployeeCreateTaskModalOpen(true)}
+                className="px-3.5 py-1.5 bg-[#2563EB] hover:bg-blue-700 text-white rounded-xl text-xs font-bold transition cursor-pointer shadow-xs flex items-center gap-1.5"
+              >
+                <Plus className="w-3.5 h-3.5 stroke-[3]" />
+                <span>Create & Assign Task</span>
+              </button>
               <button
                 type="button"
                 onClick={() => setView('notifications')}
@@ -5096,6 +5223,24 @@ export default function EmployeeDashboardPage() {
           </div>
         </div>
       )}
+      {/* Cross-Platform Task Creation Modal */}
+      <CreateTaskModal
+        isOpen={isEmployeeCreateTaskModalOpen}
+        onClose={() => setIsEmployeeCreateTaskModalOpen(false)}
+        onTaskCreated={() => {
+          setTaskActionToast('Task created & assigned successfully!');
+          setTimeout(() => setTaskActionToast(''), 3500);
+        }}
+        creatorProfile={profileData}
+      />
     </div>
+  );
+}
+
+export default function EmployeeDashboardPage() {
+  return (
+    <Suspense fallback={<div className="p-6 text-xs text-slate-500 font-bold">Loading Employee Workspace...</div>}>
+      <EmployeeDashboardContent />
+    </Suspense>
   );
 }

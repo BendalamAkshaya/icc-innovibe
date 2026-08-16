@@ -42,6 +42,7 @@ export function Navbar() {
     if (pathname.startsWith('/dashboard/coo')) return 'COO';
     if (pathname.startsWith('/dashboard/service-manager')) return 'SERVICE_MANAGER';
     if (pathname.startsWith('/dashboard/technician')) return 'TECHNICIAN';
+    if (pathname.startsWith('/dashboard/employee')) return 'EMPLOYEE';
     if (pathname.startsWith('/dashboard/ceo')) return 'CEO';
     return activeRole;
   };
@@ -231,6 +232,7 @@ export function Navbar() {
           <Search className="h-4 w-4 text-slate-400 shrink-0" />
           <input
             type="text"
+            suppressHydrationWarning
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             onFocus={() => setIsSearchFocused(true)}
@@ -329,6 +331,8 @@ export function Navbar() {
 
         {/* Notifications Bell */}
         <button
+          type="button"
+          suppressHydrationWarning
           onClick={() => setIsNotificationsOpen(!isNotificationsOpen)}
           className={`relative p-2 rounded-xl transition-all cursor-pointer ${isNotificationsOpen ? 'bg-indigo-50 text-indigo-600' : 'text-slate-500 hover:text-indigo-600 hover:bg-indigo-50'}`}
           title="Notifications"
@@ -487,6 +491,8 @@ export function Navbar() {
         </div>
 
         <button
+          type="button"
+          suppressHydrationWarning
           onClick={handleLogout}
           title="Log Out"
           className="p-2 rounded-xl bg-slate-100 hover:bg-red-50 text-slate-600 hover:text-red-600 border border-slate-200 hover:border-red-200 transition-all ml-1"
