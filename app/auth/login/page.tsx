@@ -157,7 +157,7 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen w-full relative flex flex-col items-center justify-center p-2 sm:p-4 lg:p-5 font-sans overflow-x-hidden selection:bg-[#6D35F5] selection:text-white">
+    <div suppressHydrationWarning className="min-h-screen w-full relative flex flex-col items-center justify-center p-2 sm:p-4 lg:p-5 font-sans overflow-x-hidden selection:bg-[#6D35F5] selection:text-white">
       
       {/* Blurred Wallpaper Background Image */}
       <div className="absolute inset-0 z-0 overflow-hidden pointer-events-none">
@@ -303,6 +303,7 @@ export default function LoginPage() {
                   <button
                     key={portal.role}
                     type="button"
+                    suppressHydrationWarning
                     onClick={() => handleSelectRole(portal)}
                     className={`p-2 sm:p-2.5 rounded-xl text-left border transition-all duration-200 flex items-center justify-between relative cursor-pointer ${
                       isSelected

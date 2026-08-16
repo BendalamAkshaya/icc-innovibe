@@ -200,61 +200,48 @@ export function TaskWorkspaceModal({ taskId, onClose, onTaskUpdated }: TaskWorks
 
                 {/* Collaborators & Individual Progress Grid */}
                 <div className="space-y-2 pt-1">
-                  <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest block">COLLABORATORS & INDIVIDUAL PROGRESS</span>
+                  <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest block">
+                    ASSIGNED WORKFORCE ({task.assignees ? task.assignees.length : 1}) & INDIVIDUAL PROGRESS
+                  </span>
                   
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                    {/* Collaborator Card 1 */}
-                    <div className="p-3 rounded-2xl bg-[#030712] border border-slate-800 flex items-center justify-between gap-3">
-                      <div className="flex items-center gap-2.5 min-w-0">
-                        <div className="w-8 h-8 rounded-full bg-slate-800 text-slate-300 font-black text-xs flex items-center justify-center shrink-0">
-                          G
+                    {(task.assignees && task.assignees.length > 0
+                      ? task.assignees
+                      : [
+                          {
+                            employeeId: task.assignee.id,
+                            employeeName: task.assignee.name,
+                            departmentName: task.department,
+                            avatar: task.assignee.avatar,
+                            status: task.status === 'COMPLETED' ? 'COMPLETED' : 'ASSIGNED',
+                          },
+                        ]
+                    ).map((assigneeItem, idx) => (
+                      <div key={idx} className="p-3 rounded-2xl bg-[#030712] border border-slate-800 flex items-center justify-between gap-3">
+                        <div className="flex items-center gap-2.5 min-w-0">
+                          <img
+                            src={assigneeItem.avatar || 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&auto=format&fit=crop&q=80'}
+                            alt={assigneeItem.employeeName}
+                            className="w-8 h-8 rounded-full object-cover shrink-0 border border-slate-700"
+                          />
+                          <div className="min-w-0">
+                            <h5 className="text-xs font-bold text-white truncate">{assigneeItem.employeeName}</h5>
+                            <p className="text-[9px] text-slate-400 truncate">{assigneeItem.departmentName || 'Staff Member'}</p>
+                          </div>
                         </div>
-                        <div className="min-w-0">
-                          <h5 className="text-xs font-bold text-white truncate">Geetha Sowmya...</h5>
-                          <p className="text-[9px] text-slate-400 truncate">Backend Engineer • Inf...</p>
-                        </div>
-                      </div>
-                      <span className="px-2 py-0.5 rounded-md bg-emerald-500/20 text-emerald-400 border border-emerald-500/40 text-[9px] font-black shrink-0">
-                        COMPLETED
-                      </span>
-                    </div>
-
-                    {/* Collaborator Card 2 (Current User) */}
-                    <div className="p-3 rounded-2xl bg-[#030712] border border-blue-500/50 flex items-center justify-between gap-3 relative">
-                      <div className="flex items-center gap-2.5 min-w-0">
-                        <div className="w-8 h-8 rounded-full bg-blue-600 text-white font-black text-xs flex items-center justify-center shrink-0">
-                          S
-                        </div>
-                        <div className="min-w-0">
-                          <h5 className="text-xs font-bold text-white truncate">Sri Varun Tej Ch...</h5>
-                          <p className="text-[9px] text-slate-400 truncate">IT Intern • Information ...</p>
-                        </div>
-                      </div>
-                      <div className="flex flex-col items-end gap-1 shrink-0">
-                        <span className="px-2 py-0.5 rounded-md bg-emerald-500/20 text-emerald-400 border border-emerald-500/40 text-[9px] font-black">
-                          COMPLETED
+                        <span
+                          className={`px-2 py-0.5 rounded-md text-[9px] font-black shrink-0 ${
+                            assigneeItem.status === 'COMPLETED'
+                              ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/40'
+                              : assigneeItem.status === 'ACCEPTED' || assigneeItem.status === 'IN_PROGRESS'
+                              ? 'bg-blue-500/20 text-blue-400 border border-blue-500/40'
+                              : 'bg-amber-500/20 text-amber-400 border border-amber-500/40'
+                          }`}
+                        >
+                          {assigneeItem.status}
                         </span>
-                        <span className="px-1.5 py-0.2 rounded bg-blue-600 text-white text-[8px] font-black uppercase">
-                          CURRENT USER
-                        </span>
                       </div>
-                    </div>
-
-                    {/* Collaborator Card 3 */}
-                    <div className="p-3 rounded-2xl bg-[#030712] border border-slate-800 flex items-center justify-between gap-3">
-                      <div className="flex items-center gap-2.5 min-w-0">
-                        <div className="w-8 h-8 rounded-full bg-slate-800 text-slate-300 font-black text-xs flex items-center justify-center shrink-0">
-                          B
-                        </div>
-                        <div className="min-w-0">
-                          <h5 className="text-xs font-bold text-white truncate">Bendalam Aksha...</h5>
-                          <p className="text-[9px] text-slate-400 truncate">Automation Engineer • ...</p>
-                        </div>
-                      </div>
-                      <span className="px-2 py-0.5 rounded-md bg-emerald-500/20 text-emerald-400 border border-emerald-500/40 text-[9px] font-black shrink-0">
-                        COMPLETED
-                      </span>
-                    </div>
+                    ))}
                   </div>
                 </div>
               </div>

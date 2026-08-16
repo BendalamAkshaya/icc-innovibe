@@ -108,6 +108,9 @@ const seedWorkSessions: WorkSession[] = [
   },
 ];
 
+export const EVENT_LOGOUT_UPDATED = 'innovibe:logout_updated';
+import { NotificationRepository } from './notification-repository';
+
 export class LogoutRepository {
   private static loadFromStorage(): WorkSession[] {
     if (typeof window === 'undefined') return seedWorkSessions;
@@ -136,9 +139,23 @@ export class LogoutRepository {
     if (typeof window === 'undefined') return;
     try {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+      window.dispatchEvent(new CustomEvent(EVENT_LOGOUT_UPDATED, { detail: data }));
     } catch (e) {
       console.error('Failed to save work sessions to localStorage:', e);
     }
+  }
+
+  static onLogoutUpdated(callback: (sessions: WorkSession[]) => void): () => void {
+    if (typeof window === 'undefined') return () => {};
+    const handler = () => {
+      callback(LogoutRepository.getWorkSessions());
+    };
+    window.addEventListener(EVENT_LOGOUT_UPDATED, handler);
+    window.addEventListener('storage', handler);
+    return () => {
+      window.removeEventListener(EVENT_LOGOUT_UPDATED, handler);
+      window.removeEventListener('storage', handler);
+    };
   }
 
   static getWorkSessions(filters?: LogoutFilterParams): WorkSession[] {
@@ -241,6 +258,19 @@ export class LogoutRepository {
 
     list[idx] = updated;
     this.saveToStorage(list);
+
+    try {
+      NotificationRepository.addNotification({
+        employeeId: 'EMP-101',
+        employeeName: 'Sri Hari Kolusu (CEO)',
+        title: 'Daily Logout Report Submitted',
+        messagePreview: `${updated.employeeName} submitted end-of-day work report: "${payload.workSummary.slice(0, 80)}"`,
+        type: 'COMMENT_ADDED',
+        priority: 'NORMAL',
+        linkTab: 'logout',
+      });
+    } catch (e) {}
+
     return updated;
   }
 

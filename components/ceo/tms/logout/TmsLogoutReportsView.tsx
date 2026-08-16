@@ -58,6 +58,10 @@ export function TmsLogoutReportsView() {
 
   useEffect(() => {
     loadData();
+    const unsubscribe = LogoutService.onLogoutUpdated(() => {
+      loadData();
+    });
+    return () => unsubscribe();
   }, []);
 
   const filteredSessions = sessions.filter((s) => {

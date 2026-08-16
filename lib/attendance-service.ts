@@ -196,12 +196,83 @@ const mockAttendanceRecords: AttendanceRecord[] = [
   },
 ];
 
+const STORAGE_KEY = 'icc_tms_attendance_records_v3';
+export const EVENT_ATTENDANCE_UPDATED = 'innovibe:attendance_updated';
+
+function getStoredAttendanceRecords(): AttendanceRecord[] {
+  if (typeof window === 'undefined') return mockAttendanceRecords;
+  try {
+    const data = localStorage.getItem(STORAGE_KEY);
+    if (data) return JSON.parse(data);
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(mockAttendanceRecords));
+    return mockAttendanceRecords;
+  } catch (e) {
+    return mockAttendanceRecords;
+  }
+}
+
+function saveStoredAttendanceRecords(records: AttendanceRecord[]): void {
+  if (typeof window === 'undefined') return;
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(records));
+    window.dispatchEvent(new CustomEvent(EVENT_ATTENDANCE_UPDATED, { detail: records }));
+  } catch (e) {}
+}
+
 export class AttendanceService {
+  /**
+   * Subscribe to live attendance changes across components and windows
+   */
+  static onAttendanceUpdated(callback: (records: AttendanceRecord[]) => void): () => void {
+    if (typeof window === 'undefined') return () => {};
+    const handler = () => {
+      AttendanceService.getAttendanceRecords().then(callback);
+    };
+    window.addEventListener(EVENT_ATTENDANCE_UPDATED, handler);
+    window.addEventListener('storage', handler);
+    return () => {
+      window.removeEventListener(EVENT_ATTENDANCE_UPDATED, handler);
+      window.removeEventListener('storage', handler);
+    };
+  }
+
+  /**
+   * Record punch in/out from employee dashboard
+   */
+  static async recordPunch(record: Partial<AttendanceRecord>): Promise<AttendanceRecord> {
+    const list = getStoredAttendanceRecords();
+    const idx = list.findIndex((r) => r.employeeId === record.employeeId || r.employeeName.includes('Sri Varun'));
+    if (idx !== -1) {
+      list[idx] = { ...list[idx], ...record };
+    } else {
+      const newRec: AttendanceRecord = {
+        id: `ATT-${Date.now()}`,
+        employeeId: record.employeeId || 'EMP-102',
+        employeeName: record.employeeName || 'Sri Varun Tej Chavitina',
+        avatar: record.avatar || 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&auto=format&fit=crop&q=80',
+        role: record.role || 'Information Technology Intern',
+        department: record.department || 'Technology',
+        status: record.status || 'PRESENT',
+        firstCheckIn: record.firstCheckIn || '09:00 AM',
+        lastCheckOut: record.lastCheckOut || '--:--',
+        totalWorkingHours: record.totalWorkingHours || 8.0,
+        attendancePercentage: 100,
+        date: new Date().toLocaleDateString('en-US', { month: 'short', day: '2-digit', year: 'numeric' }),
+        shiftName: 'General Shift (09:00 AM - 06:00 PM)',
+        sessions: [],
+        ...record,
+      };
+      list.unshift(newRec);
+    }
+    saveStoredAttendanceRecords(list);
+    return list[idx >= 0 ? idx : 0];
+  }
+
   /**
    * Fetch attendance records with multi-dimensional filtering
    */
   static async getAttendanceRecords(filters?: AttendanceFilterParams): Promise<AttendanceRecord[]> {
-    let result = [...mockAttendanceRecords];
+    let result = getStoredAttendanceRecords();
 
     if (!filters) return result;
 
@@ -235,18 +306,19 @@ export class AttendanceService {
    * Fetch attendance KPIs
    */
   static async getAttendanceKpis(): Promise<AttendanceKpis> {
-    const present = mockAttendanceRecords.filter((r) => r.status === 'PRESENT' || r.status === 'LATE').length;
-    const late = mockAttendanceRecords.filter((r) => r.status === 'LATE').length;
-    const absent = mockAttendanceRecords.filter((r) => r.status === 'ABSENT').length;
-    const leave = mockAttendanceRecords.filter((r) => r.status === 'LEAVE').length;
-    const wfh = mockAttendanceRecords.filter((r) => r.status === 'WORK_FROM_HOME').length;
+    const list = getStoredAttendanceRecords();
+    const present = list.filter((r) => r.status === 'PRESENT' || r.status === 'LATE').length;
+    const late = list.filter((r) => r.status === 'LATE').length;
+    const absent = list.filter((r) => r.status === 'ABSENT').length;
+    const leave = list.filter((r) => r.status === 'LEAVE').length;
+    const wfh = list.filter((r) => r.status === 'WORK_FROM_HOME').length;
 
     return {
       totalStrength: 148,
-      presentToday: 139,
+      presentToday: 139 + present,
       includesLateCount: late + 5,
-      lateCheckIns: 8,
-      absentToday: 9,
+      lateCheckIns: 8 + late,
+      absentToday: Math.max(0, 9 - present),
       leaveToday: leave + 3,
       wfhToday: wfh + 4,
     };

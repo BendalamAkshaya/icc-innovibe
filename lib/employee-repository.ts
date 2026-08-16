@@ -157,6 +157,8 @@ const seedEmployees: EmployeeRecord[] = [
   },
 ];
 
+export const EVENT_EMPLOYEES_UPDATED = 'innovibe:employees_updated';
+
 export class EmployeeRepository {
   private static loadFromStorage(): EmployeeRecord[] {
     if (typeof window === 'undefined') return seedEmployees;
@@ -185,9 +187,23 @@ export class EmployeeRepository {
     if (typeof window === 'undefined') return;
     try {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+      window.dispatchEvent(new CustomEvent(EVENT_EMPLOYEES_UPDATED, { detail: data }));
     } catch (e) {
       console.error('Failed to save employees to localStorage:', e);
     }
+  }
+
+  static onEmployeesUpdated(callback: (records: EmployeeRecord[]) => void): () => void {
+    if (typeof window === 'undefined') return () => {};
+    const handler = () => {
+      callback(EmployeeRepository.getEmployees());
+    };
+    window.addEventListener(EVENT_EMPLOYEES_UPDATED, handler);
+    window.addEventListener('storage', handler);
+    return () => {
+      window.removeEventListener(EVENT_EMPLOYEES_UPDATED, handler);
+      window.removeEventListener('storage', handler);
+    };
   }
 
   static getEmployees(): EmployeeRecord[] {

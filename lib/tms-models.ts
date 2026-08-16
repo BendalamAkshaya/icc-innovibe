@@ -80,6 +80,27 @@ export interface TaskTimeline {
   completedDate?: string;
 }
 
+export type AssigneeIndividualStatus = 'ASSIGNED' | 'ACCEPTED' | 'IN_PROGRESS' | 'COMPLETED';
+
+export interface TaskCompletionProof {
+  submittedAt: string;
+  description: string;
+  uploadedDocuments?: TaskAttachment[];
+  hoursSpent?: string;
+}
+
+export interface TaskAssigneeStatus {
+  employeeId: string;
+  employeeName: string;
+  departmentName?: string;
+  avatar?: string;
+  email?: string;
+  status: AssigneeIndividualStatus;
+  acceptedAt?: string;
+  completedAt?: string;
+  completionProof?: TaskCompletionProof;
+}
+
 export interface Task {
   id: string;
   title: string;
@@ -90,12 +111,14 @@ export interface Task {
   department: string;
   owner: Employee;
   assignee: Employee;
+  assignees?: TaskAssigneeStatus[];
   collaborators: Collaborator[];
   subtasks: Subtask[];
   progressPercent: number;
   timeline: TaskTimeline;
   attachments: TaskAttachment[];
   discussionCount: number;
+  discussions?: TaskDiscussionMessage[];
   assignedToMe?: boolean;
   assignedByMe?: boolean;
 }
@@ -125,8 +148,12 @@ export interface CreateTaskPayload {
   category: TaskCategory;
   priority: TaskPriority;
   department: string;
-  assigneeId: string;
+  owner?: Employee;
+  assigneeId?: string;
+  assigneeIds?: string[];
+  assigneeRole?: string;
   deadline: string;
   collaboratorIds?: string[];
   subtaskTitles?: string[];
+  attachments?: TaskAttachment[];
 }

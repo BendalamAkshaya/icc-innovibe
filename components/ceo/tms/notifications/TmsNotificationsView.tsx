@@ -104,10 +104,37 @@ const initialNotifications: MockNotification[] = [
   },
 ];
 
+import { NotificationRepository } from '../../../../lib/notification-repository';
+
 export function TmsNotificationsView() {
   const [notifications, setNotifications] = useState<MockNotification[]>(initialNotifications);
   const [filterCategory, setFilterCategory] = useState<string>('ALL');
   const [searchQuery, setSearchQuery] = useState('');
+
+  const loadLiveNotifications = () => {
+    const liveRecords = NotificationRepository.getNotifications();
+    const mapped: MockNotification[] = liveRecords.map((r) => ({
+      id: r.id,
+      title: r.title,
+      sender: r.employeeName,
+      senderRole: 'Team Member',
+      avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&auto=format&fit=crop&q=80',
+      messagePreview: r.messagePreview,
+      category: r.type === 'LEAVE_SUBMITTED' || r.type === 'LEAVE_APPROVED' ? 'LEAVE' : r.type === 'ANNOUNCEMENT' ? 'ANNOUNCEMENT' : 'TASK',
+      priority: r.priority === 'IMPORTANT' ? 'IMPORTANT' : 'NORMAL',
+      timestamp: r.timeAgo,
+      isRead: r.isRead,
+    }));
+    setNotifications([...mapped, ...initialNotifications]);
+  };
+
+  React.useEffect(() => {
+    loadLiveNotifications();
+    const unsubscribe = NotificationRepository.onNotificationsChanged(() => {
+      loadLiveNotifications();
+    });
+    return () => unsubscribe();
+  }, []);
 
   const toggleReadStatus = (id: string) => {
     setNotifications((prev) =>

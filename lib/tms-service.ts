@@ -12,13 +12,26 @@ import {
   TaskActivityHistory,
   Employee,
   Department,
+  TaskAssigneeStatus,
+  AssigneeIndividualStatus,
+  TaskCompletionProof,
 } from './tms-models';
+import { NotificationRepository } from './notification-repository';
+import { EmployeeRepository } from './employee-repository';
 
 const mockEmployees: Employee[] = [
   {
+    id: 'EMP-100',
+    name: 'Sri Hari Kolusu',
+    role: 'Founder & CEO',
+    department: 'Executive Office',
+    avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80',
+    email: 'ceo@innovibe.in',
+  },
+  {
     id: 'EMP-101',
     name: 'Srinivas Thalada',
-    role: 'DEPARTMENT',
+    role: 'Department Head & Architect',
     department: 'Technology',
     avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80',
     email: 'srinivas.t@innovibe.in',
@@ -270,6 +283,8 @@ const initialTasksDataset: Task[] = [
   },
 ];
 
+export const EVENT_TMS_TASKS_UPDATED = 'innovibe:tms_tasks_updated';
+
 // Helper to manage localStorage persistence
 function getStoredTasks(): Task[] {
   if (typeof window === 'undefined') return initialTasksDataset;
@@ -287,6 +302,7 @@ function saveStoredTasks(tasks: Task[]): void {
   if (typeof window === 'undefined') return;
   try {
     localStorage.setItem('icc_tms_tasks_v3', JSON.stringify(tasks));
+    window.dispatchEvent(new CustomEvent(EVENT_TMS_TASKS_UPDATED, { detail: tasks }));
   } catch (e) {}
 }
 
@@ -319,10 +335,27 @@ function saveStoredDiscussions(discussions: Record<string, TaskDiscussionMessage
   if (typeof window === 'undefined') return;
   try {
     localStorage.setItem('icc_tms_discussions_v3', JSON.stringify(discussions));
+    window.dispatchEvent(new CustomEvent(EVENT_TMS_TASKS_UPDATED));
   } catch (e) {}
 }
 
 export class TmsTaskService {
+  /**
+   * Subscribe to real-time task updates across components and windows
+   */
+  static onTasksUpdated(callback: (tasks: Task[]) => void): () => void {
+    if (typeof window === 'undefined') return () => {};
+    const handler = () => {
+      TmsTaskService.getTasks().then(callback);
+    };
+    window.addEventListener(EVENT_TMS_TASKS_UPDATED, handler);
+    window.addEventListener('storage', handler);
+    return () => {
+      window.removeEventListener(EVENT_TMS_TASKS_UPDATED, handler);
+      window.removeEventListener('storage', handler);
+    };
+  }
+
   /**
    * Fetch tasks filtered by params
    */
@@ -366,7 +399,7 @@ export class TmsTaskService {
           result = result.filter((t) => t.assignedToMe || t.assignee.id === 'EMP-102' || t.assignee.name.includes('Sri Varun'));
           break;
         case 'ASSIGNED_BY_ME':
-          result = result.filter((t) => t.assignedByMe || t.owner.id === 'EMP-101' || t.owner.name.includes('Srinivas'));
+          result = result.filter((t) => t.assignedByMe || t.owner.id === 'EMP-101' || t.owner.name.includes('Srinivas') || t.owner.name.includes('Hari'));
           break;
         case 'PENDING_ACTIONS':
           result = result.filter((t) => t.status === 'UNDER_REVIEW' || t.status === 'OPEN' || t.status === 'IN_PROGRESS');
@@ -392,12 +425,79 @@ export class TmsTaskService {
   }
 
   /**
-   * Create new task
+   * Fetch employee roster dynamically from EmployeeRepository
+   */
+  static async getEmployees(): Promise<Employee[]> {
+    try {
+      const records = EmployeeRepository.getEmployees();
+      if (records && records.length > 0) {
+        return records.map((r) => ({
+          id: r.employeeId || r.id,
+          name: r.fullName,
+          role: r.designation || r.role,
+          department: r.departmentName || 'General',
+          avatar: r.avatar || 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&auto=format&fit=crop&q=80',
+          email: r.email,
+        }));
+      }
+    } catch (e) {}
+    return mockEmployees;
+  }
+
+  /**
+   * Fetch departments list
+   */
+  static async getDepartments(): Promise<Department[]> {
+    return mockDepartments;
+  }
+
+  /**
+   * Create new task with multi-assignee support
    */
   static async createTask(payload: CreateTaskPayload): Promise<Task> {
     const tasks = getStoredTasks();
-    const newId = `TMS-${Math.floor(910 + Math.random() * 100)}`;
-    const assigneeObj = mockEmployees.find((e) => e.id === payload.assigneeId) || mockEmployees[1];
+    const newId = `TMS-${Math.floor(910 + Math.random() * 900)}`;
+
+    const allEmps = await TmsTaskService.getEmployees();
+
+    let targetIds: string[] = [];
+    if (payload.assigneeIds && payload.assigneeIds.length > 0) {
+      targetIds = payload.assigneeIds;
+    } else if (payload.assigneeId) {
+      targetIds = [payload.assigneeId];
+    } else {
+      targetIds = [allEmps[0]?.id || 'EMP-102'];
+    }
+
+    const selectedEmps: Employee[] = targetIds.map(
+      (id) => allEmps.find((e) => e.id === id || e.email === id) || {
+        id,
+        name: 'Assigned Employee',
+        role: 'Employee',
+        department: payload.department || 'Technology',
+        avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&auto=format&fit=crop&q=80',
+        email: 'employee@innovibe.in',
+      }
+    );
+
+    const primaryAssignee = selectedEmps[0];
+
+    const assigneesList: TaskAssigneeStatus[] = selectedEmps.map((emp) => ({
+      employeeId: emp.id,
+      employeeName: emp.name,
+      departmentName: emp.department,
+      avatar: emp.avatar,
+      email: emp.email,
+      status: 'ASSIGNED',
+    }));
+
+    const collaboratorsList = selectedEmps.slice(1).map((emp) => ({
+      id: emp.id,
+      name: emp.name,
+      role: emp.role,
+      avatar: emp.avatar,
+      status: 'ACTIVE' as const,
+    }));
 
     const newTask: Task = {
       id: newId,
@@ -406,20 +506,25 @@ export class TmsTaskService {
       category: payload.category,
       priority: payload.priority,
       status: 'OPEN',
-      department: payload.department || assigneeObj.department,
-      owner: mockEmployees[0],
-      assignee: assigneeObj,
-      collaborators: (payload.collaboratorIds || []).map((cid) => {
-        const emp = mockEmployees.find((e) => e.id === cid) || mockEmployees[1];
-        return { id: emp.id, name: emp.name, role: emp.role, avatar: emp.avatar, status: 'ACTIVE' };
-      }),
+      department: payload.department || primaryAssignee.department || 'Technology',
+      owner: payload.owner || {
+        id: 'EMP-100',
+        name: 'Sri Hari Kolusu',
+        role: 'Founder & CEO',
+        department: 'Executive Office',
+        avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80',
+        email: 'ceo@innovibe.in',
+      },
+      assignee: primaryAssignee,
+      assignees: assigneesList,
+      collaborators: collaboratorsList,
       subtasks: (payload.subtaskTitles || []).map((t, i) => ({ id: `ST-${newId}-${i}`, title: t, completed: false })),
       progressPercent: 0,
       timeline: {
         createdDate: new Date().toLocaleDateString('en-US', { month: 'short', day: '2-digit', year: 'numeric' }),
-        targetDeadline: payload.deadline || '30 Aug',
+        targetDeadline: payload.deadline && payload.deadline !== 'dd-mm-yyyy' ? payload.deadline : '30 Aug 2026',
       },
-      attachments: [],
+      attachments: payload.attachments || [],
       discussionCount: 0,
       assignedByMe: true,
     };
@@ -427,7 +532,167 @@ export class TmsTaskService {
     tasks.unshift(newTask);
     saveStoredTasks(tasks);
 
+    // Dispatch real-time notifications to all assigned employees
+    selectedEmps.forEach((emp) => {
+      try {
+        NotificationRepository.addNotification({
+          employeeId: emp.id,
+          employeeName: emp.name,
+          title: 'New Task Assigned',
+          messagePreview: `You have been assigned to Task: "${newTask.title}" by ${newTask.owner.name}`,
+          type: 'TASK_ASSIGNED',
+          priority: newTask.priority === 'URGENT' || newTask.priority === 'HIGH' ? 'IMPORTANT' : 'NORMAL',
+          linkTab: 'tasks',
+        });
+      } catch (e) {}
+    });
+
     return newTask;
+  }
+
+  /**
+   * Update an individual employee's status for a parent task without mutating co-assignees
+   */
+  static async updateAssigneeStatus(taskId: string, empIdentifier: string, newStatus: AssigneeIndividualStatus): Promise<Task | null> {
+    const tasks = getStoredTasks();
+    const idx = tasks.findIndex((t) => t.id === taskId);
+    if (idx === -1) return null;
+
+    const task = { ...tasks[idx] };
+
+    // Migrate assignees array if missing
+    if (!task.assignees || task.assignees.length === 0) {
+      task.assignees = [
+        {
+          employeeId: task.assignee.id,
+          employeeName: task.assignee.name,
+          departmentName: task.department,
+          avatar: task.assignee.avatar,
+          email: task.assignee.email,
+          status: (task.status === 'COMPLETED' ? 'COMPLETED' : task.status === 'IN_PROGRESS' ? 'IN_PROGRESS' : 'ASSIGNED') as AssigneeIndividualStatus,
+        },
+      ];
+    } else {
+      task.assignees = task.assignees.map((a) => ({ ...a }));
+    }
+
+    const empIdx = task.assignees.findIndex(
+      (a) =>
+        a.employeeId === empIdentifier ||
+        a.email === empIdentifier ||
+        a.employeeName.toLowerCase().includes(empIdentifier.toLowerCase())
+    );
+
+    if (empIdx !== -1) {
+      task.assignees[empIdx].status = newStatus;
+      if (newStatus === 'ACCEPTED' || newStatus === 'IN_PROGRESS') {
+        task.assignees[empIdx].acceptedAt = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+      } else if (newStatus === 'COMPLETED') {
+        task.assignees[empIdx].completedAt = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+      }
+    }
+
+    // Recalculate parent task progress percentage and overall status
+    const completedCount = task.assignees.filter((a) => a.status === 'COMPLETED').length;
+    const acceptedOrInProgress = task.assignees.filter((a) => a.status === 'ACCEPTED' || a.status === 'IN_PROGRESS').length;
+    const totalCount = task.assignees.length;
+
+    task.progressPercent = Math.round((completedCount / totalCount) * 100);
+
+    if (completedCount === totalCount) {
+      task.status = 'COMPLETED';
+    } else if (completedCount > 0 || acceptedOrInProgress > 0) {
+      task.status = 'IN_PROGRESS';
+    } else {
+      task.status = 'OPEN';
+    }
+
+    tasks[idx] = task;
+    saveStoredTasks(tasks);
+
+    // Notify CEO / Task Owner
+    try {
+      NotificationRepository.addNotification({
+        employeeId: task.owner.id || 'EMP-101',
+        employeeName: task.owner.name || 'Sri Hari Kolusu',
+        title: `Task Progress Updated`,
+        messagePreview: `${empIdx !== -1 ? task.assignees[empIdx].employeeName : 'Employee'} marked status as ${newStatus} on "${task.title}"`,
+        type: 'TASK_ACCEPTED',
+        priority: 'NORMAL',
+        linkTab: 'tasks',
+      });
+    } catch (e) {}
+
+    return task;
+  }
+
+  /**
+   * Submit completion proof for an individual employee
+   */
+  static async submitAssigneeCompletion(taskId: string, empIdentifier: string, proof: TaskCompletionProof): Promise<Task | null> {
+    const tasks = getStoredTasks();
+    const idx = tasks.findIndex((t) => t.id === taskId);
+    if (idx === -1) return null;
+
+    const task = { ...tasks[idx] };
+
+    if (!task.assignees || task.assignees.length === 0) {
+      task.assignees = [
+        {
+          employeeId: task.assignee.id,
+          employeeName: task.assignee.name,
+          departmentName: task.department,
+          avatar: task.assignee.avatar,
+          email: task.assignee.email,
+          status: 'ASSIGNED',
+        },
+      ];
+    } else {
+      task.assignees = task.assignees.map((a) => ({ ...a }));
+    }
+
+    const empIdx = task.assignees.findIndex(
+      (a) =>
+        a.employeeId === empIdentifier ||
+        a.email === empIdentifier ||
+        a.employeeName.toLowerCase().includes(empIdentifier.toLowerCase())
+    );
+
+    if (empIdx !== -1) {
+      task.assignees[empIdx].status = 'COMPLETED';
+      task.assignees[empIdx].completedAt = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+      task.assignees[empIdx].completionProof = proof;
+    }
+
+    // Recalculate parent task progress percentage
+    const completedCount = task.assignees.filter((a) => a.status === 'COMPLETED').length;
+    const totalCount = task.assignees.length;
+
+    task.progressPercent = Math.round((completedCount / totalCount) * 100);
+
+    if (completedCount === totalCount) {
+      task.status = 'COMPLETED';
+    } else {
+      task.status = 'IN_PROGRESS';
+    }
+
+    tasks[idx] = task;
+    saveStoredTasks(tasks);
+
+    // Notify CEO / Task Owner
+    try {
+      NotificationRepository.addNotification({
+        employeeId: task.owner.id || 'EMP-101',
+        employeeName: task.owner.name || 'Sri Hari Kolusu',
+        title: `Task Completed`,
+        messagePreview: `${empIdx !== -1 ? task.assignees[empIdx].employeeName : 'Employee'} submitted completion proof for "${task.title}"`,
+        type: 'TASK_ACCEPTED',
+        priority: 'IMPORTANT',
+        linkTab: 'tasks',
+      });
+    } catch (e) {}
+
+    return task;
   }
 
   /**
@@ -438,9 +703,12 @@ export class TmsTaskService {
     const idx = tasks.findIndex((t) => t.id === id);
     if (idx === -1) return null;
 
-    tasks[idx] = { ...tasks[idx], ...patch };
+    const prevTask = tasks[idx];
+    const updatedTask = { ...prevTask, ...patch };
+    tasks[idx] = updatedTask;
     saveStoredTasks(tasks);
-    return tasks[idx];
+
+    return updatedTask;
   }
 
   /**
@@ -461,25 +729,11 @@ export class TmsTaskService {
     return {
       totalTasks: tasks.length,
       assignedToMe: tasks.filter((t) => t.assignedToMe || t.assignee.id === 'EMP-102' || t.assignee.name.includes('Sri Varun')).length,
-      assignedByMe: tasks.filter((t) => t.assignedByMe || t.owner.id === 'EMP-101' || t.owner.name.includes('Srinivas')).length,
+      assignedByMe: tasks.filter((t) => t.assignedByMe || t.owner.id === 'EMP-101' || t.owner.name.includes('Srinivas') || t.owner.name.includes('Hari')).length,
       pendingTasks: tasks.filter((t) => t.status === 'IN_PROGRESS' || t.status === 'OPEN' || t.status === 'UNDER_REVIEW').length,
       completedTasks: tasks.filter((t) => t.status === 'COMPLETED').length,
       overdueTasks: tasks.filter((t) => t.status === 'OVERDUE').length,
     };
-  }
-
-  /**
-   * Fetch employee roster
-   */
-  static async getEmployees(): Promise<Employee[]> {
-    return mockEmployees;
-  }
-
-  /**
-   * Fetch departments list
-   */
-  static async getDepartments(): Promise<Department[]> {
-    return mockDepartments;
   }
 
   /**

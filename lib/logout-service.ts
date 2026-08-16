@@ -34,6 +34,10 @@ export class LogoutService {
     return LogoutRepository.autoCloseSession(id);
   }
 
+  static onLogoutUpdated(callback: (sessions: WorkSession[]) => void): () => void {
+    return LogoutRepository.onLogoutUpdated(callback);
+  }
+
   static async getKpis(): Promise<LogoutKpis> {
     return LogoutRepository.getKpis();
   }

@@ -98,6 +98,10 @@ export function TmsAnnouncementsView() {
 
   useEffect(() => {
     loadData();
+    const unsubscribe = AnnouncementService.onAnnouncementUpdated(() => {
+      loadData();
+    });
+    return () => unsubscribe();
   }, []);
 
   // Voice Recording Handlers
@@ -203,10 +207,14 @@ export function TmsAnnouncementsView() {
   };
 
   const handleConfirmPublish = async () => {
-    if (!previewPayload) return;
+    const payload = previewPayload || buildPayloadFromForm();
+    if (!payload.title.trim() || !payload.message.trim()) {
+      alert('Please fill in both Announcement Title and Message body.');
+      return;
+    }
     setIsPublishing(true);
 
-    await AnnouncementService.create(previewPayload);
+    await AnnouncementService.create(payload);
 
     // Reset Form
     setTitle('');
@@ -214,6 +222,7 @@ export function TmsAnnouncementsView() {
     setAttachments([]);
     setVoiceRecord(undefined);
     setIsPinned(false);
+    setPreviewPayload(null);
 
     setIsPublishing(false);
     setIsPreviewOpen(false);

@@ -16,6 +16,10 @@ export class AnnouncementService {
     return AnnouncementRepository.getAnnouncements(filters);
   }
 
+  static async getForUser(employeeId?: string, departmentName?: string, filters?: AnnouncementFilterParams): Promise<AnnouncementRecord[]> {
+    return AnnouncementRepository.getAnnouncementsForUser(employeeId, departmentName, filters);
+  }
+
   static async getById(id: string): Promise<AnnouncementRecord | null> {
     return AnnouncementRepository.getAnnouncementById(id);
   }
@@ -34,6 +38,10 @@ export class AnnouncementService {
 
   static async togglePin(id: string): Promise<AnnouncementRecord | null> {
     return AnnouncementRepository.togglePin(id);
+  }
+
+  static onAnnouncementUpdated(callback: (records: AnnouncementRecord[]) => void): () => void {
+    return AnnouncementRepository.onAnnouncementUpdated(callback);
   }
 
   static async getStatistics(): Promise<AnnouncementStatistics> {

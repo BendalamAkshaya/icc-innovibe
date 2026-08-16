@@ -161,6 +161,8 @@ const seedAnnouncements: AnnouncementRecord[] = [
   },
 ];
 
+export const EVENT_ANNOUNCEMENT_UPDATED = 'innovibe:announcement_updated';
+
 export class AnnouncementRepository {
   private static loadFromStorage(): AnnouncementRecord[] {
     if (typeof window === 'undefined') return seedAnnouncements;
@@ -189,9 +191,23 @@ export class AnnouncementRepository {
     if (typeof window === 'undefined') return;
     try {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+      window.dispatchEvent(new CustomEvent(EVENT_ANNOUNCEMENT_UPDATED, { detail: data }));
     } catch (e) {
       console.error('Failed to save announcements to localStorage:', e);
     }
+  }
+
+  static onAnnouncementUpdated(callback: (records: AnnouncementRecord[]) => void): () => void {
+    if (typeof window === 'undefined') return () => {};
+    const handler = () => {
+      callback(AnnouncementRepository.getAnnouncements());
+    };
+    window.addEventListener(EVENT_ANNOUNCEMENT_UPDATED, handler);
+    window.addEventListener('storage', handler);
+    return () => {
+      window.removeEventListener(EVENT_ANNOUNCEMENT_UPDATED, handler);
+      window.removeEventListener('storage', handler);
+    };
   }
 
   static getAnnouncements(filters?: AnnouncementFilterParams): AnnouncementRecord[] {
@@ -225,6 +241,38 @@ export class AnnouncementRepository {
     }
 
     return list;
+  }
+
+  static getAnnouncementsForUser(
+    employeeId?: string,
+    departmentName?: string,
+    filters?: AnnouncementFilterParams
+  ): AnnouncementRecord[] {
+    let list = this.getAnnouncements(filters);
+
+    if (!employeeId && !departmentName) return list;
+
+    const empId = employeeId || 'EMP-102';
+    const dept = (departmentName || 'Technology').toLowerCase();
+
+    return list.filter((a) => {
+      // 1. Everyone / All Staff -> Always visible
+      if (a.targetAudience === 'EVERYONE' || a.targetAudience === 'ALL_EMPLOYEES') {
+        return true;
+      }
+      // 2. Specific Department -> Only visible if department matches
+      if (a.targetAudience === 'SPECIFIC_DEPARTMENT') {
+        if (a.targetDepartmentName && a.targetDepartmentName.toLowerCase() === dept) return true;
+        if (a.targetDepartmentId && a.targetDepartmentId.toLowerCase() === dept) return true;
+        return false;
+      }
+      // 3. Specific Employee -> Only visible if employeeId matches
+      if (a.targetAudience === 'SPECIFIC_EMPLOYEE') {
+        if (a.targetEmployeeId === empId) return true;
+        return false;
+      }
+      return true;
+    });
   }
 
   static getAnnouncementById(id: string): AnnouncementRecord | null {

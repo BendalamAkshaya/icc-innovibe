@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { NotificationRecord, NotificationRepository, NotificationType } from '../../../../lib/notification-repository';
+import { useRole } from '../../../../components/RoleContext';
 import { Bell, Check, CheckCircle2, ClipboardList, Info, MessageSquare, Megaphone } from 'lucide-react';
 
 interface TmsEmployeeNotificationsViewProps {
@@ -9,10 +10,14 @@ interface TmsEmployeeNotificationsViewProps {
 }
 
 export function TmsEmployeeNotificationsView({ onTabNavigate }: TmsEmployeeNotificationsViewProps) {
+  const { currentProfile } = useRole();
+  const cp = currentProfile as any;
+  const activeEmpId = cp?.employeeId || currentProfile?.email || 'EMP-102';
+
   const [notifications, setNotifications] = useState<NotificationRecord[]>([]);
 
   const loadNotifications = () => {
-    const list = NotificationRepository.getNotifications('EMP-102');
+    const list = NotificationRepository.getNotifications(activeEmpId);
     setNotifications(list);
   };
 
@@ -31,12 +36,12 @@ export function TmsEmployeeNotificationsView({ onTabNavigate }: TmsEmployeeNotif
         window.removeEventListener('ICC_TMS_NOTIFICATIONS_CHANGED', handleUpdate);
       }
     };
-  }, []);
+  }, [activeEmpId]);
 
   const unreadCount = notifications.filter((n) => !n.isRead).length;
 
   const handleMarkAllRead = () => {
-    NotificationRepository.markAllAsRead('EMP-102');
+    NotificationRepository.markAllAsRead(activeEmpId);
     loadNotifications();
   };
 

@@ -34,6 +34,7 @@ import {
   ShieldAlert,
 } from 'lucide-react';
 import { CreateTaskModal } from './tasks/CreateTaskModal';
+import { TmsTasksView as ModernTmsTasksView } from './tasks/TmsTasksView';
 import { TmsAttendanceView } from './attendance/TmsAttendanceView';
 import { TmsDepartmentsView } from './departments/TmsDepartmentsView';
 import { TmsEmployeesView } from './employees/TmsEmployeesView';
@@ -124,9 +125,9 @@ export function TmsModule({ subModule = 'tms-dashboard' }: TmsModuleProps) {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedDepartment, setSelectedDepartment] = useState('ALL');
 
-  // If subModule is 'tms-tasks', render the Tasks management table view
-  if (subModule === 'tms-tasks') {
-    return <TmsTasksView tasks={tasks} setTasks={setTasks} />;
+  // If subModule is 'tms-tasks' or 'tasks', render the Tasks management workspace view
+  if (subModule === 'tms-tasks' || subModule === 'tasks') {
+    return <ModernTmsTasksView />;
   }
 
   // If subModule is 'tms-dashboard' or 'tms', render the Actual Executive TMS Dashboard Overview
@@ -894,6 +895,7 @@ function TmsTasksView({
 }) {
   const [activeTab, setActiveTab] = useState<'ALL' | 'IN_PROGRESS' | 'UNDER_REVIEW' | 'COMPLETED'>('ALL');
   const [searchQuery, setSearchQuery] = useState('');
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
 
   const filteredTasks = tasks.filter((task) => {
     const matchesTab =
@@ -966,7 +968,10 @@ function TmsTasksView({
             <span>Filter Tasks</span>
           </button>
 
-          <button className="px-5 py-2.5 rounded-2xl bg-gradient-to-r from-[#d97706] to-[#b45309] hover:from-[#b45309] hover:to-[#78350f] text-white font-apfel font-extrabold text-xs shadow-md shadow-amber-900/10 flex items-center gap-2 transition-all">
+          <button
+            onClick={() => setIsCreateModalOpen(true)}
+            className="px-5 py-2.5 rounded-2xl bg-gradient-to-r from-[#d97706] to-[#b45309] hover:from-[#b45309] hover:to-[#78350f] text-white font-apfel font-extrabold text-xs shadow-md shadow-amber-900/10 flex items-center gap-2 transition-all cursor-pointer"
+          >
             <Plus className="h-4 w-4" />
             <span>Create New Task</span>
           </button>
@@ -1217,6 +1222,12 @@ function TmsTasksView({
           </button>
         </div>
       </div>
+
+      <CreateTaskModal
+        isOpen={isCreateModalOpen}
+        onClose={() => setIsCreateModalOpen(false)}
+        onTaskCreated={() => {}}
+      />
     </div>
   );
 }

@@ -40,6 +40,10 @@ export function TmsDepartmentsView() {
 
   useEffect(() => {
     loadDepartments();
+    const unsubscribe = DepartmentService.onDepartmentsUpdated(() => {
+      loadDepartments();
+    });
+    return () => unsubscribe();
   }, []);
 
   const handleDeleteDepartment = async (id: string, name: string) => {

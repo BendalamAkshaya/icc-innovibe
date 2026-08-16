@@ -3,9 +3,14 @@
 import React, { useState, useEffect } from 'react';
 import { WorkSession } from '../../../../lib/logout-models';
 import { LogoutService } from '../../../../lib/logout-service';
+import { useRole } from '../../../../components/RoleContext';
 import { Calendar, FileText, X, Clock, CheckCircle2, AlertCircle } from 'lucide-react';
 
 export function TmsEmployeeSessionHistoryView() {
+  const { currentProfile } = useRole();
+  const cp = currentProfile as any;
+  const activeEmpId = cp?.employeeId || currentProfile?.email || 'EMP-102';
+
   const [sessions, setSessions] = useState<WorkSession[]>([]);
   const [kpis, setKpis] = useState({ totalShifts: 62, reportsSubmitted: 61 });
   const [selectedReportSession, setSelectedReportSession] = useState<WorkSession | null>(null);
@@ -14,7 +19,7 @@ export function TmsEmployeeSessionHistoryView() {
   // Load Session History via Service Layer
   const loadData = async () => {
     setIsLoading(true);
-    const sessionList = await LogoutService.getAll({ employeeId: 'EMP-102' });
+    const sessionList = await LogoutService.getAll({ employeeId: activeEmpId });
     const kpiSummary = await LogoutService.getKpis();
 
     setSessions(sessionList);
@@ -27,7 +32,11 @@ export function TmsEmployeeSessionHistoryView() {
 
   useEffect(() => {
     loadData();
-  }, []);
+    const unsubscribe = LogoutService.onLogoutUpdated(() => {
+      loadData();
+    });
+    return () => unsubscribe();
+  }, [activeEmpId]);
 
   return (
     <div className="space-y-6 text-left font-sans animate-in fade-in duration-300">
