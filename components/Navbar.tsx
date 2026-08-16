@@ -1,14 +1,15 @@
 'use client';
 
-import React from 'react';
+import React, { useState } from 'react';
 import { useRole } from './RoleContext';
 import { useRouter } from 'next/navigation';
 import { RoleType } from '../lib/types';
-import { Zap, Sparkles, LogOut, Search, Activity } from 'lucide-react';
+import { Zap, Sparkles, LogOut, Search, Activity, Bell } from 'lucide-react';
 import Link from 'next/link';
 
 export function Navbar() {
   const router = useRouter();
+  const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
   const { activeRole, currentProfile, logout, isSuperAdmin } = useRole();
 
   const handleLogout = () => {
@@ -29,16 +30,13 @@ export function Navbar() {
     <header className="sticky top-0 z-50 w-full bg-white border-b border-slate-200 px-6 py-3 flex items-center justify-between shadow-sm">
       {/* Left Branding & Role Indicator */}
       <div className="flex items-center gap-4">
-        <Link href="/dashboard" className="flex items-center gap-3 group">
-          <div className="h-10 w-10 rounded-xl bg-gradient-to-tr from-sky-600 to-blue-700 flex items-center justify-center shadow-md shadow-sky-500/20 group-hover:scale-105 transition-transform">
-            <Zap className="h-5 w-5 text-white fill-white" />
-          </div>
+        <Link href="/dashboard" className="flex items-center gap-1.5 group">
+          <img src="/logo.jpeg" alt="InnoVibe Logo" className="h-10 w-auto object-contain group-hover:scale-105 transition-transform" />
           <div>
             <div className="flex items-center gap-2">
               <span className="font-extrabold text-base tracking-wider text-slate-900">INNOVIBE</span>
               <span className="text-[10px] px-2 py-0.5 rounded-full bg-sky-50 text-sky-700 font-bold border border-sky-200">ICC v1.0</span>
             </div>
-            <p className="text-[10px] text-slate-400 font-mono tracking-tight">office.innovibemobility.com</p>
           </div>
         </Link>
 
@@ -69,8 +67,61 @@ export function Navbar() {
       </div>
 
       {/* Right User & Logout Controls */}
-      <div className="flex items-center gap-3">
-        <div className="flex items-center gap-3 pl-2">
+      <div className="flex items-center gap-2 sm:gap-3">
+        {/* Notifications */}
+        <div className="relative">
+          <button 
+            onClick={() => setIsNotificationsOpen(!isNotificationsOpen)}
+            className={`relative p-2 rounded-xl transition-all ${isNotificationsOpen ? 'bg-indigo-50 text-indigo-600' : 'text-slate-400 hover:text-indigo-600 hover:bg-indigo-50'}`}
+            title="Notifications"
+          >
+            <Bell className="h-4 w-4" />
+            <span className="absolute top-1.5 right-1.5 h-2 w-2 rounded-full bg-rose-500 border border-white"></span>
+          </button>
+          
+          {isNotificationsOpen && (
+            <>
+              <div className="fixed inset-0 z-40" onClick={() => setIsNotificationsOpen(false)}></div>
+              <div className="absolute right-0 mt-2 w-80 bg-white rounded-2xl shadow-xl border border-slate-100 z-50 overflow-hidden animate-in fade-in slide-in-from-top-2 duration-200">
+                <div className="p-4 border-b border-slate-100 flex items-center justify-between bg-slate-50">
+                  <h3 className="text-sm font-black text-slate-900">Notifications</h3>
+                  <span className="text-[10px] font-bold text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded-full border border-indigo-100">2 New</span>
+                </div>
+                <div className="max-h-[300px] overflow-y-auto">
+                  <div className="p-3 border-b border-slate-50 hover:bg-slate-50 transition-colors cursor-pointer flex gap-3">
+                    <div className="h-8 w-8 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center shrink-0 mt-0.5">
+                      <Activity className="h-4 w-4" />
+                    </div>
+                    <div>
+                      <p className="text-xs font-bold text-slate-800">System Update</p>
+                      <p className="text-[10px] text-slate-500 mt-0.5 leading-relaxed">InnoVibe Command Center v1.0 has been successfully deployed.</p>
+                      <p className="text-[9px] font-medium text-slate-400 mt-1">10 mins ago</p>
+                    </div>
+                  </div>
+                  <div className="p-3 hover:bg-slate-50 transition-colors cursor-pointer flex gap-3">
+                    <div className="h-8 w-8 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center shrink-0 mt-0.5">
+                      <Zap className="h-4 w-4" />
+                    </div>
+                    <div>
+                      <p className="text-xs font-bold text-slate-800">New Task Assigned</p>
+                      <p className="text-[10px] text-slate-500 mt-0.5 leading-relaxed">You have a new high-voltage EV diagnostic task pending in your queue.</p>
+                      <p className="text-[9px] font-medium text-slate-400 mt-1">1 hour ago</p>
+                    </div>
+                  </div>
+                </div>
+                <div className="p-2.5 border-t border-slate-100 text-center bg-slate-50">
+                  <button onClick={() => setIsNotificationsOpen(false)} className="text-[11px] font-bold text-indigo-600 hover:text-indigo-800 transition-colors">
+                    View All Notifications
+                  </button>
+                </div>
+              </div>
+            </>
+          )}
+        </div>
+        
+        <div className="h-5 w-px bg-slate-200 mx-1 hidden sm:block"></div>
+
+        <div className="flex items-center gap-3 pl-1">
           <img
             src={currentProfile.avatar}
             alt={currentProfile.name}

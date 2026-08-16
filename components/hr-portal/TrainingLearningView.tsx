@@ -118,6 +118,7 @@ export function TrainingLearningView({ showToast }: TrainingLearningViewProps) {
   const [activeTab, setActiveTab] = useState<'Overview' | 'Catalog' | 'Progress' | 'Certifications' | 'Compliance' | 'Trainers' | 'Insights'>('Overview');
   const [searchQuery, setSearchQuery] = useState('');
   const [isCreateCourseOpen, setIsCreateCourseOpen] = useState(false);
+  const [isIssueCertOpen, setIsIssueCertOpen] = useState(false);
 
   return (
     <div className="space-y-6 animate-in fade-in duration-300">
@@ -445,7 +446,10 @@ export function TrainingLearningView({ showToast }: TrainingLearningViewProps) {
               <div className="bg-white border border-slate-200 rounded-3xl shadow-sm overflow-hidden">
                 <div className="p-5 border-b border-slate-200 flex items-center justify-between">
                   <h3 className="text-sm font-black text-slate-900">Certificate Repository</h3>
-                  <button className="px-3 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold rounded-lg flex items-center gap-1.5">
+                  <button 
+                    onClick={() => setIsIssueCertOpen(true)}
+                    className="px-3 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold rounded-lg flex items-center gap-1.5"
+                  >
                     <Plus className="h-3.5 w-3.5" /> Issue Certificate
                   </button>
                 </div>
@@ -855,6 +859,94 @@ export function TrainingLearningView({ showToast }: TrainingLearningViewProps) {
                 className="flex-1 px-4 py-2.5 bg-indigo-600 text-white rounded-xl font-bold text-sm hover:bg-indigo-700 transition-all"
               >
                 Publish Course
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+      {/* =========================================
+          ISSUE CERTIFICATE SLIDE-OUT DRAWER
+          ========================================= */}
+      {isIssueCertOpen && (
+        <div className="fixed inset-0 z-50 flex justify-end">
+          <div className="absolute inset-0 bg-slate-900/50 backdrop-blur-sm transition-opacity" onClick={() => setIsIssueCertOpen(false)}></div>
+          
+          <div className="relative w-full max-w-lg bg-white h-full shadow-2xl flex flex-col animate-in slide-in-from-right-full duration-300">
+            <div className="flex items-center justify-between p-5 border-b border-slate-100">
+              <div>
+                <h3 className="text-lg font-black text-slate-900">Issue New Certificate</h3>
+                <p className="text-xs text-slate-500 font-medium">Award a certification to an employee.</p>
+              </div>
+              <button 
+                onClick={() => setIsIssueCertOpen(false)}
+                className="p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-full transition-all"
+              >
+                <ArrowLeft className="h-5 w-5" />
+              </button>
+            </div>
+
+            <div className="flex-1 overflow-y-auto p-5 space-y-5 text-sm">
+              <div className="space-y-1.5">
+                <label className="text-xs font-bold text-slate-700">Select Employee</label>
+                <select className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm appearance-none">
+                  <option>Kiran Gopi (INNO-104)</option>
+                  <option>Priya Sharma (INNO-105)</option>
+                  <option>Rahul Verma (INNO-106)</option>
+                  <option>Anita Patel (INNO-107)</option>
+                </select>
+              </div>
+
+              <div className="space-y-1.5">
+                <label className="text-xs font-bold text-slate-700">Certificate Type / Course</label>
+                <select className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm appearance-none">
+                  <option>High Voltage EV Safety</option>
+                  <option>Advanced Battery Diagnostics</option>
+                  <option>Workplace POSH & Ethics</option>
+                  <option>ISO 27001 Auditor</option>
+                  <option>Custom Certification...</option>
+                </select>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-1.5">
+                  <label className="text-xs font-bold text-slate-700">Issue Date</label>
+                  <input type="date" defaultValue={new Date().toISOString().split('T')[0]} className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm" />
+                </div>
+                <div className="space-y-1.5">
+                  <label className="text-xs font-bold text-slate-700">Expiry Date (Optional)</label>
+                  <input type="date" className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm" />
+                </div>
+              </div>
+              
+              <div className="space-y-1.5">
+                <label className="text-xs font-bold text-slate-700">Certificate Signature / Approver</label>
+                <input type="text" defaultValue="HR Compliance Team" className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm" />
+              </div>
+
+              <div className="bg-indigo-50 border border-indigo-100 rounded-xl p-4 flex items-start gap-3 mt-4">
+                <Award className="h-5 w-5 text-indigo-600 shrink-0 mt-0.5" />
+                <div>
+                  <p className="text-xs font-bold text-indigo-900">Digital Badge Generation</p>
+                  <p className="text-[10px] text-indigo-700 mt-1">A verified digital badge will be generated and emailed to the employee along with the PDF certificate.</p>
+                </div>
+              </div>
+            </div>
+
+            <div className="p-5 border-t border-slate-100 flex gap-3 bg-slate-50">
+              <button 
+                onClick={() => setIsIssueCertOpen(false)} 
+                className="flex-1 px-4 py-2.5 bg-white border border-slate-200 text-slate-700 rounded-xl font-bold text-sm hover:bg-slate-100 transition-all"
+              >
+                Cancel
+              </button>
+              <button 
+                onClick={() => {
+                  showToast('Certificate successfully issued and emailed to employee!', 'success');
+                  setIsIssueCertOpen(false);
+                }} 
+                className="flex-1 px-4 py-2.5 bg-indigo-600 text-white rounded-xl font-bold text-sm hover:bg-indigo-700 transition-all"
+              >
+                Issue Certificate
               </button>
             </div>
           </div>

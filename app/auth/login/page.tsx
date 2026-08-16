@@ -109,13 +109,10 @@ export default function LoginPage() {
           <div className="absolute -bottom-20 -right-20 w-64 h-64 bg-sky-500/10 rounded-full blur-3xl pointer-events-none" />
           
           <div className="space-y-6 z-10">
-            <div className="flex items-center gap-3">
-              <div className="h-10 w-10 rounded-xl bg-gradient-to-tr from-sky-500 to-blue-600 flex items-center justify-center shadow-lg shadow-sky-500/30">
-                <Zap className="h-6 w-6 text-white fill-white" />
-              </div>
+            <div className="flex items-center gap-1.5">
+              <img src="/logo.jpeg" alt="InnoVibe Logo" className="h-12 w-auto object-contain drop-shadow-md" />
               <div>
                 <h1 className="font-extrabold text-lg tracking-wider text-white">INNOVIBE</h1>
-                <p className="text-[10px] text-sky-300 font-mono">office.innovibemobility.com</p>
               </div>
             </div>
 
