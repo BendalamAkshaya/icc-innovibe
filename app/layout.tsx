@@ -2,6 +2,7 @@ import './globals.css';
 import '@/styles.css';
 import type { Metadata } from 'next';
 import { RoleProvider } from '../components/RoleContext';
+export const dynamic = 'force-dynamic';
 
 export const metadata: Metadata = {
   title: 'InnoVibe Command Center (ICC) | Office Portal',
