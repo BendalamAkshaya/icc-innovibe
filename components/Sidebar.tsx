@@ -184,37 +184,60 @@ const roleNavigationMap: Record<RoleType, WorkspaceConfig> = {
     ],
   },
   HR: {
-    workspaceTitle: 'HR Management Suite',
+    workspaceTitle: 'HR Staff Workspace',
     categories: [
       {
         title: 'Core HR',
         items: [
-          { name: 'HR Overview', path: '/dashboard/hr?view=dashboard', exactQuery: 'dashboard', icon: LayoutDashboard, color: 'text-pink-600' },
-          { name: 'Employee Directory', path: '/dashboard/hr?view=employees', exactQuery: 'employees', icon: Users, color: 'text-blue-600' },
-          { name: 'Attendance Matrix', path: '/dashboard/hr?view=attendance', exactQuery: 'attendance', icon: Clock, color: 'text-emerald-600' },
-          { name: 'Leave Management', path: '/dashboard/hr?view=leaves', exactQuery: 'leaves', icon: CalendarRange, color: 'text-amber-600' },
-          { name: 'Payroll Engine', path: '/dashboard/hr?view=payroll', exactQuery: 'payroll', icon: IndianRupee, color: 'text-purple-600' },
+          { name: 'Dashboard', path: '/dashboard/hr?view=dashboard', exactQuery: 'dashboard', icon: LayoutDashboard, color: 'text-sky-600' },
+          { name: 'Employee Management', path: '/dashboard/hr?view=employees', exactQuery: 'employees', icon: Users, color: 'text-blue-600' },
+          { name: 'Attendance', path: '/dashboard/hr?view=attendance', exactQuery: 'attendance', icon: Clock, color: 'text-amber-600' },
+          { name: 'Leave Management', path: '/dashboard/hr?view=leaves', exactQuery: 'leaves', icon: CalendarRange, color: 'text-rose-600' },
+          { name: 'Payroll', path: '/dashboard/hr?view=payroll', exactQuery: 'payroll', icon: IndianRupee, color: 'text-emerald-600' },
+          { name: 'Performance', path: '/dashboard/hr?view=performance', exactQuery: 'performance', icon: Award, color: 'text-amber-500' },
         ],
       },
       {
-        title: 'Talent & Operations',
+        title: 'Recruitment & Growth',
         items: [
-          { name: 'Recruitment & Hiring', path: '/dashboard/hr?view=recruitment', exactQuery: 'recruitment', icon: Briefcase, color: 'text-indigo-600' },
-          { name: 'Performance Review', path: '/dashboard/hr?view=performance', exactQuery: 'performance', icon: Award, color: 'text-yellow-600' },
-          { name: 'Training & Skill Badges', path: '/dashboard/hr?view=training', exactQuery: 'training', icon: GraduationCap, color: 'text-teal-600' },
-          { name: 'Documents & Contracts', path: '/dashboard/hr?view=documents', exactQuery: 'documents', icon: FolderOpen, color: 'text-rose-600' },
+          { name: 'Recruitment', path: '/dashboard/hr?view=recruitment', exactQuery: 'recruitment', icon: Briefcase, color: 'text-indigo-600' },
+          { name: 'Candidate Management', path: '/dashboard/hr?view=candidates', exactQuery: 'candidates', icon: UserCheck, color: 'text-emerald-600' },
+          { name: 'Onboarding', path: '/dashboard/hr?view=onboarding', exactQuery: 'onboarding', icon: ClipboardList, color: 'text-violet-600' },
+          { name: 'Training & Learning', path: '/dashboard/hr?view=training', exactQuery: 'training', icon: GraduationCap, color: 'text-purple-600' },
+          { name: 'Intern Management', path: '/dashboard/hr?view=interns', exactQuery: 'interns', icon: Sparkles, color: 'text-pink-500' },
+        ],
+      },
+      {
+        title: 'Administration',
+        items: [
+          { name: 'Employee Documents', path: '/dashboard/hr?view=documents', exactQuery: 'documents', icon: FolderOpen, color: 'text-teal-600' },
+          { name: 'Employee ID Cards', path: '/dashboard/hr?view=id-cards', exactQuery: 'id-cards', icon: Contact, color: 'text-cyan-600' },
+          { name: 'HR Policies', path: '/dashboard/hr?view=policies', exactQuery: 'policies', icon: FileText, color: 'text-slate-600' },
+          { name: 'Holiday Calendar', path: '/dashboard/hr?view=holidays', exactQuery: 'holidays', icon: Calendar, color: 'text-orange-500' },
+          { name: 'Exit Management', path: '/dashboard/hr?view=exit', exactQuery: 'exit', icon: DoorOpen, color: 'text-red-500' },
+          { name: 'Reports', path: '/dashboard/hr?view=reports', exactQuery: 'reports', icon: BarChart3, color: 'text-indigo-600' },
+          { name: 'Settings', path: '/dashboard/hr?view=settings', exactQuery: 'settings', icon: Settings, color: 'text-slate-600' },
         ],
       },
     ],
   },
   TECHNICIAN: {
-    workspaceTitle: 'Technician Portal',
+    workspaceTitle: 'Technician Hub',
     categories: [
       {
         title: 'Field Operations',
         items: [
-          { name: 'Technician Dashboard', path: '/dashboard/technician?view=overview', exactQuery: 'overview', icon: Wrench, color: 'text-teal-600' },
-          { name: 'My Assigned Tasks', path: '/dashboard/technician?view=tasks', exactQuery: 'tasks', icon: CheckSquare, color: 'text-blue-600' },
+          { name: 'My Dashboard', path: '/dashboard/technician?view=dashboard', exactQuery: 'dashboard', icon: LayoutDashboard, color: 'text-blue-600' },
+          { name: 'Assigned Jobs', path: '/dashboard/technician?view=assigned-jobs', exactQuery: 'assigned-jobs', icon: Briefcase, color: 'text-indigo-600' },
+          { name: 'Job Cards', path: '/dashboard/technician?view=job-cards', exactQuery: 'job-cards', icon: FileText, color: 'text-blue-500' },
+          { name: 'Service Schedule', path: '/dashboard/technician?view=service-schedule', exactQuery: 'service-schedule', icon: Calendar, color: 'text-cyan-600' },
+        ],
+      },
+      {
+        title: 'Service & Diagnosis',
+        items: [
+          { name: 'Vehicle Inspection', path: '/dashboard/technician?view=inspection', exactQuery: 'inspection', icon: CheckSquare, color: 'text-amber-500' },
+          { name: 'EV Diagnosis Reports', path: '/dashboard/technician?view=diagnosis', exactQuery: 'diagnosis', icon: TrendingUp, color: 'text-violet-600' },
           { name: 'Service Checklists', path: '/dashboard/technician?view=checklists', exactQuery: 'checklists', icon: ClipboardList, color: 'text-teal-600' },
           { name: 'Service Completion', path: '/dashboard/technician?view=completion', exactQuery: 'completion', icon: CheckCircle2, color: 'text-green-600' },
         ],
