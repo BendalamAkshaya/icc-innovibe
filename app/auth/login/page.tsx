@@ -5,6 +5,9 @@ import { useRouter } from 'next/navigation';
 import { useRole } from '../../../components/RoleContext';
 import { RoleType } from '../../../lib/types';
 import { DEV_CREDENTIALS } from '../../../lib/auth-service';
+import { UserRoleProfile } from '../../../lib/types';
+import { LogoutRepository } from '../../../lib/logout-repository';
+import { AuthService } from '../../../lib/auth-service';
 import { 
   Zap, 
   ShieldCheck, 
@@ -23,7 +26,9 @@ import {
   Settings,
   Users,
   Wrench,
-  User
+  User,
+  UserCheck,
+  X
 } from 'lucide-react';
 
 interface PortalConfig {
@@ -47,6 +52,7 @@ export default function LoginPage() {
   const [rememberDevice, setRememberDevice] = useState(true);
   const [errorMsg, setErrorMsg] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [pendingVerificationProfile, setPendingVerificationProfile] = useState<UserRoleProfile | null>(null);
 
   const portals: PortalConfig[] = [
     {
@@ -142,10 +148,15 @@ export default function LoginPage() {
     try {
       const res = await login(email, password);
       if (res.success && res.profile) {
-        const dest = res.profile.role === 'CEO' 
-          ? '/dashboard/ceo' 
-          : `/dashboard/${res.profile.role.toLowerCase().replace('_', '-')}`;
-        router.push(dest);
+        if (res.profile.role === 'EMPLOYEE') {
+          setPendingVerificationProfile(res.profile);
+          setIsSubmitting(false);
+        } else {
+          const dest = res.profile.role === 'CEO' 
+            ? '/dashboard/ceo' 
+            : `/dashboard/${res.profile.role.toLowerCase().replace('_', '-')}`;
+          router.push(dest);
+        }
       } else {
         setErrorMsg(res.error || 'Authentication failed. Please check your credentials.');
         setIsSubmitting(false);
@@ -154,6 +165,31 @@ export default function LoginPage() {
       setErrorMsg(err.message || 'An unexpected authentication error occurred.');
       setIsSubmitting(false);
     }
+  };
+
+  const handleVerifyAndCheckIn = async () => {
+    if (!pendingVerificationProfile) return;
+    setIsSubmitting(true);
+    try {
+      const empId = pendingVerificationProfile.employeeId || pendingVerificationProfile.id || 'EMP-102';
+      const empName = pendingVerificationProfile.name;
+      const avatar = pendingVerificationProfile.avatar || '';
+      const deptId = pendingVerificationProfile.departmentId || 'DEP-1';
+      const deptName = pendingVerificationProfile.department || 'Technology';
+      const role = pendingVerificationProfile.title || pendingVerificationProfile.designation || 'Employee';
+
+      LogoutRepository.startWorkSession(empId, empName, avatar, deptId, deptName, role);
+      router.push('/dashboard/employee');
+    } catch (err) {
+      console.error('Failed to start work session:', err);
+      router.push('/dashboard/employee');
+    }
+  };
+
+  const handleNotMe = () => {
+    AuthService.logout();
+    setPendingVerificationProfile(null);
+    setErrorMsg('');
   };
 
   return (
@@ -266,7 +302,7 @@ export default function LoginPage() {
 
         </div>
 
-        {/* ================= RIGHT SIDE: AUTHENTICATION CARD ================= */}
+        {/* ================= RIGHT SIDE: AUTHENTICATION / VERIFICATION CARD ================= */}
         <div className="lg:col-span-7 bg-white rounded-[18px] sm:rounded-[22px] border border-slate-100 shadow-[0_10px_30px_-8px_rgba(109,53,245,0.07)] p-4 sm:p-6 flex flex-col justify-between relative">
           
           {/* Top Right Security Badge */}
@@ -278,15 +314,96 @@ export default function LoginPage() {
             </div>
           </div>
 
-          <div>
-            {/* Header Title Section */}
-            <div className="mb-3">
-              <p className="text-[9px] font-bold text-[#6D35F5] uppercase tracking-[0.2em]">WELCOME BACK</p>
-              <h3 className="text-xl sm:text-2xl font-extrabold text-[#101A36] tracking-tight mt-0.5">
-                Command Center <span className="bg-gradient-to-r from-[#6D35F5] via-[#8B4DFF] to-[#35BDF6] bg-clip-text text-transparent">Login</span>
-              </h3>
-              <p className="text-[11px] text-slate-500 font-medium mt-0.5">Select your portal and sign in to continue</p>
+          {pendingVerificationProfile ? (
+            /* IDENTITY VERIFICATION CARD */
+            <div className="my-auto space-y-6 animate-in fade-in zoom-in-95 duration-200 text-left">
+              <div>
+                <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-amber-50 text-amber-800 border border-amber-200 text-[10px] font-black uppercase mb-2">
+                  <UserCheck className="w-3.5 h-3.5 text-amber-600" />
+                  <span>STEP 2: IDENTITY VERIFICATION</span>
+                </div>
+                <h3 className="text-xl sm:text-2xl font-extrabold text-[#101A36] tracking-tight">
+                  Employee <span className="bg-gradient-to-r from-amber-600 to-amber-700 bg-clip-text text-transparent">Identity Check</span>
+                </h3>
+                <p className="text-xs text-slate-500 font-medium mt-1">
+                  Please verify your identity details before checking in to start your work session.
+                </p>
+              </div>
+
+              {/* Dynamic Employee Details Card */}
+              <div className="bg-slate-50 p-5 rounded-2xl border border-slate-200/90 space-y-4 font-sans">
+                <div className="flex items-center gap-4">
+                  <img
+                    src={pendingVerificationProfile.avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(pendingVerificationProfile.name)}&background=fef3c7&color=92400e`}
+                    alt={pendingVerificationProfile.name}
+                    onError={(e) => {
+                      e.currentTarget.onerror = null;
+                      e.currentTarget.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(pendingVerificationProfile.name)}&background=fef3c7&color=92400e`;
+                    }}
+                    className="w-14 h-14 rounded-2xl object-cover border-2 border-amber-400 shadow-md shrink-0"
+                  />
+                  <div className="min-w-0 flex-1">
+                    <div className="flex items-center gap-2">
+                      <h4 className="font-extrabold text-base text-slate-900 truncate">
+                        {pendingVerificationProfile.name}
+                      </h4>
+                      <span className="px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 text-[9px] font-black uppercase shrink-0">
+                        VERIFIED
+                      </span>
+                    </div>
+                    <p className="text-xs text-amber-800 font-bold mt-0.5 truncate">
+                      {pendingVerificationProfile.title || pendingVerificationProfile.designation || 'Team Member'}
+                    </p>
+                    <p className="text-[11px] text-slate-500 font-semibold mt-0.5 truncate">
+                      {pendingVerificationProfile.department || 'Technology & Engineering'}
+                    </p>
+                  </div>
+                </div>
+
+                <div className="pt-3 border-t border-slate-200/80 grid grid-cols-2 gap-2 text-xs font-apfel">
+                  <div className="p-2.5 rounded-xl bg-white border border-slate-200">
+                    <span className="text-[9px] font-extrabold text-slate-400 uppercase tracking-wider block">EMPLOYEE ID</span>
+                    <span className="font-bold text-slate-900">{pendingVerificationProfile.employeeId || pendingVerificationProfile.id || 'EMP-102'}</span>
+                  </div>
+                  <div className="p-2.5 rounded-xl bg-white border border-slate-200">
+                    <span className="text-[9px] font-extrabold text-slate-400 uppercase tracking-wider block">SESSION DATE</span>
+                    <span className="font-bold text-slate-900">{new Date().toLocaleDateString('en-US', { day: '2-digit', month: 'short', year: 'numeric' })}</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Action Buttons */}
+              <div className="space-y-2.5 font-apfel pt-1">
+                <button
+                  type="button"
+                  disabled={isSubmitting}
+                  onClick={handleVerifyAndCheckIn}
+                  className="w-full py-3.5 px-4 rounded-2xl bg-gradient-to-r from-[#d97706] to-[#b45309] hover:from-[#b45309] hover:to-[#78350f] text-white font-extrabold text-xs shadow-lg shadow-amber-900/15 transition-all flex items-center justify-center gap-2 cursor-pointer hover:scale-[1.01] active:scale-[0.99]"
+                >
+                  <Zap className="w-4 h-4 fill-white" />
+                  <span>{isSubmitting ? 'Starting Work Session...' : 'Check In / Verify Identity'}</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={handleNotMe}
+                  className="w-full py-3 px-4 rounded-2xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs transition-all flex items-center justify-center gap-2 cursor-pointer"
+                >
+                  <X className="w-4 h-4 text-slate-500" />
+                  <span>This isn&apos;t me</span>
+                </button>
+              </div>
             </div>
+          ) : (
+            <div>
+              {/* Header Title Section */}
+              <div className="mb-3">
+                <p className="text-[9px] font-bold text-[#6D35F5] uppercase tracking-[0.2em]">WELCOME BACK</p>
+                <h3 className="text-xl sm:text-2xl font-extrabold text-[#101A36] tracking-tight mt-0.5">
+                  Command Center <span className="bg-gradient-to-r from-[#6D35F5] via-[#8B4DFF] to-[#35BDF6] bg-clip-text text-transparent">Login</span>
+                </h3>
+                <p className="text-[11px] text-slate-500 font-medium mt-0.5">Select your portal and sign in to continue</p>
+              </div>
 
             {/* Portal Selection Label */}
             <div className="flex items-center gap-1.5 mb-2">
@@ -437,6 +554,7 @@ export default function LoginPage() {
 
             </form>
           </div>
+          )}
 
           {/* Development Credentials Container */}
           <div 

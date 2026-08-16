@@ -23,21 +23,29 @@ import {
   Plus,
 } from 'lucide-react';
 
+import { EmployeeRepository } from '../../../../lib/employee-repository';
+import { Employee } from '../../../../lib/tms-models';
+
 export function TmsLogoutReportsView() {
   const [sessions, setSessions] = useState<WorkSession[]>([]);
   const [departments, setDepartments] = useState<DepartmentItem[]>([]);
+  const [employeesList, setEmployeesList] = useState<Array<{ id: string; name: string }>>([]);
   const [kpis, setKpis] = useState<LogoutKpis>({
     totalSessionsToday: 6,
     activeSessions: 1,
     reportsSubmittedToday: 4,
+    interruptedCount: 0,
     autoClosedCount: 1,
-    averageWorkingHours: 9.6,
+    averageWorkingHours: 8.2,
   });
 
   // Filters
   const [searchQuery, setSearchQuery] = useState('');
+  const [selectedEmployeeId, setSelectedEmployeeId] = useState<string>('ALL');
   const [selectedDepartment, setSelectedDepartment] = useState<string>('ALL');
   const [selectedStatus, setSelectedStatus] = useState<SessionStatus | 'ALL'>('ALL');
+  const [startDate, setStartDate] = useState<string>('');
+  const [endDate, setEndDate] = useState<string>('');
 
   // Modals
   const [selectedSessionForModal, setSelectedSessionForModal] = useState<WorkSession | null>(null);
@@ -49,10 +57,12 @@ export function TmsLogoutReportsView() {
     const list = await LogoutService.getAll();
     const depts = await DepartmentService.getAll();
     const summary = await LogoutService.getKpis();
+    const emps = EmployeeRepository.getEmployees();
 
     setSessions(list);
     setDepartments(depts);
     setKpis(summary);
+    setEmployeesList(emps.map((e) => ({ id: e.employeeId || e.id, name: e.fullName })));
     setIsLoading(false);
   };
 
@@ -71,18 +81,36 @@ export function TmsLogoutReportsView() {
       s.departmentName.toLowerCase().includes(searchQuery.toLowerCase()) ||
       s.id.toLowerCase().includes(searchQuery.toLowerCase());
 
-    const matchesDept = selectedDepartment === 'ALL' ? true : s.departmentName === selectedDepartment;
+    const matchesEmp = selectedEmployeeId === 'ALL' ? true : s.employeeId === selectedEmployeeId;
+    const matchesDept = selectedDepartment === 'ALL' ? true : s.departmentName.toLowerCase() === selectedDepartment.toLowerCase();
     const matchesStatus = selectedStatus === 'ALL' ? true : s.status === selectedStatus;
 
-    return matchesSearch && matchesDept && matchesStatus;
+    let matchesStart = true;
+    if (startDate) {
+      const sMs = new Date(startDate).getTime();
+      const dMs = new Date(s.date).getTime();
+      if (!isNaN(sMs) && !isNaN(dMs)) matchesStart = dMs >= sMs;
+    }
+
+    let matchesEnd = true;
+    if (endDate) {
+      const eMs = new Date(endDate).getTime();
+      const dMs = new Date(s.date).getTime();
+      if (!isNaN(eMs) && !isNaN(dMs)) matchesEnd = dMs <= eMs;
+    }
+
+    return matchesSearch && matchesEmp && matchesDept && matchesStatus && matchesStart && matchesEnd;
   });
 
   const getStatusBadgeStyle = (status: SessionStatus) => {
     switch (status) {
+      case 'COMPLETED':
       case 'LOGGED_OUT':
         return 'bg-emerald-50 text-emerald-700 border-emerald-200';
       case 'ACTIVE':
         return 'bg-amber-50 text-amber-700 border-amber-200';
+      case 'INTERRUPTED':
+        return 'bg-rose-50 text-rose-700 border-rose-200';
       case 'AUTO_CLOSED':
         return 'bg-purple-50 text-purple-700 border-purple-200';
       default:
@@ -187,6 +215,20 @@ export function TmsLogoutReportsView() {
               Sessions Found: {filteredSessions.length}
             </span>
 
+            {/* Employee Filter (Dynamic from Employee Repository) */}
+            <select
+              value={selectedEmployeeId}
+              onChange={(e) => setSelectedEmployeeId(e.target.value)}
+              className="bg-slate-50 border border-slate-200 rounded-xl px-3 py-1.5 font-semibold text-slate-800 outline-none"
+            >
+              <option value="ALL">All Employees</option>
+              {employeesList.map((emp) => (
+                <option key={emp.id} value={emp.id}>
+                  {emp.name} ({emp.id})
+                </option>
+              ))}
+            </select>
+
             {/* Department (Dynamic from Department Repository) */}
             <select
               value={selectedDepartment}
@@ -208,10 +250,28 @@ export function TmsLogoutReportsView() {
               className="bg-slate-50 border border-slate-200 rounded-xl px-3 py-1.5 font-semibold text-slate-800 outline-none"
             >
               <option value="ALL">All Session Statuses</option>
-              <option value="LOGGED_OUT">Logged Out</option>
+              <option value="COMPLETED">Completed</option>
               <option value="ACTIVE">Active Now</option>
+              <option value="INTERRUPTED">Interrupted</option>
               <option value="AUTO_CLOSED">Auto Closed</option>
             </select>
+
+            {/* Date Boundaries */}
+            <input
+              type="date"
+              value={startDate}
+              onChange={(e) => setStartDate(e.target.value)}
+              title="Start Date Boundary"
+              className="bg-slate-50 border border-slate-200 rounded-xl px-2.5 py-1.5 font-semibold text-slate-800 outline-none text-xs"
+            />
+            <span className="text-slate-400 font-bold">to</span>
+            <input
+              type="date"
+              value={endDate}
+              onChange={(e) => setEndDate(e.target.value)}
+              title="End Date Boundary"
+              className="bg-slate-50 border border-slate-200 rounded-xl px-2.5 py-1.5 font-semibold text-slate-800 outline-none text-xs"
+            />
           </div>
         </div>
 

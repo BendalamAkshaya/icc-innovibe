@@ -50,6 +50,10 @@ export function Navbar() {
   const effectiveRole = getEffectiveRole();
 
   const handleLogout = () => {
+    if (effectiveRole === 'EMPLOYEE' || pathname.includes('/dashboard/employee')) {
+      window.dispatchEvent(new CustomEvent('innovibe:open_logout_modal'));
+      return;
+    }
     logout();
     router.push('/auth/login');
   };

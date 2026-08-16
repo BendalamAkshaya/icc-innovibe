@@ -13,6 +13,10 @@ import { TmsEmployeeAnnouncementsView } from '@/components/ceo/tms/announcements
 import { TmsEmployeeReportsView } from '@/components/ceo/tms/reports/TmsEmployeeReportsView';
 import { TmsEmployeeNotificationsView } from '@/components/ceo/tms/notifications/TmsEmployeeNotificationsView';
 import { NotificationRepository } from '@/lib/notification-repository';
+import { LogoutService } from '@/lib/logout-service';
+import { LogoutRepository } from '@/lib/logout-repository';
+import { WorkSession } from '@/lib/logout-models';
+import { DailyWorkReportModal } from '@/components/ceo/tms/logout/DailyWorkReportModal';
 import {
   ResponsiveContainer,
   AreaChart,
@@ -132,11 +136,60 @@ function EmployeeDashboardContent() {
     router.push(`/dashboard/employee?view=${viewName}`);
   };
 
+  const cp = currentProfile as any;
+  const activeEmpId = cp?.employeeId || currentProfile?.email || 'EMP-102';
+
+  const [activeSession, setActiveSession] = useState<WorkSession | null>(null);
+  const [isLogoutModalOpen, setIsLogoutModalOpen] = useState(false);
+
   // Live Timer & Working Duration
   const [currentTime, setCurrentTime] = useState<string>('');
   const [isClockedIn, setIsClockedIn] = useState<boolean>(true);
-  const [clockInTimestamp, setClockInTimestamp] = useState<number>(Date.now() - 5 * 3600 * 1000 - 48 * 60 * 1000); // 5h 48m ago
-  const [workingDuration, setWorkingDuration] = useState<string>('05h 48m 12s');
+  const [clockInTimestamp, setClockInTimestamp] = useState<number>(Date.now() - 5 * 3600 * 1000);
+  const [workingDuration, setWorkingDuration] = useState<string>('00h 00m 00s');
+
+  useEffect(() => {
+    const syncSession = async () => {
+      const sess = await LogoutService.getActiveSessionForEmployee(activeEmpId);
+      if (sess) {
+        setActiveSession(sess);
+        setIsClockedIn(true);
+        if (sess.loginTimestamp) {
+          setClockInTimestamp(sess.loginTimestamp);
+        }
+      } else {
+        setActiveSession(null);
+        setIsClockedIn(false);
+      }
+    };
+
+    syncSession();
+    const unsub = LogoutService.onLogoutUpdated(() => syncSession());
+
+    const handleOpenLogoutModal = () => {
+      setIsLogoutModalOpen(true);
+    };
+
+    window.addEventListener('innovibe:open_logout_modal', handleOpenLogoutModal);
+
+    return () => {
+      unsub();
+      window.removeEventListener('innovibe:open_logout_modal', handleOpenLogoutModal);
+    };
+  }, [activeEmpId]);
+
+  // Requirement 4: Browser Close warning beforeunload
+  useEffect(() => {
+    const handleBeforeUnload = (e: BeforeUnloadEvent) => {
+      if (isClockedIn && activeSession) {
+        e.preventDefault();
+        e.returnValue = 'You have an active working session. Please use the Logout button to submit your Work Session Report.';
+        return e.returnValue;
+      }
+    };
+    window.addEventListener('beforeunload', handleBeforeUnload);
+    return () => window.removeEventListener('beforeunload', handleBeforeUnload);
+  }, [isClockedIn, activeSession]);
 
   useEffect(() => {
     const updateTime = () => {
@@ -152,7 +205,7 @@ function EmployeeDashboardContent() {
       setCurrentTime(`${h12}:${mm.toString().padStart(2,'0')}:${ss.toString().padStart(2,'0')} ${ampm} IST`);
 
       if (isClockedIn) {
-        const diffMs = now.getTime() - clockInTimestamp;
+        const diffMs = Math.max(0, now.getTime() - clockInTimestamp);
         const hrs = Math.floor(diffMs / 3600000);
         const mins = Math.floor((diffMs % 3600000) / 60000);
         const secs = Math.floor((diffMs % 60000) / 1000);
@@ -5232,6 +5285,18 @@ function EmployeeDashboardContent() {
           setTimeout(() => setTaskActionToast(''), 3500);
         }}
         creatorProfile={profileData}
+      />
+
+      {/* Employee Daily Work Session Report Checkout Modal */}
+      <DailyWorkReportModal
+        isOpen={isLogoutModalOpen}
+        sessionId={activeSession?.id || 'SES-1005'}
+        employeeId={activeEmpId}
+        onClose={() => setIsLogoutModalOpen(false)}
+        onSubmitted={() => {
+          setActiveSession(null);
+          setIsClockedIn(false);
+        }}
       />
     </div>
   );

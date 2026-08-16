@@ -3,9 +3,16 @@
  * Centralized schema definitions for daily work sessions, end-of-day reports, and session states.
  */
 
-export type SessionStatus = 'ACTIVE' | 'LOGGED_OUT' | 'AUTO_CLOSED' | 'MISSED_LOGOUT';
+export type SessionStatus = 'ACTIVE' | 'COMPLETED' | 'LOGGED_OUT' | 'INTERRUPTED' | 'AUTO_CLOSED' | 'MISSED_LOGOUT';
 
-export type LogoutMethod = 'MANUAL_LOGOUT' | 'AUTO_CLOSED' | 'FORCE_LOGOUT';
+export type LogoutMethod = 'MANUAL_LOGOUT' | 'AUTO_CLOSED' | 'FORCE_LOGOUT' | 'SYSTEM_RECONCILED';
+
+export interface ReportAttachment {
+  id: string;
+  filename: string;
+  size: string;
+  url: string;
+}
 
 export interface DailyWorkReport {
   workSummary: string;
@@ -14,6 +21,7 @@ export interface DailyWorkReport {
   challengesBlockers: string;
   timeNotes: string;
   additionalNotes?: string;
+  attachments?: ReportAttachment[];
   submittedAt: string;
   logoutMethod: LogoutMethod;
 }
@@ -27,7 +35,9 @@ export interface WorkSession {
   departmentName: string;
   role: string;
   loginTime: string;
+  loginTimestamp?: number;
   logoutTime?: string;
+  logoutTimestamp?: number;
   status: SessionStatus;
   duration: string;
   date: string;
@@ -45,6 +55,7 @@ export interface SubmitWorkReportPayload {
   challengesBlockers: string;
   timeNotes: string;
   additionalNotes?: string;
+  attachments?: ReportAttachment[];
   logoutMethod?: LogoutMethod;
 }
 
@@ -62,6 +73,7 @@ export interface LogoutKpis {
   totalSessionsToday: number;
   activeSessions: number;
   reportsSubmittedToday: number;
+  interruptedCount: number;
   autoClosedCount: number;
   averageWorkingHours: number;
 }

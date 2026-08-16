@@ -113,17 +113,27 @@ export function TmsEmployeeSessionHistoryView() {
                   key={sess.id}
                   className="p-5 sm:p-6 rounded-3xl bg-white border border-slate-200/90 shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-4 hover:border-blue-300 transition"
                 >
-                  {/* Left Side: Dot, Date, Active Pill, IN/OUT times */}
+                  {/* Left Side: Dot, Date, Active/Completed Pill, IN/OUT times */}
                   <div className="space-y-2">
                     <div className="flex items-center gap-2.5 flex-wrap">
-                      <span className="w-2.5 h-2.5 rounded-full bg-blue-600 inline-block"></span>
+                      <span className={`w-2.5 h-2.5 rounded-full inline-block ${isActive ? 'bg-amber-500 animate-pulse' : sess.status === 'COMPLETED' ? 'bg-emerald-500' : 'bg-slate-400'}`}></span>
                       <h3 className="text-sm font-black text-slate-900 tracking-tight">{sess.date}</h3>
                       
-                      {isActive && (
-                        <span className="px-2.5 py-0.5 rounded-full bg-emerald-50 text-emerald-600 border border-emerald-200 text-[9px] font-black uppercase tracking-wider">
-                          ACTIVE
-                        </span>
-                      )}
+                      <span className={`px-2.5 py-0.5 rounded-full text-[9px] font-black uppercase tracking-wider border ${
+                        sess.status === 'ACTIVE'
+                          ? 'bg-amber-50 text-amber-700 border-amber-200'
+                          : sess.status === 'COMPLETED' || sess.status === 'LOGGED_OUT'
+                          ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
+                          : sess.status === 'INTERRUPTED'
+                          ? 'bg-rose-50 text-rose-700 border-rose-200'
+                          : 'bg-slate-100 text-slate-600 border-slate-200'
+                      }`}>
+                        {sess.status}
+                      </span>
+
+                      <span className="text-xs font-black text-slate-600 bg-slate-100 px-2.5 py-0.5 rounded-md">
+                        Duration: {sess.duration}
+                      </span>
                     </div>
 
                     <div className="flex items-center gap-6 text-xs text-slate-500 font-bold pt-0.5">
@@ -133,7 +143,7 @@ export function TmsEmployeeSessionHistoryView() {
                       </span>
                       <span>
                         <strong className="text-slate-400 font-bold mr-1">OUT:</strong>
-                        <span className={isActive ? 'text-slate-700 font-bold' : 'text-slate-700'}>
+                        <span className={isActive ? 'text-amber-700 font-bold' : 'text-slate-700'}>
                           {sess.logoutTime || 'Active Shift'}
                         </span>
                       </span>
