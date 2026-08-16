@@ -115,16 +115,45 @@ export function ViewReportModal({ session, onClose }: ViewReportModalProps) {
 
           {/* Time Notes & Challenges */}
           {report && (
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs font-sans">
-              <div className="p-3.5 rounded-2xl bg-slate-950/40 border border-slate-800 space-y-1">
-                <span className="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider block">CHALLENGES / BLOCKERS</span>
-                <p className="text-slate-300">{report.challengesBlockers}</p>
+            <div className="space-y-4 font-sans text-xs">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="p-3.5 rounded-2xl bg-slate-950/40 border border-slate-800 space-y-1">
+                  <span className="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider block">CHALLENGES / BLOCKERS</span>
+                  <p className="text-slate-300">{report.challengesBlockers}</p>
+                </div>
+
+                <div className="p-3.5 rounded-2xl bg-slate-950/40 border border-slate-800 space-y-1">
+                  <span className="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider block">TIME SPENT NOTES</span>
+                  <p className="text-slate-300">{report.timeNotes}</p>
+                </div>
               </div>
 
-              <div className="p-3.5 rounded-2xl bg-slate-950/40 border border-slate-800 space-y-1">
-                <span className="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider block">TIME SPENT NOTES</span>
-                <p className="text-slate-300">{report.timeNotes}</p>
-              </div>
+              {report.additionalNotes && (
+                <div className="p-3.5 rounded-2xl bg-slate-950/40 border border-slate-800 space-y-1">
+                  <span className="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider block">ADDITIONAL NOTES / COMMENTARY</span>
+                  <p className="text-slate-300">{report.additionalNotes}</p>
+                </div>
+              )}
+
+              {report.attachments && report.attachments.length > 0 && (
+                <div className="p-3.5 rounded-2xl bg-slate-950/40 border border-slate-800 space-y-2">
+                  <span className="text-[10px] font-extrabold text-amber-400 uppercase tracking-wider block">ATTACHED DELIVERABLES & FILES</span>
+                  <div className="flex flex-wrap gap-2">
+                    {report.attachments.map((att) => (
+                      <a
+                        key={att.id}
+                        href={att.url || '#'}
+                        download={att.filename}
+                        className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-slate-900 border border-slate-700 text-slate-200 hover:text-white hover:border-amber-500/50 transition-colors"
+                      >
+                        <FileText className="w-3.5 h-3.5 text-amber-400" />
+                        <span className="font-semibold text-xs">{att.filename}</span>
+                        <span className="text-[10px] text-slate-500">({att.size})</span>
+                      </a>
+                    ))}
+                  </div>
+                </div>
+              )}
             </div>
           )}
         </div>

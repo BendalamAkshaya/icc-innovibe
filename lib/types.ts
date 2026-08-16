@@ -8,6 +8,10 @@ export interface UserRoleProfile {
   title: string;
   avatar: string;
   permissions: string[];
+  employeeId?: string;
+  designation?: string;
+  department?: string;
+  departmentId?: string;
 }
 
 export interface EVHealthScore {

@@ -1,27 +1,61 @@
-'use client';
-
-import React, { useState } from 'react';
-import { SubmitWorkReportPayload } from '../../../../lib/logout-models';
+import React, { useState, useEffect } from 'react';
+import { SubmitWorkReportPayload, ReportAttachment } from '../../../../lib/logout-models';
 import { LogoutService } from '../../../../lib/logout-service';
-import { X, LogOut, CheckCircle2, FileText, AlertCircle, Save, Clock } from 'lucide-react';
+import { TmsTaskService } from '../../../../lib/tms-service';
+import { AuthService } from '../../../../lib/auth-service';
+import { X, LogOut, CheckCircle2, FileText, AlertCircle, Save, Clock, Paperclip, Trash2, Plus } from 'lucide-react';
 
 interface DailyWorkReportModalProps {
   isOpen: boolean;
   sessionId: string;
+  employeeId?: string;
   onClose: () => void;
   onSubmitted: () => void;
 }
 
-export function DailyWorkReportModal({ isOpen, sessionId, onClose, onSubmitted }: DailyWorkReportModalProps) {
+export function DailyWorkReportModal({ isOpen, sessionId, employeeId, onClose, onSubmitted }: DailyWorkReportModalProps) {
   const [workSummary, setWorkSummary] = useState('');
   const [tasksCompletedRaw, setTasksCompletedRaw] = useState('');
   const [pendingTasksRaw, setPendingTasksRaw] = useState('');
   const [challenges, setChallenges] = useState('');
   const [timeNotes, setTimeNotes] = useState('');
   const [additionalNotes, setAdditionalNotes] = useState('');
+  const [attachments, setAttachments] = useState<ReportAttachment[]>([]);
+  const [availableTasks, setAvailableTasks] = useState<Array<{ id: string; title: string; status: string }>>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+  useEffect(() => {
+    if (isOpen) {
+      TmsTaskService.getTasks().then((allTasks) => {
+        const myTasks = allTasks.filter(
+          (t) => !employeeId || t.assignee.id === employeeId || t.assignee.name.toLowerCase().includes('varun')
+        );
+        setAvailableTasks(myTasks.map((t) => ({ id: t.id, title: t.title, status: t.status })));
+      });
+    }
+  }, [isOpen, employeeId]);
+
   if (!isOpen || !sessionId) return null;
+
+  const handleSelectTask = (taskTitle: string) => {
+    setTasksCompletedRaw((prev) => (prev ? `${prev}\n${taskTitle}` : taskTitle));
+  };
+
+  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (!e.target.files || e.target.files.length === 0) return;
+    const file = e.target.files[0];
+    const newAtt: ReportAttachment = {
+      id: `ATT-${Date.now()}`,
+      filename: file.name,
+      size: `${(file.size / 1024).toFixed(1)} KB`,
+      url: URL.createObjectURL(file),
+    };
+    setAttachments((prev) => [...prev, newAtt]);
+  };
+
+  const handleRemoveAttachment = (id: string) => {
+    setAttachments((prev) => prev.filter((a) => a.id !== id));
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -50,6 +84,7 @@ export function DailyWorkReportModal({ isOpen, sessionId, onClose, onSubmitted }
       challengesBlockers: challenges.trim() || 'No major blockers encountered today.',
       timeNotes: timeNotes.trim() || 'Standard business working hours.',
       additionalNotes: additionalNotes.trim() || undefined,
+      attachments: attachments.length > 0 ? attachments : undefined,
       logoutMethod: 'MANUAL_LOGOUT',
     };
 
@@ -57,6 +92,12 @@ export function DailyWorkReportModal({ isOpen, sessionId, onClose, onSubmitted }
     setIsSubmitting(false);
     onSubmitted();
     onClose();
+
+    // Clear auth session and redirect
+    AuthService.logout();
+    if (typeof window !== 'undefined') {
+      window.location.href = '/auth/login';
+    }
   };
 
   return (
@@ -99,9 +140,11 @@ export function DailyWorkReportModal({ isOpen, sessionId, onClose, onSubmitted }
           {/* Row 2: Tasks Completed & Pending Tasks */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
-              <label className="font-montserrat block text-[10px] font-extrabold uppercase text-slate-400 mb-1.5">
-                Tasks Completed (One per line)
-              </label>
+              <div className="flex items-center justify-between mb-1.5">
+                <label className="font-montserrat text-[10px] font-extrabold uppercase text-slate-400">
+                  Tasks Completed (One per line)
+                </label>
+              </div>
               <textarea
                 value={tasksCompletedRaw}
                 onChange={(e) => setTasksCompletedRaw(e.target.value)}
@@ -109,6 +152,26 @@ export function DailyWorkReportModal({ isOpen, sessionId, onClose, onSubmitted }
                 rows={3}
                 className="w-full px-4 py-2.5 rounded-xl bg-slate-950 border border-slate-800 text-white placeholder-slate-500 outline-none focus:border-amber-500 font-sans text-xs"
               />
+
+              {/* Assigned Task Quick Selectors */}
+              {availableTasks.length > 0 && (
+                <div className="mt-2 space-y-1">
+                  <span className="text-[9px] font-bold text-slate-400 uppercase tracking-wider block">Quick Add Assigned Tasks:</span>
+                  <div className="flex flex-wrap gap-1 max-h-20 overflow-y-auto">
+                    {availableTasks.map((t) => (
+                      <button
+                        key={t.id}
+                        type="button"
+                        onClick={() => handleSelectTask(t.title)}
+                        className="px-2 py-0.5 rounded-lg bg-slate-800 hover:bg-amber-900/40 text-[10px] text-amber-300 border border-slate-700 transition-colors truncate max-w-[200px]"
+                        title={t.title}
+                      >
+                        + {t.title}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
             </div>
 
             <div>
@@ -148,17 +211,40 @@ export function DailyWorkReportModal({ isOpen, sessionId, onClose, onSubmitted }
                 type="text"
                 value={timeNotes}
                 onChange={(e) => setTimeNotes(e.target.value)}
-                placeholder="e.g. 4 hrs meetings, 3 hrs architecture review..."
+                placeholder="e.g. 4h Coding, 2h Debugging, 1h Meeting..."
                 className="w-full px-4 py-2.5 rounded-xl bg-slate-950 border border-slate-800 text-white placeholder-slate-500 outline-none focus:border-amber-500 font-sans text-xs"
               />
             </div>
           </div>
 
-          {/* Row 4: Additional Notes */}
+          {/* Row 4: Attach Deliverables & Additional Notes */}
           <div>
-            <label className="font-montserrat block text-[10px] font-extrabold uppercase text-slate-400 mb-1.5">
-              Additional Commentary / Notes (Optional)
-            </label>
+            <div className="flex items-center justify-between mb-1.5">
+              <label className="font-montserrat text-[10px] font-extrabold uppercase text-slate-400">
+                Attach Deliverables / Files (Optional)
+              </label>
+              <label className="cursor-pointer px-2.5 py-1 rounded-lg bg-amber-500/20 text-amber-300 border border-amber-500/30 text-[10px] font-bold flex items-center gap-1 hover:bg-amber-500/30 transition-colors">
+                <Paperclip className="w-3 h-3" />
+                <span>Upload File</span>
+                <input type="file" onChange={handleFileUpload} className="hidden" />
+              </label>
+            </div>
+
+            {attachments.length > 0 && (
+              <div className="flex flex-wrap gap-2 mb-2">
+                {attachments.map((att) => (
+                  <div key={att.id} className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-slate-950 border border-slate-800 text-slate-200 text-xs">
+                    <Paperclip className="w-3.5 h-3.5 text-amber-400 shrink-0" />
+                    <span className="font-semibold text-xs truncate max-w-[180px]">{att.filename}</span>
+                    <span className="text-[10px] text-slate-500">({att.size})</span>
+                    <button type="button" onClick={() => handleRemoveAttachment(att.id)} className="text-rose-400 hover:text-rose-300 ml-1">
+                      <Trash2 className="w-3.5 h-3.5" />
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
+
             <input
               type="text"
               value={additionalNotes}

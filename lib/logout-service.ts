@@ -38,7 +38,11 @@ export class LogoutService {
     return LogoutRepository.onLogoutUpdated(callback);
   }
 
-  static async getKpis(): Promise<LogoutKpis> {
-    return LogoutRepository.getKpis();
+  static async getActiveSessionForEmployee(employeeId: string): Promise<WorkSession | null> {
+    return LogoutRepository.getActiveSessionForEmployee(employeeId);
+  }
+
+  static async getKpis(employeeId?: string): Promise<LogoutKpis> {
+    return LogoutRepository.getKpis(employeeId);
   }
 }
