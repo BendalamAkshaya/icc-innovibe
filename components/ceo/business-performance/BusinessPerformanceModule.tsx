@@ -8,7 +8,6 @@ import { RevenueBreakdownDonut } from './RevenueBreakdownDonut';
 import { BranchRevenueComparison } from './BranchRevenueComparison';
 import { BusinessKpiStrip } from './BusinessKpiStrip';
 import { TopRevenueContributors } from './TopRevenueContributors';
-import { FinancialAiInsights } from './FinancialAiInsights';
 import { FinancialQuickActions } from './FinancialQuickActions';
 
 import {
@@ -93,10 +92,9 @@ export function BusinessPerformanceModule() {
       {/* 5. Business KPI Summary Strip */}
       <BusinessKpiStrip kpis={mockBusinessKpis} />
 
-      {/* 6. Top Contributors & Conversational AI Insights */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      {/* 6. Top Contributors */}
+      <div className="grid grid-cols-1 gap-6">
         <TopRevenueContributors contributors={mockTopContributors} />
-        <FinancialAiInsights insights={mockFinancialAiInsights} />
       </div>
 
       {/* 7. Quick Report Actions */}

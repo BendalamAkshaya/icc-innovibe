@@ -1,116 +1,47 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, Suspense } from 'react';
 import { useRole } from '../../../components/RoleContext';
 import { ApiGateway, CEOMetricsResponse, getStoredApiUrl, setStoredApiUrl } from '../../../lib/api-client';
 import { mockVehicles } from '../../../lib/mock-data';
 import { Vehicle } from '../../../lib/types';
 import {
-  Crown,
-  IndianRupee,
-  Users,
-  ShieldCheck,
-  Zap,
-  TrendingUp,
+  Shield,
   Sparkles,
-  CheckCircle2,
+  TrendingUp,
+  Radio,
+  Users,
+  Zap,
+  ChevronRight,
+  MoreHorizontal,
+  Bot,
+  AlertTriangle,
+  FileText,
+  MessageSquare,
+  Activity,
   Server,
   RefreshCw,
-  Globe,
-  PlusCircle,
-  MapPin,
-  Activity,
-  Navigation,
-  Compass,
-  FileText,
-  Sliders,
   Check,
 } from 'lucide-react';
-import {
-  AreaChart,
-  Area,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  ResponsiveContainer,
-  PieChart,
-  Pie,
-  Cell,
-  BarChart,
-  Bar,
-} from 'recharts';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
+
+import { TmsModule } from '../../../components/ceo/tms/TmsModule';
 import { BusinessPerformanceModule } from '../../../components/ceo/business-performance/BusinessPerformanceModule';
 import { CompanyOperationsModule } from '../../../components/ceo/company-operations/CompanyOperationsModule';
 import { FleetIntelligenceModule } from '../../../components/ceo/fleet-intelligence/FleetIntelligenceModule';
 import { DepartmentPerformanceModule } from '../../../components/ceo/department-performance/DepartmentPerformanceModule';
-import { AiCommandCenterModule } from '../../../components/ceo/ai-command-center/AiCommandCenterModule';
 import { ActionCenterModule } from '../../../components/ceo/action-center/ActionCenterModule';
 import { AlertsRiskModule } from '../../../components/ceo/alerts-risk-center/AlertsRiskModule';
 import { CommunicationHubModule } from '../../../components/ceo/communication-hub/CommunicationHubModule';
 import { ReportsAnalyticsModule } from '../../../components/ceo/reports-analytics/ReportsAnalyticsModule';
 import { RoleAccessGovernanceModule } from '../../../components/ceo/role-access/RoleAccessGovernanceModule';
 import { GlobalFilterProvider } from '../../../lib/global-filter-context';
-import { ExportModal } from '../../../components/ceo/common/ExportModal';
-import { ShareAnalyticsModal } from '../../../components/ceo/common/ShareAnalyticsModal';
-import { DrillDownModal } from '../../../components/ceo/common/DrillDownModal';
-import { FloatingAiCopilotWidget } from '../../../components/ceo/common/FloatingAiCopilotWidget';
 
 function CEODashboardContent() {
-
-
-
-
-
-
-
-
-  const { currentProfile, roleConfigs } = useRole();
+  const { currentProfile } = useRole();
   const searchParams = useSearchParams();
   const activeModule = searchParams ? searchParams.get('module') : null;
-
-  const moduleMeta: Record<string, { title: string; desc: string; badge: string }> = {
-    'business-performance': {
-      title: 'Business Performance Workspace',
-      desc: 'Detailed financial growth, margin analysis, and membership subscription streams.',
-      badge: 'Financial Suite',
-    },
-    'fleet-intelligence': {
-      title: 'Fleet Intelligence & Telematics',
-      desc: 'Live IoT telemetry stream monitoring battery degradation, controller temps, and active EVs.',
-      badge: 'IoT Stream',
-    },
-    'department-performance': {
-      title: 'Department Performance Index',
-      desc: 'Comparative execution scores across Operations, Tech, HR, and Service Hubs.',
-      badge: 'Performance Index',
-    },
-    'alerts-risk': {
-      title: 'Alerts & Risk Management Center',
-      desc: 'Real-time thermal cutoff alerts, SLA breach warnings, and critical system thresholds.',
-      badge: 'Active Risk Stream',
-    },
-    'action-center': {
-      title: 'Executive Action Center',
-      desc: 'Immediate operational overrides, manual dispatch authorizations, and system commands.',
-      badge: 'Command Suite',
-    },
-    'communication-hub': {
-      title: 'Communication & Dispatch Hub',
-      desc: 'Multi-channel broadcast logs, automated customer WhatsApp notifications, and alerts.',
-      badge: 'Omnichannel Hub',
-    },
-    'reports-analytics': {
-      title: 'Executive Reports & Analytics',
-      desc: 'Comprehensive P&L reports, quarterly projections, and compliance audit histories.',
-      badge: 'Executive Analytics',
-    },
-  };
-
-  const currentModuleInfo = activeModule && moduleMeta[activeModule] ? moduleMeta[activeModule] : null;
-
 
   // Metrics State
   const [metrics, setMetrics] = useState<CEOMetricsResponse>({
@@ -119,151 +50,28 @@ function CEODashboardContent() {
     connectedVehiclesCount: 148,
     zeroBackOfficePercent: 94.2,
     activeAmcCount: 342,
-    revenueOverview: [
-      { month: 'Jan', revenue: 18400 },
-      { month: 'Feb', revenue: 28900 },
-      { month: 'Mar', revenue: 41200 },
-      { month: 'Apr', revenue: 54800 },
-      { month: 'May', revenue: 69100 },
-      { month: 'Jun', revenue: 84500 },
-    ],
+    revenueOverview: [],
     isLiveServer: true,
-    dataSourceName: 'Live Laravel Database Sync',
+    dataSourceName: 'Live Database Sync',
   });
 
-  // Vehicles Telematics Stream State
   const [vehicles, setVehicles] = useState<Vehicle[]>(mockVehicles);
-  const [selectedCityFilter, setSelectedCityFilter] = useState<string>('ALL');
-
-  // Interactive UI Controls
-  const [timeRange, setTimeRange] = useState<'7D' | '30D' | '6M' | 'YTD'>('6M');
-  const [activeChartTab, setActiveChartTab] = useState<'REVENUE' | 'SERVICES' | 'CITIES'>('REVENUE');
-  const [liveTransactionFeed, setLiveTransactionFeed] = useState<
-    { id: string; user: string; service: string; amount: number; time: string }[]
-  >([
-    { id: 'tx_01', user: 'Srinivas Rao', service: '3-Year Membership Plan', amount: 499, time: 'Just now' },
-    { id: 'tx_02', user: 'Anita Roy', service: 'Service at Doorstep', amount: 249, time: '2 mins ago' },
-    { id: 'tx_03', user: 'Kamesh Gupta', service: 'Service at Garage', amount: 499, time: '5 mins ago' },
-  ]);
-
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [serverUrl, setServerUrl] = useState('http://localhost:8000/api');
   const [testResult, setTestResult] = useState<{ success: boolean; message: string } | null>(null);
   const [isTesting, setIsTesting] = useState(false);
-  const [lastSyncTime, setLastSyncTime] = useState<string>('Just now');
 
   useEffect(() => {
     setServerUrl(getStoredApiUrl());
   }, []);
-
-  // Datasets by Time Range ('7D' | '30D' | '6M' | 'YTD')
-  const revenueOverviewData: Record<'7D' | '30D' | '6M' | 'YTD', { month: string; revenue: number }[]> = {
-    '7D': [
-      { month: 'Mon', revenue: 11200 },
-      { month: 'Tue', revenue: 13500 },
-      { month: 'Wed', revenue: 12100 },
-      { month: 'Thu', revenue: 14800 },
-      { month: 'Fri', revenue: 16200 },
-      { month: 'Sat', revenue: 18900 },
-      { month: 'Sun', revenue: 21400 },
-    ],
-    '30D': [
-      { month: 'Week 1', revenue: 18400 },
-      { month: 'Week 2', revenue: 21200 },
-      { month: 'Week 3', revenue: 22800 },
-      { month: 'Week 4', revenue: 24100 },
-    ],
-    '6M': metrics.revenueOverview || [
-      { month: 'Jan', revenue: 18400 },
-      { month: 'Feb', revenue: 28900 },
-      { month: 'Mar', revenue: 41200 },
-      { month: 'Apr', revenue: 54800 },
-      { month: 'May', revenue: 69100 },
-      { month: 'Jun', revenue: 84500 },
-    ],
-    'YTD': [
-      { month: 'Q1 2025', revenue: 112000 },
-      { month: 'Q2 2025', revenue: 145000 },
-      { month: 'Q3 2025', revenue: 188000 },
-      { month: 'Q4 2025', revenue: 235000 },
-      { month: 'Q1 2026', revenue: 295000 },
-      { month: 'Q2 2026', revenue: 348000 },
-    ],
-  };
-
-  const serviceRevenueBreakdownData: Record<
-    '7D' | '30D' | '6M' | 'YTD',
-    { name: string; value: number; color: string }[]
-  > = {
-    '7D': [
-      { name: 'Service at Garage (₹499)', value: 5488, color: '#0280d2' },
-      { name: 'Service at Home (₹249)', value: 3486, color: '#10b981' },
-      { name: 'Roadside Assistance (₹199)', value: 1990, color: '#f59e0b' },
-      { name: 'Membership Plans (₹199-999)', value: 1592, color: '#8b5cf6' },
-    ],
-    '30D': [
-      { name: 'Service at Garage (₹499)', value: 21457, color: '#0280d2' },
-      { name: 'Service at Home (₹249)', value: 13944, color: '#10b981' },
-      { name: 'Roadside Assistance (₹199)', value: 7562, color: '#f59e0b' },
-      { name: 'Membership Plans (₹199-999)', value: 5190, color: '#8b5cf6' },
-    ],
-    '6M': [
-      { name: 'Service at Garage (₹499)', value: 38400, color: '#0280d2' },
-      { name: 'Service at Home (₹249)', value: 24200, color: '#10b981' },
-      { name: 'Roadside Assistance (₹199)', value: 12900, color: '#f59e0b' },
-      { name: 'Membership Plans (₹199-999)', value: 9000, color: '#8b5cf6' },
-    ],
-    'YTD': [
-      { name: 'Service at Garage (₹499)', value: 142000, color: '#0280d2' },
-      { name: 'Service at Home (₹249)', value: 94500, color: '#10b981' },
-      { name: 'Roadside Assistance (₹199)', value: 52000, color: '#f59e0b' },
-      { name: 'Membership Plans (₹199-999)', value: 39500, color: '#8b5cf6' },
-    ],
-  };
-
-  const cityRevenueDataByRange: Record<
-    '7D' | '30D' | '6M' | 'YTD',
-    { city: string; revenue: number; bookings: number }[]
-  > = {
-    '7D': [
-      { city: 'Kakinada Main Hub', revenue: 4800, bookings: 22 },
-      { city: 'Rajahmundry East', revenue: 3200, bookings: 14 },
-      { city: 'Vijayawada Central', revenue: 2400, bookings: 10 },
-      { city: 'Visakhapatnam Port', revenue: 1600, bookings: 6 },
-    ],
-    '30D': [
-      { city: 'Kakinada Main Hub', revenue: 18600, bookings: 78 },
-      { city: 'Rajahmundry East', revenue: 12400, bookings: 52 },
-      { city: 'Vijayawada Central', revenue: 9100, bookings: 37 },
-      { city: 'Visakhapatnam Port', revenue: 5800, bookings: 20 },
-    ],
-    '6M': [
-      { city: 'Kakinada Main Hub', revenue: 34200, bookings: 142 },
-      { city: 'Rajahmundry East', revenue: 22800, bookings: 94 },
-      { city: 'Vijayawada Central', revenue: 16500, bookings: 68 },
-      { city: 'Visakhapatnam Port', revenue: 11000, bookings: 38 },
-    ],
-    'YTD': [
-      { city: 'Kakinada Main Hub', revenue: 138000, bookings: 580 },
-      { city: 'Rajahmundry East', revenue: 91000, bookings: 375 },
-      { city: 'Vijayawada Central', revenue: 66000, bookings: 270 },
-      { city: 'Visakhapatnam Port', revenue: 44000, bookings: 160 },
-    ],
-  };
-
-  const currentRevenueOverview = revenueOverviewData[timeRange] || metrics.revenueOverview;
-  const currentServiceBreakdown = serviceRevenueBreakdownData[timeRange];
-  const currentCityRevenueData = cityRevenueDataByRange[timeRange];
 
   const fetchMetrics = async () => {
     const data = await ApiGateway.getCEOMetrics();
     const liveVehs = await ApiGateway.getConnectedVehicles();
     setMetrics(data);
     setVehicles(liveVehs);
-    setLastSyncTime(new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' }));
   };
 
-  // Live Auto-Refresh Polling every 8 seconds
   useEffect(() => {
     fetchMetrics();
     const interval = setInterval(() => {
@@ -272,40 +80,13 @@ function CEODashboardContent() {
     return () => clearInterval(interval);
   }, []);
 
-  // Simulate Live Payment Transaction
-  const handleSimulatePayment = () => {
-    const sampleTx = [
-      { service: 'Service at Home', amount: 249 },
-      { service: 'Service at Garage', amount: 499 },
-      { service: 'Roadside Assistance', amount: 199 },
-      { service: 'Lifetime Membership Plan', amount: 999 },
-    ];
-    const picked = sampleTx[Math.floor(Math.random() * sampleTx.length)];
-    const newTx = {
-      id: `tx_${Date.now()}`,
-      user: `Customer #${Math.floor(100 + Math.random() * 900)}`,
-      service: picked.service,
-      amount: picked.amount,
-      time: 'Just now',
-    };
-
-    setLiveTransactionFeed((prev) => [newTx, ...prev.slice(0, 4)]);
-    setMetrics((prev) => ({
-      ...prev,
-      monthlyRevenue: prev.monthlyRevenue + picked.amount,
-      activeAmcCount: prev.activeAmcCount + 1,
-    }));
-  };
-
   const handleTestAndSave = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsTesting(true);
     setTestResult(null);
-
     setStoredApiUrl(serverUrl);
     const res = await ApiGateway.testBackendConnection(serverUrl);
     setTestResult(res);
-
     if (res.success) {
       await fetchMetrics();
     }
@@ -313,10 +94,11 @@ function CEODashboardContent() {
   };
 
   return (
-    <div className="space-y-6 text-left" suppressHydrationWarning>
-      {/* Dedicated Module Views */}
-
-      {activeModule === 'business-performance' ? (
+    <div className="space-y-6 text-left font-sans">
+      {/* Sub-module Routing Views */}
+      {activeModule && (activeModule === 'tms' || activeModule.startsWith('tms-')) ? (
+        <TmsModule subModule={activeModule} />
+      ) : activeModule === 'business-performance' ? (
         <BusinessPerformanceModule />
       ) : activeModule === 'company-operations' ? (
         <CompanyOperationsModule />
@@ -324,8 +106,6 @@ function CEODashboardContent() {
         <FleetIntelligenceModule />
       ) : activeModule === 'department-performance' ? (
         <DepartmentPerformanceModule />
-      ) : activeModule === 'ai-command' ? (
-        <AiCommandCenterModule />
       ) : activeModule === 'action-center' ? (
         <ActionCenterModule />
       ) : activeModule === 'alerts-risk' || activeModule === 'alerts' ? (
@@ -338,418 +118,660 @@ function CEODashboardContent() {
         <RoleAccessGovernanceModule />
       ) : (
         <>
-          {/* CEO Executive Welcome Banner (Only displayed on Executive Overview) */}
-          <div className="glass-panel p-6 rounded-3xl border border-amber-200 bg-gradient-to-r from-amber-500/10 via-amber-500/5 to-white flex flex-col lg:flex-row lg:items-center justify-between gap-6 relative overflow-hidden">
-            <div className="space-y-2 z-10">
+          {/* Top Hero Banner */}
+          <div className="rounded-3xl border border-[#fde68a]/70 bg-gradient-to-r from-[#fffbeb] via-[#fef3c7]/50 to-[#fffdf5] p-6 lg:p-7 relative overflow-hidden flex flex-col md:flex-row md:items-center justify-between gap-6 shadow-2xs">
+            <div className="space-y-3 relative z-10 max-w-xl">
               <div className="flex items-center gap-2">
-                <Crown className="h-6 w-6 text-amber-600 fill-amber-500" />
-                <span className="text-xs font-black uppercase tracking-widest text-amber-700">Chief Executive Office</span>
-              </div>
-              <h1 className="text-2xl lg:text-3xl font-extrabold text-slate-900">Welcome back, {currentProfile.name}</h1>
-              <p className="text-xs text-slate-600 max-w-xl font-medium">
-                InnoVibe Mobility Command Center Executive Suite. Overseeing live vehicle tracking, service hub performance, and revenue growth.
-              </p>
-            </div>
-
-            <div className="flex flex-wrap items-center gap-3 z-10">
-              <Link
-                href="/dashboard/roles"
-                className="px-4 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-600 text-white font-extrabold text-xs shadow-md shadow-amber-500/20 flex items-center gap-2 transition-all"
-              >
-                <ShieldCheck className="h-4 w-4" /> CEO Role & Access Matrix
-              </Link>
-              <Link
-                href="/dashboard/ai-command"
-                className="px-4 py-2.5 rounded-xl bg-white hover:bg-slate-50 border border-slate-200 text-slate-700 font-bold text-xs flex items-center gap-2 transition-all shadow-xs"
-              >
-                <Sparkles className="h-4 w-4 text-sky-600" /> AI Control Suite
-              </Link>
-            </div>
-          </div>
-
-
-
-
-
-
-
-
-          {/* Active Selected Executive Module Indicator Banner */}
-          {currentModuleInfo && (
-            <div className="p-4 rounded-2xl bg-sky-50/90 border border-sky-300 flex items-center justify-between shadow-xs">
-              <div className="flex items-center gap-3">
-                <div className="p-2.5 rounded-xl bg-sky-600 text-white">
-                  <Sparkles className="h-5 w-5" />
-                </div>
-                <div>
-                  <div className="flex items-center gap-2">
-                    <h3 className="font-extrabold text-sm text-slate-900">{currentModuleInfo.title}</h3>
-                    <span className="text-[10px] font-extrabold px-2 py-0.5 rounded bg-sky-200 text-sky-900">
-                      {currentModuleInfo.badge}
-                    </span>
-                  </div>
-                  <p className="text-xs text-slate-600 mt-0.5 font-medium">{currentModuleInfo.desc}</p>
-                </div>
-              </div>
-
-              <Link
-                href="/dashboard/ceo"
-                className="text-xs font-bold text-sky-700 hover:text-sky-900 px-3 py-1.5 rounded-xl bg-white border border-sky-200 shadow-xs"
-              >
-                Reset to Main View
-              </Link>
-            </div>
-          )}
-
-
-
-      {/* Metric Cards (Updated without Zero Back-Office card) */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        <div className="glass-card p-5 rounded-2xl border border-slate-200">
-          <div className="flex items-center justify-between">
-            <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">Live Monthly Revenue</span>
-            <div className="p-2.5 rounded-xl bg-amber-50 text-amber-600 border border-amber-200"><IndianRupee className="h-5 w-5" /></div>
-          </div>
-          <p className="text-2xl font-black text-slate-900 mt-3 flex items-center gap-2">
-            ₹{metrics.monthlyRevenue.toLocaleString('en-IN')}
-            <span className="h-2 w-2 rounded-full bg-emerald-500 animate-ping" />
-          </p>
-          <div className="flex items-center gap-1 text-xs text-emerald-600 mt-1 font-extrabold">
-            <TrendingUp className="h-3.5 w-3.5" /> +{metrics.revenueGrowthPercent}% vs last month
-          </div>
-        </div>
-
-        <div className="glass-card p-5 rounded-2xl border border-slate-200">
-          <div className="flex items-center justify-between">
-            <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">Registered EVs / Users</span>
-            <div className="p-2.5 rounded-xl bg-sky-50 text-sky-600 border border-sky-200"><Zap className="h-5 w-5" /></div>
-          </div>
-          <p className="text-2xl font-black text-slate-900 mt-3">{metrics.connectedVehiclesCount.toLocaleString('en-IN')} Active</p>
-          <p className="text-xs text-slate-500 mt-1 font-medium">Mapped to Database `users` Table</p>
-        </div>
-
-        <div className="glass-card p-5 rounded-2xl border border-slate-200">
-          <div className="flex items-center justify-between">
-            <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">Live Active Fleets</span>
-            <div className="p-2.5 rounded-xl bg-emerald-50 text-emerald-600 border border-emerald-200"><Activity className="h-5 w-5" /></div>
-          </div>
-          <p className="text-2xl font-black text-emerald-700 mt-3 flex items-center gap-2">
-            100% Online
-            <span className="h-2 w-2 rounded-full bg-emerald-500" />
-          </p>
-          <p className="text-xs text-slate-500 mt-1 font-medium">GPS Telemetry Stream Active</p>
-        </div>
-
-        <div className="glass-card p-5 rounded-2xl border border-slate-200">
-          <div className="flex items-center justify-between">
-            <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">Total Service Bookings</span>
-            <div className="p-2.5 rounded-xl bg-indigo-50 text-indigo-600 border border-indigo-200"><Users className="h-5 w-5" /></div>
-          </div>
-          <p className="text-2xl font-black text-slate-900 mt-3">{metrics.activeAmcCount.toLocaleString('en-IN')}</p>
-          <p className="text-xs text-slate-500 mt-1 font-medium">Mapped to Database `bookings` Table</p>
-        </div>
-      </div>
-
-      {/* Live Fleet Tracking Telematics Section */}
-      <div className="glass-panel p-6 rounded-3xl border border-slate-200">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
-          <div>
-            <div className="flex items-center gap-2">
-              <Navigation className="h-5 w-5 text-sky-600" />
-              <h2 className="text-base font-extrabold text-slate-900">Live Vehicle Tracking & Telematics Stream</h2>
-            </div>
-            <p className="text-xs text-slate-500 font-medium">Real-time GPS coordinates, battery health, and EV status from the live backend</p>
-          </div>
-          
-          <div className="flex items-center gap-2">
-            <span className="text-xs font-bold px-3 py-1.5 rounded-xl bg-sky-50 text-sky-800 border border-sky-200 flex items-center gap-1.5">
-              <Compass className="h-3.5 w-3.5 text-sky-600 animate-spin" /> Live Telemetry
-            </span>
-          </div>
-        </div>
-
-        <div className="overflow-x-auto">
-          <table className="w-full text-left text-xs">
-            <thead>
-              <tr className="border-b border-slate-200 text-slate-500 uppercase text-[10px] tracking-wider font-bold">
-                <th className="pb-3 px-3">Reg Number / VIN</th>
-                <th className="pb-3 px-3">EV Model</th>
-                <th className="pb-3 px-3">Owner</th>
-                <th className="pb-3 px-3">Battery %</th>
-                <th className="pb-3 px-3">Controller Temp</th>
-                <th className="pb-3 px-3">Health Score</th>
-                <th className="pb-3 px-3">Status</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-slate-100">
-              {vehicles.map((veh) => (
-                <tr key={veh.id} className="hover:bg-slate-50 transition-all">
-                  <td className="py-3.5 px-3">
-                    <p className="font-mono font-bold text-sky-700">{veh.registrationNumber}</p>
-                    <p className="text-[10px] font-mono text-slate-400">{veh.vin}</p>
-                  </td>
-                  <td className="py-3.5 px-3 font-bold text-slate-900">{veh.model}</td>
-                  <td className="py-3.5 px-3 text-slate-700 font-medium">{veh.ownerName}</td>
-                  <td className="py-3.5 px-3">
-                    <div className="flex items-center gap-2">
-                      <div className="w-16 bg-slate-200 h-2 rounded-full overflow-hidden">
-                        <div
-                          className={`h-full ${veh.healthScore.batteryHealth < 30 ? 'bg-red-500' : 'bg-emerald-500'}`}
-                          style={{ width: `${veh.healthScore.batteryHealth}%` }}
-                        />
-                      </div>
-                      <span className="font-mono font-bold text-slate-900">{veh.healthScore.batteryHealth}%</span>
-                    </div>
-                  </td>
-                  <td className="py-3.5 px-3 font-mono font-bold text-slate-700">{veh.healthScore.controllerTemp}°C</td>
-                  <td className="py-3.5 px-3 font-mono font-extrabold text-sm text-emerald-700">
-                    {veh.healthScore.overall} / 100
-                  </td>
-                  <td className="py-3.5 px-3">
-                    <span className="px-2.5 py-1 rounded-full text-[10px] font-bold bg-emerald-50 text-emerald-800 border border-emerald-200">
-                      {veh.healthScore.status}
-                    </span>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      </div>
-
-      {/* Interactive Main Visualisation Suite */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Left Column: Interactive Multi-Tab Charting Workbench */}
-        <div className="lg:col-span-2 glass-panel p-6 rounded-3xl border border-slate-200 space-y-4">
-          {/* Controls Bar: Time Filter & Tab Switcher */}
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-slate-200">
-            {/* Tab Buttons */}
-            <div className="flex items-center gap-1.5 bg-slate-100 p-1 rounded-xl">
-              <button
-                onClick={() => setActiveChartTab('REVENUE')}
-                className={`px-3 py-1.5 rounded-lg text-xs font-extrabold transition-all ${
-                  activeChartTab === 'REVENUE' ? 'bg-white text-slate-900 shadow-xs' : 'text-slate-500 hover:text-slate-800'
-                }`}
-              >
-                Revenue Trend
-              </button>
-              <button
-                onClick={() => setActiveChartTab('SERVICES')}
-                className={`px-3 py-1.5 rounded-lg text-xs font-extrabold transition-all ${
-                  activeChartTab === 'SERVICES' ? 'bg-white text-slate-900 shadow-xs' : 'text-slate-500 hover:text-slate-800'
-                }`}
-              >
-                Service Breakdown
-              </button>
-              <button
-                onClick={() => setActiveChartTab('CITIES')}
-                className={`px-3 py-1.5 rounded-lg text-xs font-extrabold transition-all ${
-                  activeChartTab === 'CITIES' ? 'bg-white text-slate-900 shadow-xs' : 'text-slate-500 hover:text-slate-800'
-                }`}
-              >
-                City Hub Mix
-              </button>
-            </div>
-
-            {/* Time Range Selector */}
-            <div className="flex items-center gap-1">
-              {(['7D', '30D', '6M', 'YTD'] as const).map((range) => (
-                <button
-                  key={range}
-                  onClick={() => setTimeRange(range)}
-                  className={`px-2.5 py-1 rounded-lg text-[11px] font-extrabold border transition-all ${
-                    timeRange === range
-                      ? 'bg-sky-50 border-sky-300 text-sky-800'
-                      : 'bg-white border-slate-200 text-slate-500 hover:border-slate-300'
-                  }`}
-                >
-                  {range}
-                </button>
-              ))}
-            </div>
-          </div>
-
-          {/* Tab 1: Live Revenue Area Chart */}
-          {activeChartTab === 'REVENUE' && (
-            <div>
-              <div className="flex items-center justify-between mb-2">
-                <p className="text-xs text-slate-500 font-semibold">
-                  {timeRange === '7D'
-                    ? 'Daily Gross Revenue Streaming (Last 7 Days)'
-                    : timeRange === '30D'
-                    ? 'Weekly Gross Revenue Streaming (This Month)'
-                    : timeRange === 'YTD'
-                    ? 'Quarterly Gross Revenue Streaming (Year-to-Date)'
-                    : 'Monthly Gross Revenue Streaming from PostgreSQL Database'}
-                </p>
-                <span className="text-[11px] font-bold text-emerald-600 flex items-center gap-1">
-                  <Activity className="h-3.5 w-3.5" /> Live Stream
+                <span className="font-montserrat text-[10px] font-extrabold uppercase tracking-widest text-[#b45309] block">
+                  CHIEF EXECUTIVE OFFICE
                 </span>
               </div>
-              <div className="h-72 w-full mt-2">
-                <ResponsiveContainer width="100%" height="100%">
-                  <AreaChart data={currentRevenueOverview} margin={{ top: 10, right: 30, left: 20, bottom: 0 }}>
-                    <defs>
-                      <linearGradient id="colorRev" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="5%" stopColor="#0280d2" stopOpacity={0.4} />
-                        <stop offset="95%" stopColor="#0280d2" stopOpacity={0} />
-                      </linearGradient>
-                    </defs>
-                    <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
-                    <XAxis dataKey="month" stroke="#64748b" tick={{ fontSize: 12 }} />
-                    <YAxis stroke="#64748b" tick={{ fontSize: 12 }} tickFormatter={(val) => `₹${val.toLocaleString('en-IN')}`} />
-                    <Tooltip contentStyle={{ backgroundColor: '#ffffff', borderColor: '#cbd5e1', borderRadius: '12px', color: '#0f172a', boxShadow: '0 10px 15px -3px rgba(0,0,0,0.1)' }} />
-                    <Area type="monotone" dataKey="revenue" stroke="#0280d2" strokeWidth={3} fillOpacity={1} fill="url(#colorRev)" />
-                  </AreaChart>
-                </ResponsiveContainer>
-              </div>
-            </div>
-          )}
 
-          {/* Tab 2: Service Revenue Breakdown Pie Chart */}
-          {activeChartTab === 'SERVICES' && (
-            <div>
-              <p className="text-xs text-slate-500 font-semibold mb-2">
-                Revenue Share by Service Package ({timeRange})
+              <h1 className="font-gotham text-2xl lg:text-3xl font-extrabold text-slate-900 tracking-tight leading-none">
+                Welcome back, {currentProfile.name} 👋
+              </h1>
+
+              <p className="font-sans text-xs text-slate-600 font-medium leading-relaxed">
+                Real-time oversight of Innovibe Mobility operations.<br />
+                Tracking performance, intelligence and growth — all in one place.
               </p>
-              <div className="h-72 w-full flex flex-col md:flex-row items-center justify-around">
-                <div className="h-64 w-64">
-                  <ResponsiveContainer width="100%" height="100%">
-                    <PieChart>
-                      <Pie data={currentServiceBreakdown} cx="50%" cy="50%" innerRadius={60} outerRadius={90} paddingAngle={4} dataKey="value">
-                        {currentServiceBreakdown.map((entry, index) => (
-                          <Cell key={`cell-${index}`} fill={entry.color} />
-                        ))}
-                      </Pie>
-                      <Tooltip contentStyle={{ backgroundColor: '#ffffff', borderColor: '#cbd5e1', borderRadius: '12px' }} />
-                    </PieChart>
-                  </ResponsiveContainer>
-                </div>
-                <div className="space-y-2 text-xs">
-                  {currentServiceBreakdown.map((item) => (
-                    <div key={item.name} className="flex items-center gap-3">
-                      <span className="h-3 w-3 rounded-full" style={{ backgroundColor: item.color }} />
-                      <span className="font-bold text-slate-700">{item.name}:</span>
-                      <span className="font-extrabold text-slate-900">₹{item.value.toLocaleString('en-IN')}</span>
-                    </div>
-                  ))}
-                </div>
+
+              <div className="flex items-center gap-3 pt-1 font-apfel">
+                <Link
+                  href="/dashboard/roles"
+                  className="px-5 py-2.5 rounded-2xl bg-gradient-to-r from-[#d97706] to-[#b45309] hover:from-[#b45309] hover:to-[#78350f] text-white font-extrabold text-xs shadow-md shadow-amber-900/10 flex items-center gap-2 transition-all"
+                >
+                  <Shield className="h-4 w-4 text-amber-100" />
+                  <span>CEO Role & Access Matrix</span>
+                </Link>
+
+                <Link
+                  href="/dashboard/ai-command"
+                  className="px-5 py-2.5 rounded-2xl bg-white hover:bg-slate-50 border border-slate-200 text-slate-800 font-extrabold text-xs shadow-2xs flex items-center gap-2 transition-all"
+                >
+                  <Sparkles className="h-4 w-4 text-[#d97706]" />
+                  <span>AI Control Suite</span>
+                </Link>
               </div>
             </div>
-          )}
 
-          {/* Tab 3: City Hub Breakdown Bar Chart */}
-          {activeChartTab === 'CITIES' && (
-            <div>
-              <p className="text-xs text-slate-500 font-semibold mb-2">
-                Revenue Performance Across Service Hubs ({timeRange})
-              </p>
-              <div className="h-72 w-full">
-                <ResponsiveContainer width="100%" height="100%">
-                  <BarChart data={currentCityRevenueData} margin={{ top: 10, right: 30, left: 20, bottom: 0 }}>
-                    <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
-                    <XAxis dataKey="city" stroke="#64748b" tick={{ fontSize: 11 }} />
-                    <YAxis stroke="#64748b" tick={{ fontSize: 11 }} />
-                    <Tooltip contentStyle={{ backgroundColor: '#ffffff', borderColor: '#cbd5e1', borderRadius: '12px' }} />
-                    <Bar dataKey="revenue" fill="#10b981" radius={[8, 8, 0, 0]} />
-                  </BarChart>
-                </ResponsiveContainer>
-              </div>
-            </div>
-          )}
-        </div>
-
-        {/* Right Column: Live Payment Transaction Feed & Quick Tools */}
-        <div className="glass-panel p-6 rounded-3xl border border-slate-200 flex flex-col justify-between space-y-4">
-          <div>
-            <div className="flex items-center justify-between pb-3 border-b border-slate-200">
-              <div className="flex items-center gap-2">
-                <Activity className="h-5 w-5 text-emerald-600" />
-                <h3 className="text-base font-extrabold text-slate-900">Live Transaction Ticker</h3>
-              </div>
-              <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-emerald-100 text-emerald-800 border border-emerald-200">
-                REALTIME
-              </span>
+            {/* Floating System Status Badge */}
+            <div className="hidden lg:flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/95 backdrop-blur-xs border border-emerald-200 text-emerald-800 font-apfel text-[10px] font-extrabold shadow-2xs absolute top-5 right-[430px] z-20">
+              <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
+              <span>SYSTEM STATUS: All Systems Operational</span>
             </div>
 
-            <div className="space-y-3 mt-4">
-              {liveTransactionFeed.map((tx) => (
-                <div key={tx.id} className="p-3 rounded-2xl bg-slate-50 border border-slate-200 flex items-center justify-between transition-all hover:bg-emerald-50/50">
-                  <div className="space-y-0.5">
-                    <p className="text-xs font-bold text-slate-900">{tx.user}</p>
-                    <p className="text-[10px] text-slate-500 font-medium">{tx.service}</p>
-                    <p className="text-[10px] text-slate-400 font-mono">{tx.time}</p>
-                  </div>
-                  <span className="text-sm font-black text-emerald-700 bg-emerald-100 px-2.5 py-1 rounded-xl border border-emerald-200">
-                    +₹{tx.amount}
-                  </span>
-                </div>
-              ))}
+            {/* EV Sedan Hero Illustration */}
+            <div className="relative shrink-0 flex items-center justify-end h-[165px] lg:h-[190px] w-full md:w-[320px] lg:w-[430px] overflow-hidden rounded-2xl border border-amber-100/60 shadow-2xs">
+              <img
+                src="/ceo_hero_ev_car_gold.png"
+                alt="Luxury Gold EV Sedan"
+                className="h-full w-full object-cover object-center pointer-events-none rounded-2xl"
+              />
             </div>
           </div>
 
-          <button
-            onClick={handleSimulatePayment}
-            className="w-full py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold text-center block transition-all shadow-sm"
-          >
-            + Trigger Live Webhook Transaction
-          </button>
-        </div>
-      </div>
-      </>
+          {/* 4 Metric Cards Row */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            {/* Card 1: LIVE MONTHLY REVENUE */}
+            <div className="bg-white rounded-2xl p-5 border border-slate-100 shadow-2xs flex flex-col justify-between">
+              <div className="flex items-start justify-between">
+                <div className="space-y-1">
+                  <span className="font-montserrat text-[10px] font-extrabold uppercase tracking-wider text-slate-400 block">
+                    LIVE MONTHLY REVENUE
+                  </span>
+                  <p className="font-apfel text-2xl font-black text-slate-900 tracking-tight leading-none mt-1">
+                    ₹{metrics.monthlyRevenue.toLocaleString('en-IN')}
+                  </p>
+                </div>
+                <div className="h-9 w-9 rounded-full bg-[#fef3c7] text-[#d97706] border border-[#fde68a] flex items-center justify-center font-bold text-sm shrink-0 font-apfel">
+                  ₹
+                </div>
+              </div>
+
+              <div className="flex items-center justify-between mt-4 pt-2 border-t border-slate-50 font-apfel">
+                <span className="text-emerald-600 text-xs font-extrabold flex items-center gap-1">
+                  <TrendingUp className="h-3.5 w-3.5" /> +{metrics.revenueGrowthPercent}% vs last month
+                </span>
+                {/* Gold Sparkline Wave */}
+                <svg className="w-16 h-6 text-[#d97706]" viewBox="0 0 60 20" fill="none" stroke="currentColor" strokeWidth="2">
+                  <path d="M0 15 Q15 18 25 10 T45 8 T60 3" strokeLinecap="round" />
+                </svg>
+              </div>
+            </div>
+
+            {/* Card 2: REGISTERED EVS / USERS */}
+            <div className="bg-white rounded-2xl p-5 border border-slate-100 shadow-2xs flex flex-col justify-between">
+              <div className="flex items-start justify-between">
+                <div className="space-y-1">
+                  <span className="font-montserrat text-[10px] font-extrabold uppercase tracking-wider text-slate-400 block">
+                    REGISTERED EVS / USERS
+                  </span>
+                  <p className="font-apfel text-2xl font-black text-slate-900 tracking-tight leading-none mt-1">
+                    {metrics.connectedVehiclesCount}
+                  </p>
+                </div>
+                <div className="h-9 w-9 rounded-full bg-emerald-50 text-emerald-600 border border-emerald-100 flex items-center justify-center shrink-0">
+                  <Users className="h-4.5 w-4.5" />
+                </div>
+              </div>
+
+              <div className="flex items-center justify-between mt-4 pt-2 border-t border-slate-50 font-apfel">
+                <div className="flex items-center gap-1.5 text-xs">
+                  <span className="font-extrabold text-emerald-600">Active</span>
+                  <span className="font-sans text-slate-400 font-medium">Mapped to 'users' table</span>
+                </div>
+                {/* Green Sparkline Wave */}
+                <svg className="w-16 h-6 text-emerald-500" viewBox="0 0 60 20" fill="none" stroke="currentColor" strokeWidth="2">
+                  <path d="M0 16 Q15 14 30 15 T45 7 T60 4" strokeLinecap="round" />
+                </svg>
+              </div>
+            </div>
+
+            {/* Card 3: LIVE ACTIVE FLEETS */}
+            <div className="bg-white rounded-2xl p-5 border border-slate-100 shadow-2xs flex flex-col justify-between">
+              <div className="flex items-start justify-between">
+                <div className="space-y-1">
+                  <span className="font-montserrat text-[10px] font-extrabold uppercase tracking-wider text-slate-400 block">
+                    LIVE ACTIVE FLEETS
+                  </span>
+                  <p className="font-apfel text-2xl font-black text-slate-900 tracking-tight leading-none mt-1">
+                    100%
+                  </p>
+                </div>
+                <div className="h-9 w-9 rounded-full bg-[#fef3c7] text-[#d97706] border border-[#fde68a] flex items-center justify-center shrink-0">
+                  <Zap className="h-4.5 w-4.5" />
+                </div>
+              </div>
+
+              <div className="flex items-center justify-between mt-4 pt-2 border-t border-slate-50 font-apfel">
+                <div className="flex items-center gap-1 text-xs">
+                  <span className="font-extrabold text-emerald-600 flex items-center gap-1">
+                    Online <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
+                  </span>
+                  <span className="font-sans text-slate-400 font-medium ml-1">GPS Telemetry Stream Active</span>
+                </div>
+                {/* Blue Sparkline Wave */}
+                <svg className="w-16 h-6 text-sky-500" viewBox="0 0 60 20" fill="none" stroke="currentColor" strokeWidth="2">
+                  <path d="M0 14 Q15 17 30 11 T45 13 T60 5" strokeLinecap="round" />
+                </svg>
+              </div>
+            </div>
+
+            {/* Card 4: TOTAL SERVICE BOOKINGS */}
+            <div className="bg-white rounded-2xl p-5 border border-slate-100 shadow-2xs flex flex-col justify-between">
+              <div className="flex items-start justify-between">
+                <div className="space-y-1">
+                  <span className="font-montserrat text-[10px] font-extrabold uppercase tracking-wider text-slate-400 block">
+                    TOTAL SERVICE BOOKINGS
+                  </span>
+                  <p className="font-apfel text-2xl font-black text-slate-900 tracking-tight leading-none mt-1">
+                    {metrics.activeAmcCount}
+                  </p>
+                </div>
+                <div className="h-9 w-9 rounded-full bg-[#fef3c7] text-[#d97706] border border-[#fde68a] flex items-center justify-center shrink-0">
+                  <Activity className="h-4.5 w-4.5" />
+                </div>
+              </div>
+
+              <div className="flex items-center justify-between mt-4 pt-2 border-t border-slate-50 font-apfel">
+                <div className="flex items-center gap-1.5 text-xs">
+                  <span className="font-extrabold text-[#b45309]">Bookings</span>
+                  <span className="font-sans text-slate-400 font-medium">Mapped to 'bookings' table</span>
+                </div>
+                {/* Gold Sparkline Wave */}
+                <svg className="w-16 h-6 text-[#d97706]" viewBox="0 0 60 20" fill="none" stroke="currentColor" strokeWidth="2">
+                  <path d="M0 16 Q15 12 30 16 T45 8 T60 3" strokeLinecap="round" />
+                </svg>
+              </div>
+            </div>
+          </div>
+
+          {/* Main Grid: Left Column (2 Cols) + Right Column (1 Col) */}
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            {/* Left 2 Columns */}
+            <div className="lg:col-span-2 space-y-6">
+              {/* Telematics Table Card */}
+              <div className="bg-white rounded-3xl p-6 border border-slate-100 shadow-2xs space-y-5">
+                {/* Header */}
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                  <div className="space-y-1">
+                    <div className="flex items-center gap-2">
+                      <Radio className="h-4 w-4 text-[#d97706]" />
+                      <h2 className="font-gotham text-base font-extrabold text-slate-900 tracking-tight">
+                        Live Vehicle Tracking & Telematics Stream
+                      </h2>
+                    </div>
+                    <p className="font-sans text-xs text-slate-500 font-medium">
+                      Real-time GPS coordinates, battery health, and EV status from the live backend
+                    </p>
+                  </div>
+
+                  <button className="font-apfel px-3.5 py-1.5 rounded-xl border border-[#fde68a] text-[#92400e] bg-[#fef3c7]/60 hover:bg-[#fef3c7] font-extrabold text-xs flex items-center gap-1.5 transition-all shrink-0">
+                    <Radio className="h-3.5 w-3.5 text-[#d97706] animate-pulse" />
+                    <span>View Live Telemetry</span>
+                  </button>
+                </div>
+
+                {/* Table */}
+                <div className="overflow-x-auto">
+                  <table className="w-full text-left text-xs">
+                    <thead>
+                      <tr className="border-b border-slate-100 text-slate-400 uppercase text-[9px] font-montserrat tracking-wider font-extrabold">
+                        <th className="pb-3 px-2">VEHICLE / VIN</th>
+                        <th className="pb-3 px-2">EV MODEL</th>
+                        <th className="pb-3 px-2">OWNER</th>
+                        <th className="pb-3 px-2">BATTERY</th>
+                        <th className="pb-3 px-2">CONTROLLER TEMP</th>
+                        <th className="pb-3 px-2">HEALTH SCORE</th>
+                        <th className="pb-3 px-2">STATUS</th>
+                        <th className="pb-3 px-2 text-right"></th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-slate-50 font-sans">
+                      {/* Row 1 */}
+                      <tr className="hover:bg-slate-50/60 transition-colors">
+                        <td className="py-3.5 px-2">
+                          <p className="font-apfel font-extrabold text-[#b45309]">AP39AB1234</p>
+                          <p className="font-apfel text-[9px] text-slate-400">INV0450X2026001</p>
+                        </td>
+                        <td className="py-3.5 px-2">
+                          <div className="flex items-center gap-2 font-bold text-slate-800">
+                            <span className="h-6 w-6 rounded bg-slate-100 flex items-center justify-center text-[10px]">🛵</span>
+                            <span>Ather 450X Apex</span>
+                          </div>
+                        </td>
+                        <td className="py-3.5 px-2 font-medium text-slate-600">User 1</td>
+                        <td className="py-3.5 px-2">
+                          <div className="flex items-center gap-2">
+                            <div className="w-16 bg-slate-100 h-2 rounded-full overflow-hidden">
+                              <div className="h-full bg-emerald-500 rounded-full" style={{ width: '96%' }} />
+                            </div>
+                            <span className="font-apfel font-bold text-slate-800 text-[11px]">96%</span>
+                          </div>
+                        </td>
+                        <td className="py-3.5 px-2 font-apfel font-semibold text-slate-700">42°C</td>
+                        <td className="py-3.5 px-2 font-apfel font-black text-emerald-700 text-xs">94 / 100</td>
+                        <td className="py-3.5 px-2">
+                          <span className="font-apfel px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200/80">
+                            Optimal
+                          </span>
+                        </td>
+                        <td className="py-3.5 px-2 text-right">
+                          <button className="text-slate-300 hover:text-slate-600"><MoreHorizontal className="h-4 w-4" /></button>
+                        </td>
+                      </tr>
+
+                      {/* Row 2 */}
+                      <tr className="hover:bg-slate-50/60 transition-colors">
+                        <td className="py-3.5 px-2">
+                          <p className="font-apfel font-extrabold text-[#b45309]">AP39CD5678</p>
+                          <p className="font-apfel text-[9px] text-slate-400">INV00LA2026002</p>
+                        </td>
+                        <td className="py-3.5 px-2">
+                          <div className="flex items-center gap-2 font-bold text-slate-800">
+                            <span className="h-6 w-6 rounded bg-slate-100 flex items-center justify-center text-[10px]">🛴</span>
+                            <span>Ola S1 Pro Gen2</span>
+                          </div>
+                        </td>
+                        <td className="py-3.5 px-2 font-medium text-slate-600">User 2</td>
+                        <td className="py-3.5 px-2">
+                          <div className="flex items-center gap-2">
+                            <div className="w-16 bg-slate-100 h-2 rounded-full overflow-hidden">
+                              <div className="h-full bg-emerald-500 rounded-full" style={{ width: '82%' }} />
+                            </div>
+                            <span className="font-apfel font-bold text-slate-800 text-[11px]">82%</span>
+                          </div>
+                        </td>
+                        <td className="py-3.5 px-2 font-apfel font-semibold text-slate-700">56°C</td>
+                        <td className="py-3.5 px-2 font-apfel font-black text-emerald-700 text-xs">78 / 100</td>
+                        <td className="py-3.5 px-2">
+                          <span className="font-apfel px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-amber-50 text-amber-700 border border-amber-200/80">
+                            Attention
+                          </span>
+                        </td>
+                        <td className="py-3.5 px-2 text-right">
+                          <button className="text-slate-300 hover:text-slate-600"><MoreHorizontal className="h-4 w-4" /></button>
+                        </td>
+                      </tr>
+
+                      {/* Row 3 */}
+                      <tr className="hover:bg-slate-50/60 transition-colors">
+                        <td className="py-3.5 px-2">
+                          <p className="font-apfel font-extrabold text-[#b45309]">AP39EF9012</p>
+                          <p className="font-apfel text-[9px] text-slate-400">INV0TVS2026003</p>
+                        </td>
+                        <td className="py-3.5 px-2">
+                          <div className="flex items-center gap-2 font-bold text-slate-800">
+                            <span className="h-6 w-6 rounded bg-slate-100 flex items-center justify-center text-[10px]">🛵</span>
+                            <span>iQube ST</span>
+                          </div>
+                        </td>
+                        <td className="py-3.5 px-2 font-medium text-slate-600">User 3</td>
+                        <td className="py-3.5 px-2">
+                          <div className="flex items-center gap-2">
+                            <div className="w-16 bg-slate-100 h-2 rounded-full overflow-hidden">
+                              <div className="h-full bg-amber-500 rounded-full" style={{ width: '60%' }} />
+                            </div>
+                            <span className="font-apfel font-bold text-slate-800 text-[11px]">60%</span>
+                          </div>
+                        </td>
+                        <td className="py-3.5 px-2 font-apfel font-semibold text-slate-700">68°C</td>
+                        <td className="py-3.5 px-2 font-apfel font-black text-rose-600 text-xs">52 / 100</td>
+                        <td className="py-3.5 px-2">
+                          <span className="font-apfel px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-rose-50 text-rose-700 border border-rose-200/80">
+                            Warning
+                          </span>
+                        </td>
+                        <td className="py-3.5 px-2 text-right">
+                          <button className="text-slate-300 hover:text-slate-600"><MoreHorizontal className="h-4 w-4" /></button>
+                        </td>
+                      </tr>
+
+                      {/* Row 4 */}
+                      <tr className="hover:bg-slate-50/60 transition-colors">
+                        <td className="py-3.5 px-2">
+                          <p className="font-apfel font-extrabold text-[#b45309]">AP39GH3456</p>
+                          <p className="font-apfel text-[9px] text-slate-400">INV0HERO2026004</p>
+                        </td>
+                        <td className="py-3.5 px-2">
+                          <div className="flex items-center gap-2 font-bold text-slate-800">
+                            <span className="h-6 w-6 rounded bg-slate-100 flex items-center justify-center text-[10px]">🛴</span>
+                            <span>Hero Electric Nyx</span>
+                          </div>
+                        </td>
+                        <td className="py-3.5 px-2 font-medium text-slate-600">User 4</td>
+                        <td className="py-3.5 px-2">
+                          <div className="flex items-center gap-2">
+                            <div className="w-16 bg-slate-100 h-2 rounded-full overflow-hidden">
+                              <div className="h-full bg-emerald-500 rounded-full" style={{ width: '91%' }} />
+                            </div>
+                            <span className="font-apfel font-bold text-slate-800 text-[11px]">91%</span>
+                          </div>
+                        </td>
+                        <td className="py-3.5 px-2 font-apfel font-semibold text-slate-700">44°C</td>
+                        <td className="py-3.5 px-2 font-apfel font-black text-emerald-700 text-xs">89 / 100</td>
+                        <td className="py-3.5 px-2">
+                          <span className="font-apfel px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200/80">
+                            Optimal
+                          </span>
+                        </td>
+                        <td className="py-3.5 px-2 text-right">
+                          <button className="text-slate-300 hover:text-slate-600"><MoreHorizontal className="h-4 w-4" /></button>
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+
+                {/* Footer Controls */}
+                <div className="flex items-center justify-between pt-2 text-xs text-slate-500 font-medium">
+                  <span className="font-sans">Showing 1 to 4 of 48 vehicles</span>
+                  <button className="font-apfel px-3 py-1.5 rounded-xl border border-slate-200 hover:bg-slate-50 text-slate-800 font-bold text-xs flex items-center gap-1 transition-all">
+                    <span>View All Vehicles</span>
+                    <ChevronRight className="h-3.5 w-3.5 text-slate-400" />
+                  </button>
+                </div>
+              </div>
+
+              {/* Quick Actions Row */}
+              <div className="space-y-2">
+                <p className="font-montserrat text-[10px] font-extrabold uppercase tracking-widest text-slate-400 px-1">
+                  ⚡ Quick Actions
+                </p>
+
+                <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
+                  {/* Action 1 */}
+                  <Link
+                    href="/dashboard/ai-command"
+                    className="p-3 rounded-2xl bg-[#fef3c7]/50 hover:bg-[#fef3c7] border border-[#fde68a] transition-all flex items-center justify-between group"
+                  >
+                    <div className="flex items-center gap-2.5">
+                      <div className="p-2 rounded-xl bg-gradient-to-br from-[#d97706] to-[#b45309] text-white shadow-2xs">
+                        <Bot className="h-4 w-4" />
+                      </div>
+                      <div className="text-left">
+                        <p className="font-gotham text-xs font-extrabold text-slate-900 leading-tight">AI Command Center</p>
+                        <p className="font-sans text-[9px] text-[#b45309] font-medium">Open AI Suite</p>
+                      </div>
+                    </div>
+                    <ChevronRight className="h-3.5 w-3.5 text-slate-400 group-hover:translate-x-0.5 transition-transform" />
+                  </Link>
+
+                  {/* Action 2 */}
+                  <Link
+                    href="/dashboard/ceo?module=alerts-risk"
+                    className="p-3 rounded-2xl bg-rose-50/70 hover:bg-rose-100/80 border border-rose-100 transition-all flex items-center justify-between group"
+                  >
+                    <div className="flex items-center gap-2.5">
+                      <div className="p-2 rounded-xl bg-rose-500 text-white shadow-2xs">
+                        <AlertTriangle className="h-4 w-4" />
+                      </div>
+                      <div className="text-left">
+                        <p className="font-gotham text-xs font-extrabold text-slate-900 leading-tight">Alerts & Risk Center</p>
+                        <p className="font-sans text-[9px] text-rose-700 font-medium">View Live Alerts</p>
+                      </div>
+                    </div>
+                    <ChevronRight className="h-3.5 w-3.5 text-slate-400 group-hover:translate-x-0.5 transition-transform" />
+                  </Link>
+
+                  {/* Action 3 */}
+                  <Link
+                    href="/dashboard/ceo?module=action-center"
+                    className="p-3 rounded-2xl bg-[#fef3c7]/50 hover:bg-[#fef3c7] border border-[#fde68a] transition-all flex items-center justify-between group"
+                  >
+                    <div className="flex items-center gap-2.5">
+                      <div className="p-2 rounded-xl bg-gradient-to-br from-[#d97706] to-[#b45309] text-white shadow-2xs">
+                        <Zap className="h-4 w-4" />
+                      </div>
+                      <div className="text-left">
+                        <p className="font-gotham text-xs font-extrabold text-slate-900 leading-tight">Action Center</p>
+                        <p className="font-sans text-[9px] text-[#b45309] font-medium">Take Action</p>
+                      </div>
+                    </div>
+                    <ChevronRight className="h-3.5 w-3.5 text-slate-400 group-hover:translate-x-0.5 transition-transform" />
+                  </Link>
+
+                  {/* Action 4 */}
+                  <Link
+                    href="/dashboard/ceo?module=reports-analytics"
+                    className="p-3 rounded-2xl bg-[#fef3c7]/50 hover:bg-[#fef3c7] border border-[#fde68a] transition-all flex items-center justify-between group"
+                  >
+                    <div className="flex items-center gap-2.5">
+                      <div className="p-2 rounded-xl bg-gradient-to-br from-[#d97706] to-[#b45309] text-white shadow-2xs">
+                        <FileText className="h-4 w-4" />
+                      </div>
+                      <div className="text-left">
+                        <p className="font-gotham text-xs font-extrabold text-slate-900 leading-tight">Reports & Analytics</p>
+                        <p className="font-sans text-[9px] text-[#b45309] font-medium">View Insights</p>
+                      </div>
+                    </div>
+                    <ChevronRight className="h-3.5 w-3.5 text-slate-400 group-hover:translate-x-0.5 transition-transform" />
+                  </Link>
+
+                  {/* Action 5 */}
+                  <Link
+                    href="/dashboard/ceo?module=communication-hub"
+                    className="p-3 rounded-2xl bg-[#fef3c7]/50 hover:bg-[#fef3c7] border border-[#fde68a] transition-all flex items-center justify-between group"
+                  >
+                    <div className="flex items-center gap-2.5">
+                      <div className="p-2 rounded-xl bg-gradient-to-br from-[#d97706] to-[#b45309] text-white shadow-2xs">
+                        <MessageSquare className="h-4 w-4" />
+                      </div>
+                      <div className="text-left">
+                        <p className="font-gotham text-xs font-extrabold text-slate-900 leading-tight">Communication Hub</p>
+                        <p className="font-sans text-[9px] text-[#b45309] font-medium">Send Message</p>
+                      </div>
+                    </div>
+                    <ChevronRight className="h-3.5 w-3.5 text-slate-400 group-hover:translate-x-0.5 transition-transform" />
+                  </Link>
+                </div>
+              </div>
+            </div>
+
+            {/* Right 1 Column Widgets */}
+            <div className="space-y-6">
+              {/* Widget 1: Live Activity Feed */}
+              <div className="bg-white rounded-3xl p-5 border border-slate-100 shadow-2xs space-y-4">
+                <div className="flex items-center justify-between pb-3 border-b border-slate-100">
+                  <div className="flex items-center gap-2">
+                    <Zap className="h-4 w-4 text-[#d97706]" />
+                    <h3 className="font-gotham text-sm font-extrabold text-slate-900">Live Activity Feed</h3>
+                  </div>
+                  <button className="font-apfel text-[10px] font-bold text-slate-400 hover:text-slate-700 bg-slate-50 border border-slate-200 px-2 py-0.5 rounded-lg">
+                    View all
+                  </button>
+                </div>
+
+                <div className="space-y-3.5 text-xs text-left">
+                  {/* Feed Item 1 */}
+                  <div className="flex items-start gap-3">
+                    <div className="h-2 w-2 rounded-full bg-emerald-500 mt-1.5 shrink-0" />
+                    <div className="space-y-0.5 flex-1 font-sans">
+                      <div className="flex items-center justify-between">
+                        <span className="font-apfel text-[10px] font-semibold text-slate-400">10:24 AM</span>
+                      </div>
+                      <p className="font-bold text-slate-800 leading-tight">
+                        Vehicle AP39AB1234 telemetry synced
+                      </p>
+                      <p className="text-[10px] text-slate-400 font-medium">Battery: 96% • Temp: 42°C</p>
+                    </div>
+                  </div>
+
+                  {/* Feed Item 2 */}
+                  <div className="flex items-start gap-3">
+                    <div className="h-2 w-2 rounded-full bg-blue-500 mt-1.5 shrink-0" />
+                    <div className="space-y-0.5 flex-1 font-sans">
+                      <div className="flex items-center justify-between">
+                        <span className="font-apfel text-[10px] font-semibold text-slate-400">10:18 AM</span>
+                      </div>
+                      <p className="font-bold text-slate-800 leading-tight">
+                        New service booking created
+                      </p>
+                      <p className="text-[10px] text-slate-400 font-medium">Booking ID #BK3421 • Customer: User 5</p>
+                    </div>
+                  </div>
+
+                  {/* Feed Item 3 */}
+                  <div className="flex items-start gap-3">
+                    <div className="h-2 w-2 rounded-full bg-amber-500 mt-1.5 shrink-0" />
+                    <div className="space-y-0.5 flex-1 font-sans">
+                      <div className="flex items-center justify-between">
+                        <span className="font-apfel text-[10px] font-semibold text-slate-400">10:12 AM</span>
+                      </div>
+                      <p className="font-bold text-slate-800 leading-tight">
+                        Battery temperature warning
+                      </p>
+                      <p className="text-[10px] text-slate-400 font-medium">Vehicle AP39EF9012 • 68°C detected</p>
+                    </div>
+                  </div>
+
+                  {/* Feed Item 4 */}
+                  <div className="flex items-start gap-3">
+                    <div className="h-2 w-2 rounded-full bg-amber-600 mt-1.5 shrink-0" />
+                    <div className="space-y-0.5 flex-1 font-sans">
+                      <div className="flex items-center justify-between">
+                        <span className="font-apfel text-[10px] font-semibold text-slate-400">10:05 AM</span>
+                      </div>
+                      <p className="font-bold text-slate-800 leading-tight">
+                        AI anomaly detection resolved
+                      </p>
+                      <p className="text-[10px] text-slate-400 font-medium">Vehicle AP39CD5678 • System normal</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Widget 2: Business Performance (This Month) */}
+              <div className="bg-white rounded-3xl p-5 border border-slate-100 shadow-2xs space-y-4">
+                <div className="flex items-center justify-between pb-3 border-b border-slate-100">
+                  <div className="flex items-center gap-2">
+                    <span className="text-[#d97706] font-extrabold text-sm">❖</span>
+                    <h3 className="font-gotham text-sm font-extrabold text-slate-900">Business Performance <span className="font-sans text-slate-400 font-normal text-xs">(This Month)</span></h3>
+                  </div>
+                  <button className="font-apfel text-[10px] font-bold text-slate-400 hover:text-slate-700 bg-slate-50 border border-slate-200 px-2 py-0.5 rounded-lg">
+                    View Report
+                  </button>
+                </div>
+
+                <div className="grid grid-cols-2 gap-4 items-center">
+                  {/* Left Stats & Gauge */}
+                  <div className="space-y-4">
+                    <div>
+                      <span className="font-sans text-[10px] font-semibold text-slate-400 block">Revenue Growth</span>
+                      <p className="font-apfel text-lg font-black text-emerald-600 leading-none mt-0.5">22.3%</p>
+                      <span className="font-sans text-[9px] text-slate-400 font-medium">vs last month</span>
+                    </div>
+
+                    <div>
+                      <span className="font-sans text-[10px] font-semibold text-slate-400 block">Target Achievement</span>
+                      <div className="flex items-center gap-2 mt-1">
+                        <p className="font-apfel text-lg font-black text-slate-900 leading-none">87%</p>
+                        {/* Circular Donut Gauge - Warm Gold */}
+                        <div className="relative h-10 w-10 flex items-center justify-center">
+                          <svg className="h-10 w-10 transform -rotate-90" viewBox="0 0 36 36">
+                            <path
+                              className="text-slate-100"
+                              strokeWidth="4"
+                              stroke="currentColor"
+                              fill="none"
+                              d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
+                            />
+                            <path
+                              className="text-[#d97706]"
+                              strokeDasharray="87, 100"
+                              strokeWidth="4"
+                              strokeLinecap="round"
+                              stroke="currentColor"
+                              fill="none"
+                              d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
+                            />
+                          </svg>
+                          <span className="absolute font-apfel text-[9px] font-black text-slate-800">87%</span>
+                        </div>
+                      </div>
+                      <span className="font-sans text-[9px] text-slate-400 font-medium">of monthly target</span>
+                    </div>
+                  </div>
+
+                  {/* Right Bar Chart - Warm Gold Bars */}
+                  <div className="h-40 flex items-end justify-between gap-1.5 pt-4 font-apfel">
+                    {/* Week 1 */}
+                    <div className="flex flex-col items-center gap-1.5 h-full justify-end flex-1">
+                      <span className="text-[8px] text-slate-400 font-mono">100K</span>
+                      <div className="w-full bg-[#fde68a] rounded-lg h-[45%]" />
+                      <span className="text-[8px] font-semibold text-slate-400">Week 1</span>
+                    </div>
+
+                    {/* Week 2 */}
+                    <div className="flex flex-col items-center gap-1.5 h-full justify-end flex-1">
+                      <span className="text-[8px] text-slate-400 font-mono">75K</span>
+                      <div className="w-full bg-[#f59e0b] rounded-lg h-[65%]" />
+                      <span className="text-[8px] font-semibold text-slate-400">Week 2</span>
+                    </div>
+
+                    {/* Week 3 */}
+                    <div className="flex flex-col items-center gap-1.5 h-full justify-end flex-1">
+                      <span className="text-[8px] text-slate-400 font-mono">50K</span>
+                      <div className="w-full bg-[#d97706] rounded-lg h-[75%]" />
+                      <span className="text-[8px] font-semibold text-slate-400">Week 3</span>
+                    </div>
+
+                    {/* Week 4 */}
+                    <div className="flex flex-col items-center gap-1.5 h-full justify-end flex-1">
+                      <span className="text-[8px] text-slate-400 font-mono">25K</span>
+                      <div className="w-full bg-[#b45309] rounded-lg h-[90%]" />
+                      <span className="text-[8px] font-semibold text-slate-400">Week 4</span>
+                    </div>
+
+                    {/* This Week (Dashed Gold) */}
+                    <div className="flex flex-col items-center gap-1.5 h-full justify-end flex-1">
+                      <span className="text-[8px] text-slate-400 font-mono">0</span>
+                      <div className="w-full bg-[#fde68a]/80 rounded-lg h-[80%] border border-dashed border-[#b45309]" />
+                      <span className="text-[8px] font-semibold text-[#b45309]">This Week</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </>
       )}
 
-      {/* Backend API Configuration Modal */}
+      {/* Connection Modal */}
       {isModalOpen && (
-        <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4">
+        <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4 font-sans">
           <div className="bg-white rounded-3xl p-6 max-w-lg w-full border border-slate-200 shadow-2xl space-y-4 text-left">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <Server className="h-5 w-5 text-sky-600" />
-                <h3 className="text-lg font-extrabold text-slate-900">Live Backend API Connection</h3>
+                <Server className="h-5 w-5 text-[#d97706]" />
+                <h3 className="font-gotham text-lg font-extrabold text-slate-900">Live Backend Connection</h3>
               </div>
               <button onClick={() => setIsModalOpen(false)} className="text-slate-400 hover:text-slate-600 text-sm font-bold">✕</button>
             </div>
 
-            <p className="text-xs text-slate-600 leading-relaxed font-medium">
-              Specify your live API Server Base URL. The Next.js server proxy seamlessly connects without browser CORS restrictions.
-            </p>
-
             <form onSubmit={handleTestAndSave} className="space-y-4">
               <div>
-                <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">API Server Base URL</label>
+                <label className="font-montserrat block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">API Server Base URL</label>
                 <input
                   type="text"
                   value={serverUrl}
                   onChange={(e) => setServerUrl(e.target.value)}
                   placeholder="http://localhost:8000/api"
                   required
-                  className="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-xs font-mono text-slate-900 focus:border-sky-500 focus:ring-2 focus:ring-sky-500/20 outline-none"
+                  className="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-xs font-mono text-slate-900 focus:border-amber-500 outline-none"
                 />
               </div>
 
               {testResult && (
-                <div className={`p-3 rounded-xl text-xs font-bold border ${
-                  testResult.success ? 'bg-emerald-50 text-emerald-800 border-emerald-200' : 'bg-red-50 text-red-800 border-red-200'
-                }`}>
+                <div className={`p-3 rounded-xl text-xs font-bold font-apfel border ${testResult.success ? 'bg-emerald-50 text-emerald-800 border-emerald-200' : 'bg-rose-50 text-rose-800 border-rose-200'}`}>
                   {testResult.message}
                 </div>
               )}
 
-              <div className="flex items-center justify-end gap-2 pt-2">
-                <button
-                  type="button"
-                  onClick={() => setIsModalOpen(false)}
-                  className="px-4 py-2.5 rounded-xl border border-slate-200 text-slate-700 text-xs font-bold hover:bg-slate-50"
-                >
-                  Close
-                </button>
-
-                <button
-                  type="submit"
-                  disabled={isTesting}
-                  className="px-5 py-2.5 rounded-xl bg-sky-600 hover:bg-sky-700 text-white text-xs font-extrabold shadow-md flex items-center gap-2"
-                >
+              <div className="flex items-center justify-end gap-2 pt-2 font-apfel">
+                <button type="button" onClick={() => setIsModalOpen(false)} className="px-4 py-2.5 rounded-xl border border-slate-200 text-slate-700 text-xs font-bold hover:bg-slate-50">Close</button>
+                <button type="submit" disabled={isTesting} className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-[#d97706] to-[#b45309] hover:from-[#b45309] hover:to-[#78350f] text-white text-xs font-extrabold shadow-md flex items-center gap-2">
                   {isTesting ? <RefreshCw className="h-3.5 w-3.5 animate-spin" /> : <Check className="h-3.5 w-3.5" />}
                   <span>Test & Connect API</span>
                 </button>
@@ -758,12 +780,6 @@ function CEODashboardContent() {
           </div>
         </div>
       )}
-
-      {/* Global Enterprise Modals & Floating AI Copilot */}
-      <ExportModal />
-      <ShareAnalyticsModal />
-      <DrillDownModal />
-      <FloatingAiCopilotWidget />
     </div>
   );
 }
@@ -771,7 +787,9 @@ function CEODashboardContent() {
 export default function CEODashboard() {
   return (
     <GlobalFilterProvider>
-      <CEODashboardContent />
+      <Suspense fallback={<div className="p-6 text-xs text-slate-500 font-bold">Loading Executive Workspace...</div>}>
+        <CEODashboardContent />
+      </Suspense>
     </GlobalFilterProvider>
   );
 }

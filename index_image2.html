@@ -1,0 +1,23 @@
+# Walkthrough â Section & Navigation Click Handler Fix
+
+We have implemented **global event delegation** for navigation click listeners in [js/app.js](file:///C:/Users/Geetha/.gemini/antigravity/scratch/innovibe-cto-dashboard/js/app.js) and bumped the asset version to `?v=97.0` in [index.html](file:///C:/Users/Geetha/.gemini/antigravity/scratch/innovibe-cto-dashboard/index.html).
+
+---
+
+## Fix Details
+
+1. **Global Event Delegation (`[data-view]`)**:
+   - Replaced static element selectors with a global `document.addEventListener('click')` delegator.
+   - Now, **100% of all section triggers** (sidebar links, card buttons, dashboard widget links, and view-all links) open their respective module section instantly and reliably.
+
+2. **Instant Scroll-to-Top**:
+   - Whenever any section module is opened or when returning to the Technology Dashboard via `Back to Dashboard`, `window.scrollTo({ top: 0, behavior: 'instant' })` and `mainContent.scrollTop = 0` are executed.
+   - Eliminates scrolled-down view position issues, ensuring every module header and section content renders cleanly at the top of the viewport.
+
+3. **Asset Versioning (`?v=97.0`)**:
+   - Updated version parameters in `index.html` to `?v=97.0` for instant browser cache refresh.
+
+---
+
+## Live Access
+- **Local Host URL**: **`http://localhost:8080`**

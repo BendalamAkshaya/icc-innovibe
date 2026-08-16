@@ -55,6 +55,15 @@ export const initialProfiles: Record<string, UserRoleProfile> = {
     avatar: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&q=80&w=250',
     permissions: ['VIEW_JOB_CARDS', 'UPDATE_TICKETS', 'VIEW_SOP'],
   },
+  EMPLOYEE: {
+    id: 'usr_emp_007',
+    name: 'Sneha Patel',
+    email: 'employee@innovibemobility.com',
+    role: 'EMPLOYEE',
+    title: 'Operations Specialist (Employee)',
+    avatar: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&q=80&w=250',
+    permissions: ['VIEW_TASKS', 'SUBMIT_ATTENDANCE', 'VIEW_BENEFITS', 'LOG_TICKETS'],
+  },
 };
 
 export const defaultRoleConfigs: RolePermissionConfig[] = [
@@ -93,6 +102,12 @@ export const defaultRoleConfigs: RolePermissionConfig[] = [
     roleName: 'Technician Portal',
     description: 'Assigned job cards, SOPs, and service execution workflows.',
     accessibleFeatures: ['Job Cards', 'SOPs', 'Parts Requisition', 'Service Reports'],
+  },
+  {
+    role: 'EMPLOYEE',
+    roleName: 'Employee Portal (Staff Workspace)',
+    description: 'Employee personal dashboard, daily task queue, timesheets, and internal workplace requests.',
+    accessibleFeatures: ['Employee Workspace', 'Daily Tasks & SOP', 'Attendance & Leaves', 'Internal Helpdesk'],
   },
 ];
 

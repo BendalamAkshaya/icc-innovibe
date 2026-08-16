@@ -386,7 +386,16 @@ export function GlobalFilterProvider({ children }: { children: React.ReactNode }
 export function useGlobalFilter() {
   const context = useContext(GlobalFilterContext);
   if (!context) {
-    throw new Error('useGlobalFilter must be used within a GlobalFilterProvider');
+    return {
+      filters: { region: 'ALL', timeRange: '30D', vehicleType: 'ALL', status: 'ALL', searchQuery: '' },
+      setFilters: () => {},
+      resetFilters: () => {},
+      drillDownState: { isOpen: false, title: '', subtitle: '', category: 'REVENUE' as const, data: null },
+      openDrillDown: () => {},
+      closeDrillDown: () => {},
+      executiveInsight: null,
+      setExecutiveInsight: () => {},
+    } as unknown as GlobalFilterContextType;
   }
   return context;
 }

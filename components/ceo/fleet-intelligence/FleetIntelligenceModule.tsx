@@ -3,7 +3,7 @@
 import React, { useState } from 'react';
 import { FleetSectionHeader } from './FleetSectionHeader';
 import { FleetAlertsTicker } from './FleetAlertsTicker';
-import { GeographicFleetMap } from './GeographicFleetMap';
+import { VizagLiveMap } from './VizagLiveMap';
 import { FleetHealthDashboard } from './FleetHealthDashboard';
 import { LiveVehicleStatusDonut } from './LiveVehicleStatusDonut';
 import { BatteryIntelligenceCard } from './BatteryIntelligenceCard';
@@ -24,7 +24,6 @@ import {
   mockBatteryAnalytics,
   mockPredictiveMaintenanceList,
   mockFleetPerformance,
-  mockGeographicRegions,
   mockFleetAiInsights,
   mockVehicles,
 } from '../../../lib/mock-data';
@@ -137,47 +136,42 @@ export function FleetIntelligenceModule() {
         </div>
       </div>
 
-      {/* 3. HERO ZONE (Zone 1): Live Fleet Hero Map (65%) + Fleet Ecosystem Health (35%) */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-stretch">
-        <div className="lg:col-span-2 flex flex-col">
-          <GeographicFleetMap
-            regions={mockGeographicRegions}
-            onSelectRegion={(city) => triggerNotification(`Filtering GPS cluster for ${city}`)}
-            onSelectVehicle={handleOpenVehicle}
-          />
-        </div>
-        <div className="lg:col-span-1 flex flex-col justify-between space-y-4">
-          <LiveVehicleStatusDonut statusList={mockVehicleStatusBreakdown} />
-          
-          {/* Live Fleet Activity Timeline */}
-          <div className="glass-panel p-5 rounded-3xl border border-slate-200 bg-white space-y-3 flex-1 flex flex-col justify-between">
-            <div className="flex items-center justify-between pb-2 border-b border-slate-100">
-              <span className="text-xs font-black text-slate-900 flex items-center gap-1.5">
-                <Clock className="h-4 w-4 text-emerald-600" /> Fleet Activity Timeline
-              </span>
-              <span className="text-[10px] font-mono text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded font-extrabold">LIVE</span>
-            </div>
+      {/* 3. HERO ZONE (Zone 1): Live Vizag OSM Map + Fleet Ecosystem Health */}
+      <VizagLiveMap className="w-full" />
 
-            <div className="space-y-2 text-xs font-medium flex-1 justify-center flex flex-col">
-              {[
-                { time: '10:42', title: 'Vehicle AP39AB1234', desc: 'Fast Charging Started (80% Target)', status: 'bg-emerald-500' },
-                { time: '10:38', title: 'Vehicle AP39CD5678', desc: 'Reached Customer Hub Location', status: 'bg-sky-500' },
-                { time: '10:33', title: 'Vehicle AP39EF9012', desc: 'BMS Cell Thermal Alert Logged', status: 'bg-red-500' },
-                { time: '10:30', title: 'Firmware v4.2.1 OTA', desc: 'Successfully Updated 12 EVs', status: 'bg-indigo-500' },
-              ].map((ev, i) => (
-                <div key={i} className="flex items-start gap-2.5 p-2 rounded-xl hover:bg-slate-50 transition-all">
-                  <span className="font-mono text-[11px] font-bold text-slate-400 whitespace-nowrap">{ev.time}</span>
-                  <span className={`h-2 w-2 rounded-full mt-1.5 ${ev.status}`} />
-                  <div>
-                    <p className="font-extrabold text-slate-900">{ev.title}</p>
-                    <p className="text-[11px] text-slate-500">{ev.desc}</p>
-                  </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-stretch">
+        <LiveVehicleStatusDonut statusList={mockVehicleStatusBreakdown} />
+
+        {/* Live Fleet Activity Timeline */}
+        <div className="glass-panel p-5 rounded-3xl border border-slate-200 bg-white space-y-3 flex flex-col justify-between">
+          <div className="flex items-center justify-between pb-2 border-b border-slate-100">
+            <span className="text-xs font-black text-slate-900 flex items-center gap-1.5">
+              <Clock className="h-4 w-4 text-emerald-600" /> Fleet Activity Timeline
+            </span>
+            <span className="text-[10px] font-mono text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded font-extrabold">LIVE</span>
+          </div>
+
+          <div className="space-y-2 text-xs font-medium flex-1 justify-center flex flex-col">
+            {[
+              { time: '10:42', title: 'Vehicle AP39AB1234', desc: 'Fast Charging Started (80% Target)', status: 'bg-emerald-500' },
+              { time: '10:38', title: 'Vehicle AP39CD5678', desc: 'Reached Customer Hub Location', status: 'bg-sky-500' },
+              { time: '10:33', title: 'Vehicle AP39EF9012', desc: 'BMS Cell Thermal Alert Logged', status: 'bg-red-500' },
+              { time: '10:30', title: 'Firmware v4.2.1 OTA', desc: 'Successfully Updated 12 EVs', status: 'bg-indigo-500' },
+            ].map((ev, i) => (
+              <div key={i} className="flex items-start gap-2.5 p-2 rounded-xl hover:bg-slate-50 transition-all">
+                <span className="font-mono text-[11px] font-bold text-slate-400 whitespace-nowrap">{ev.time}</span>
+                <span className={`h-2 w-2 rounded-full mt-1.5 ${ev.status}`} />
+                <div>
+                  <p className="font-extrabold text-slate-900">{ev.title}</p>
+                  <p className="text-[11px] text-slate-500">{ev.desc}</p>
                 </div>
-              ))}
-            </div>
+              </div>
+            ))}
           </div>
         </div>
       </div>
+
 
       {/* 4. EV Sub-system Health Strip */}
       <FleetHealthDashboard health={mockFleetHealthSummary} />

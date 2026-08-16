@@ -20,9 +20,38 @@ interface RoleContextType {
 
 const RoleContext = createContext<RoleContextType | undefined>(undefined);
 
+function getInitialRole(): RoleType {
+  if (typeof window !== 'undefined') {
+    const path = window.location.pathname;
+    if (path.includes('/dashboard/hr')) return 'HR';
+    if (path.includes('/dashboard/cto')) return 'CTO';
+    if (path.includes('/dashboard/coo')) return 'COO';
+    if (path.includes('/dashboard/service-manager')) return 'SERVICE_MANAGER';
+    if (path.includes('/dashboard/technician')) return 'TECHNICIAN';
+    if (path.includes('/dashboard/ceo')) return 'CEO';
+
+    const storedRole = localStorage.getItem('icc_role') as RoleType;
+    if (storedRole && initialProfiles[storedRole]) return storedRole;
+  }
+  return 'CEO';
+}
+
+function getInitialProfile(role: RoleType): UserRoleProfile {
+  if (typeof window !== 'undefined') {
+    const rawProfile = localStorage.getItem('icc_profile');
+    if (rawProfile) {
+      try {
+        const parsed = JSON.parse(rawProfile);
+        if (parsed && parsed.name) return parsed;
+      } catch (e) {}
+    }
+  }
+  return initialProfiles[role] || initialProfiles.CEO;
+}
+
 export function RoleProvider({ children }: { children: React.ReactNode }) {
   const [activeRole, setActiveRoleState] = useState<RoleType>('CEO');
-  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(true);
   const [profiles, setProfiles] = useState(initialProfiles);
   const [roleConfigs, setRoleConfigs] = useState(defaultRoleConfigs);
   const [currentProfileState, setCurrentProfileState] = useState<UserRoleProfile>(initialProfiles.CEO);
@@ -31,20 +60,33 @@ export function RoleProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     const session = AuthService.getSession();
     setIsAuthenticated(session.isAuthenticated);
-    if (session.isAuthenticated && session.activeRole) {
-      setActiveRoleState(session.activeRole);
+
+    if (typeof window !== 'undefined') {
+      const path = window.location.pathname;
+      let detectedRole: RoleType | null = null;
+      if (path.includes('/dashboard/hr')) detectedRole = 'HR';
+      else if (path.includes('/dashboard/cto')) detectedRole = 'CTO';
+      else if (path.includes('/dashboard/coo')) detectedRole = 'COO';
+      else if (path.includes('/dashboard/service-manager')) detectedRole = 'SERVICE_MANAGER';
+      else if (path.includes('/dashboard/technician')) detectedRole = 'TECHNICIAN';
+      else if (path.includes('/dashboard/ceo')) detectedRole = 'CEO';
+
+      const finalRole = detectedRole || session.activeRole || activeRole || 'CEO';
+      setActiveRoleState(finalRole);
       if (session.user) {
         setCurrentProfileState(session.user);
       } else {
-        setCurrentProfileState(initialProfiles[session.activeRole] || initialProfiles.CEO);
+        setCurrentProfileState(initialProfiles[finalRole] || initialProfiles.CEO);
       }
     }
   }, []);
 
   const setActiveRole = (role: RoleType) => {
     setActiveRoleState(role);
+    setCurrentProfileState(initialProfiles[role] || initialProfiles.CEO);
     if (typeof window !== 'undefined') {
       localStorage.setItem('icc_role', role);
+      localStorage.setItem('icc_profile', JSON.stringify(initialProfiles[role] || initialProfiles.CEO));
     }
   };
 
@@ -106,4 +148,5 @@ export function useRole() {
   }
   return context;
 }
+
 

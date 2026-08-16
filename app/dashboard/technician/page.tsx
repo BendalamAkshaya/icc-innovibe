@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, Suspense } from 'react';
 import {
   Wrench,
   MapPin,
@@ -44,8 +44,9 @@ import {
 } from 'lucide-react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { useRole } from '../../../components/RoleContext';
+import { crossDashboardStore, LiveSpareRequest } from '../../../lib/cross-dashboard-store';
 
-export default function TechnicianPortalPage() {
+function TechnicianPortalContent() {
   const { currentProfile } = useRole();
   const searchParams = useSearchParams();
   const router = useRouter();
@@ -89,12 +90,17 @@ export default function TechnicianPortalPage() {
     { id: '8', label: 'Road test throttle response & regenerative braking', checked: false, category: 'Test' },
   ]);
 
-  // Spare Parts Requests
-  const [spareRequests, setSpareRequests] = useState([
-    { id: 'REQ-409', part: 'Ather 450X Front Brake Caliper Set', qty: 1, priority: 'HIGH', status: 'APPROVED', date: 'Today, 10:15 AM' },
-    { id: 'REQ-398', part: 'Ola S1 Pro Battery BMS Board v2', qty: 1, priority: 'CRITICAL', status: 'ISSUED', date: '22 Jul 2026' },
-    { id: 'REQ-382', part: 'TVS iQube Throttle Position Sensor', qty: 2, priority: 'MEDIUM', status: 'COMPLETED', date: '15 Jul 2026' },
-  ]);
+  // Live Spare Parts Requests connected to CrossDashboardStore
+  const [spareRequests, setSpareRequests] = useState<LiveSpareRequest[]>(() => crossDashboardStore.getSpareRequests());
+
+  useEffect(() => {
+    setSpareRequests(crossDashboardStore.getSpareRequests());
+    const unsubscribe = crossDashboardStore.onSparesUpdated((spares) => {
+      setSpareRequests(spares);
+    });
+    return () => unsubscribe();
+  }, []);
+
   const [newPartName, setNewPartName] = useState('');
   const [newPartQty, setNewPartQty] = useState(1);
   const [newPartPriority, setNewPartPriority] = useState('HIGH');
@@ -434,18 +440,18 @@ export default function TechnicianPortalPage() {
       showToast('Please specify spare part name', 'warning');
       return;
     }
-    const newReq = {
-      id: `REQ-${Math.floor(Math.random() * 500) + 400}`,
+    const created = crossDashboardStore.addSpareRequest({
       part: newPartName,
       qty: newPartQty,
-      priority: newPartPriority,
-      status: 'PENDING',
-      date: 'Just now',
-    };
-    setSpareRequests([newReq, ...spareRequests]);
+      priority: newPartPriority as any,
+      technicianName: currentProfile?.name || 'Rahul Sharma (Senior EV Tech)',
+      jobId: activeJobId || 'BK-2026-0001',
+      vehicleModel: 'Ather 450X Apex',
+      depotLocation: 'Bengaluru Central Hub',
+    });
     setNewPartName('');
     setNewPartQty(1);
-    showToast(`Requested ${newPartQty}x ${newPartName} successfully.`, 'success');
+    showToast(`Requisition ${created.id} submitted! Synced live to COO Procurement Queue.`, 'success');
   };
 
   const handleAddLeave = (e: React.FormEvent) => {
@@ -4731,4 +4737,12 @@ export default function TechnicianPortalPage() {
     </div>
   );
 }
-// force recompile
+
+export default function TechnicianPortalPage() {
+  return (
+    <Suspense fallback={<div className="p-6 text-xs text-slate-500 font-bold">Loading Technician Portal...</div>}>
+      <TechnicianPortalContent />
+    </Suspense>
+  );
+}
+

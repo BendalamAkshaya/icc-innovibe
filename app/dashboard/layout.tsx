@@ -36,6 +36,10 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     }
   }, [pathname, activeRole, isSuperAdmin, isAuthenticated, router]);
 
+  if (pathname.startsWith('/dashboard/coo') || pathname.startsWith('/dashboard/cto')) {
+    return <>{children}</>;
+  }
+
   return (
     <div className="min-h-screen bg-slate-50 flex flex-col" suppressHydrationWarning>
       <Navbar />
